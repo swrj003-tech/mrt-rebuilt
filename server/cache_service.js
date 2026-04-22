@@ -1,4 +1,4 @@
-import prisma from './db.js';
+import pool from './db.js';
 import path from 'path';
 import fs from 'fs/promises';
 
@@ -18,31 +18,37 @@ export const internalCache = {
  * If DB fails, stays on old data or falls back to public JSON.
  */
 export async function refreshInternalCache() {
-  console.log('[CACHE] Refreshing in-memory data for 100% Stability...');
+  console.log('[CACHE] Refreshing in-memory data via Raw SQL...');
   try {
-    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Database connection timeout (5s)')), 5000));
+    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Database timeout (5s)')), 5000));
     
-    const [products, categories, testimonials, blog] = await Promise.race([
-      Promise.all([
-        prisma.product.findMany({ include: { category: true }, orderBy: { sortOrder: 'asc' } }),
-        prisma.category.findMany({ include: { theme: true }, orderBy: { sortOrder: 'asc' } }),
-        prisma.testimonial.findMany({ where: { isActive: true }, orderBy: { sortOrder: 'asc' } }),
-        prisma.blogPost.findMany({ where: { isPublished: true }, orderBy: { createdAt: 'desc' } })
-      ]),
-      timeout
-    ]);
+    const fetchData = async () => {
+      const [products] = await pool.query('SELECT p.*, c.slug as cat_slug, c.name as cat_name FROM Product p LEFT JOIN Category c ON p.categoryId = c.id ORDER BY p.sortOrder ASC');
+      const [categories] = await pool.query('SELECT c.*, t.seoIntro, t.seoTitle FROM Category c LEFT JOIN CategoryTheme t ON c.id = t.categoryId ORDER BY c.sortOrder ASC');
+      const [testimonials] = await pool.query('SELECT * FROM Testimonial WHERE isActive = 1 ORDER BY sortOrder ASC');
+      const [blog] = await pool.query('SELECT * FROM BlogPost WHERE isPublished = 1 ORDER BY createdAt DESC');
+      
+      return {
+        products: products.map(p => ({ ...p, category: { slug: p.cat_slug, name: p.cat_name } })),
+        categories: categories.map(c => ({ ...c, theme: { seoIntro: c.seoIntro, seoTitle: c.seoTitle } })),
+        testimonials,
+        blog
+      };
+    };
 
-    internalCache.products = products;
-    internalCache.categories = categories;
-    internalCache.testimonials = testimonials;
-    internalCache.blog = blog;
+    const data = await Promise.race([fetchData(), timeout]);
+
+    internalCache.products = data.products;
+    internalCache.categories = data.categories;
+    internalCache.testimonials = data.testimonials;
+    internalCache.blog = data.blog;
     internalCache.lastRefreshed = new Date();
     internalCache.status = 'ready';
-    console.log(`[CACHE] Success! Serving ${products.length} products with absolute speed.`);
+    console.log(`[CACHE] Success! Serving ${data.products.length} products via Raw SQL.`);
     
     return true;
   } catch (err) {
-    console.error('[CACHE] DB unreachable! Entering fail-over mode:', err.message);
+    console.error('[CACHE] Raw SQL Failed! Entering fail-over mode:', err.message);
     internalCache.status = 'fail-over';
     
     // --- EMERGENCY FAIL-OVER: Fall back to local JSON files ---

@@ -1,31 +1,27 @@
-import { PrismaClient } from '@prisma/client';
+import mysql from 'mysql2/promise';
 import 'dotenv/config';
 
 /**
- * Singleton Prisma Client with connection pooling for Hostinger.
- * Lazy initialisation to prevent boot timeouts.
+ * Direct MySQL Connection Pool for Hostinger Business Hosting.
+ * Bypasses Prisma to avoid binary dependency issues.
  */
-if (!global._prisma) {
-  let url = process.env.DATABASE_URL;
-  if (url) {
-    if (!url.includes('connection_limit')) url += (url.includes('?') ? '&' : '?') + 'connection_limit=3';
-    if (!url.includes('connect_timeout')) url += '&connect_timeout=10';
-    if (!url.includes('pool_timeout')) url += '&pool_timeout=10';
-  }
+const pool = mysql.createPool({
+  uri: process.env.DATABASE_URL,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 0,
+});
 
-  global._prisma = new PrismaClient({
-    datasourceUrl: url,
-    log: ['query', 'error', 'warn'],
-    errorFormat: 'minimal'
+// Test connection
+pool.getConnection()
+  .then(conn => {
+    console.log('[DB] ✅ Direct MySQL Connection Successful');
+    conn.release();
+  })
+  .catch(err => {
+    console.error('[DB] ❌ MySQL Connection Failed:', err.message);
   });
 
-  // Explicit Connection Test
-  global._prisma.$connect()
-    .then(() => console.log('[DB] ✅ SQL Connection Established Successfully'))
-    .catch((err) => {
-      console.error('[DB] ❌ SQL Connection Failed:', err.message);
-      console.error('[DB] URL Used (masked):', url.replace(/:.*@/, ':****@'));
-    });
-}
-
-export default global._prisma;
+export default pool;
