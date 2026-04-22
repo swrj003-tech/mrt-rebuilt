@@ -66,6 +66,21 @@ app.get('/health', (req, res) => {
   });
 });
 
+app.get('/debug-dist', async (req, res) => {
+  const fs = await import('fs');
+  const distPath = path.join(__dirname, '..', 'dist');
+  try {
+    if (fs.existsSync(distPath)) {
+      const files = fs.readdirSync(distPath, { recursive: true });
+      res.json({ exists: true, files });
+    } else {
+      res.json({ exists: false, message: 'Dist folder missing' });
+    }
+  } catch (err) {
+    res.json({ error: err.message });
+  }
+});
+
 // --- ADMIN & CRUD ROUTERS (Stability + Functionality) ---
 app.use('/api/auth', authRouter);
 app.use('/api/admin', adminRouter);
