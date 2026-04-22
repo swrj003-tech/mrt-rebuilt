@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import prisma from './db.js';
+import pool from './db.js';
 import cacheService from './cache_service.js';
 
 // --- ROUTERS ---
