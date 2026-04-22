@@ -1,0 +1,304 @@
+-- CreateTable
+CREATE TABLE `Category` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(191) NOT NULL,
+    `slug` VARCHAR(191) NOT NULL,
+    `image` VARCHAR(191) NULL,
+    `sortOrder` INTEGER NOT NULL DEFAULT 0,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `Category_name_key`(`name`),
+    UNIQUE INDEX `Category_slug_key`(`slug`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `CategoryTheme` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `primary` VARCHAR(191) NOT NULL,
+    `secondary` VARCHAR(191) NOT NULL,
+    `title` VARCHAR(191) NOT NULL,
+    `subtitle` VARCHAR(191) NOT NULL,
+    `seoTitle` VARCHAR(191) NULL,
+    `seoIntro` VARCHAR(191) NULL,
+    `categoryId` INTEGER NOT NULL,
+
+    UNIQUE INDEX `CategoryTheme_categoryId_key`(`categoryId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Product` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(191) NOT NULL,
+    `slug` VARCHAR(191) NOT NULL,
+    `description` VARCHAR(191) NULL,
+    `shortBenefit` VARCHAR(191) NULL,
+    `price` DOUBLE NOT NULL,
+    `image` VARCHAR(191) NULL,
+    `badge` VARCHAR(191) NULL,
+    `affiliateUrl` VARCHAR(191) NULL,
+    `isActive` BOOLEAN NOT NULL DEFAULT true,
+    `sortOrder` INTEGER NOT NULL DEFAULT 0,
+    `ratingValue` DOUBLE NOT NULL DEFAULT 5.0,
+    `tags` VARCHAR(191) NOT NULL DEFAULT '[]',
+    `keyBenefits` VARCHAR(191) NOT NULL DEFAULT '[]',
+    `categoryId` INTEGER NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `Product_slug_key`(`slug`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Review` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `userName` VARCHAR(191) NOT NULL,
+    `rating` INTEGER NOT NULL DEFAULT 5,
+    `comment` VARCHAR(191) NULL,
+    `isVerified` BOOLEAN NOT NULL DEFAULT false,
+    `productId` INTEGER NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Testimonial` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(191) NOT NULL,
+    `location` VARCHAR(191) NULL,
+    `quote` VARCHAR(191) NULL,
+    `text` VARCHAR(191) NULL,
+    `region` VARCHAR(191) NULL,
+    `isActive` BOOLEAN NOT NULL DEFAULT true,
+    `rating` INTEGER NOT NULL DEFAULT 5,
+    `sortOrder` INTEGER NOT NULL DEFAULT 1,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `AffiliateClick` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `productId` INTEGER NOT NULL,
+    `clickedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `ip` VARCHAR(191) NULL,
+    `userAgent` VARCHAR(191) NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `User` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `email` VARCHAR(191) NOT NULL,
+    `passwordHash` VARCHAR(191) NOT NULL,
+    `name` VARCHAR(191) NULL,
+    `role` VARCHAR(191) NOT NULL DEFAULT 'USER',
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `User_email_key`(`email`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `WishlistItem` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `userId` INTEGER NULL,
+    `deviceId` VARCHAR(191) NULL,
+    `productId` INTEGER NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `ComparisonItem` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `userId` INTEGER NULL,
+    `deviceId` VARCHAR(191) NULL,
+    `productId` INTEGER NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `NewsletterSub` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `email` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    UNIQUE INDEX `NewsletterSub_email_key`(`email`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `ContactMessage` (
+    `id` VARCHAR(191) NOT NULL,
+    `name` VARCHAR(191) NOT NULL,
+    `email` VARCHAR(191) NOT NULL,
+    `phone` VARCHAR(191) NULL,
+    `subject` VARCHAR(191) NULL,
+    `message` VARCHAR(191) NOT NULL,
+    `status` VARCHAR(191) NOT NULL DEFAULT 'new',
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `MediaFile` (
+    `id` VARCHAR(191) NOT NULL,
+    `filename` VARCHAR(191) NOT NULL,
+    `originalName` VARCHAR(191) NOT NULL,
+    `mimeType` VARCHAR(191) NOT NULL,
+    `size` INTEGER NOT NULL,
+    `url` VARCHAR(191) NOT NULL,
+    `altText` VARCHAR(191) NOT NULL DEFAULT '',
+    `uploadedBy` VARCHAR(191) NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `BlogPost` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `title` VARCHAR(191) NOT NULL,
+    `slug` VARCHAR(191) NOT NULL,
+    `excerpt` VARCHAR(191) NULL,
+    `content` VARCHAR(191) NOT NULL,
+    `coverImage` VARCHAR(191) NULL,
+    `author` VARCHAR(191) NOT NULL DEFAULT 'MRT Editorial',
+    `isPublished` BOOLEAN NOT NULL DEFAULT false,
+    `sortOrder` INTEGER NOT NULL DEFAULT 0,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `BlogPost_slug_key`(`slug`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- AddForeignKey
+ALTER TABLE `CategoryTheme` ADD CONSTRAINT `CategoryTheme_categoryId_fkey` FOREIGN KEY (`categoryId`) REFERENCES `Category`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Product` ADD CONSTRAINT `Product_categoryId_fkey` FOREIGN KEY (`categoryId`) REFERENCES `Category`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Review` ADD CONSTRAINT `Review_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `Product`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `AffiliateClick` ADD CONSTRAINT `AffiliateClick_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `Product`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `WishlistItem` ADD CONSTRAINT `WishlistItem_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `Product`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `ComparisonItem` ADD CONSTRAINT `ComparisonItem_productId_fkey` FOREIGN KEY (`productId`) REFERENCES `Product`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+
+
+INSERT INTO User (email, passwordHash, name, role, createdAt, updatedAt) VALUES ('admin@mrt.com', '$2b$10$qSIRNqRBZH9pwB439JX9zOd/G04a6XxSDb4pGm16yF1YI//EU3sPK', 'mrt International Admin', 'ADMIN', NOW(), NOW());
+
+INSERT INTO Category (id, name, slug, image, sortOrder, createdAt, updatedAt) VALUES (1, 'Home & Kitchen', 'home-kitchen', '/assets/categories/home-kitchen.png', 1, NOW(), NOW());
+INSERT INTO Category (id, name, slug, image, sortOrder, createdAt, updatedAt) VALUES (2, 'Beauty & Personal Care', 'beauty-personal-care', '/assets/categories/beauty-skincare.png', 2, NOW(), NOW());
+INSERT INTO Category (id, name, slug, image, sortOrder, createdAt, updatedAt) VALUES (3, 'Health & Wellness', 'health-wellness', '/assets/categories/health-wellness.png', 3, NOW(), NOW());
+INSERT INTO Category (id, name, slug, image, sortOrder, createdAt, updatedAt) VALUES (4, 'Pet Supplies', 'pet-supplies', '/assets/categories/pet-supplies.png', 4, NOW(), NOW());
+INSERT INTO Category (id, name, slug, image, sortOrder, createdAt, updatedAt) VALUES (5, 'Baby & Kids Essentials', 'baby-kids-essentials', '/assets/categories/baby-products.png', 5, NOW(), NOW());
+INSERT INTO Category (id, name, slug, image, sortOrder, createdAt, updatedAt) VALUES (6, 'Electronics & Accessories', 'electronics-accessories', '/assets/categories/electronics.png', 6, NOW(), NOW());
+INSERT INTO Category (id, name, slug, image, sortOrder, createdAt, updatedAt) VALUES (7, 'Sports & Fitness', 'sports-fitness', '/assets/categories/sports-fitness.png', 7, NOW(), NOW());
+
+INSERT INTO CategoryTheme (`primary`, `secondary`, title, subtitle, seoTitle, seoIntro, categoryId) VALUES ('#914d00', '#f28c28', 'Home & Kitchen', 'Elite Selection', 'Top 10 Best Home & Kitchen Products (2026)', 'Discover the most useful, trending, and top-rated home & kitchen products.', 1);
+INSERT INTO CategoryTheme (`primary`, `secondary`, title, subtitle, seoTitle, seoIntro, categoryId) VALUES ('#914d00', '#f28c28', 'Beauty & Personal Care', 'Elite Selection', 'Top 10 Best Beauty & Personal Care Products (2026)', 'Pristine formulas and artisanal tools for a radiant aesthetic.', 2);
+INSERT INTO CategoryTheme (`primary`, `secondary`, title, subtitle, seoTitle, seoIntro, categoryId) VALUES ('#914d00', '#f28c28', 'Health & Wellness', 'Elite Selection', 'Top 10 Best Health & Wellness Products (2026)', 'Advanced recovery tools and wellness essentials for vitality.', 3);
+INSERT INTO CategoryTheme (`primary`, `secondary`, title, subtitle, seoTitle, seoIntro, categoryId) VALUES ('#914d00', '#f28c28', 'Pet Supplies', 'Elite Selection', 'Top 10 Best Pet Supplies (2026)', 'Sophisticated gear for your most loyal companions.', 4);
+INSERT INTO CategoryTheme (`primary`, `secondary`, title, subtitle, seoTitle, seoIntro, categoryId) VALUES ('#914d00', '#f28c28', 'Baby & Kids Essentials', 'Elite Selection', 'Top 10 Best Baby & Kids Essentials (2026)', 'Ergonomic designs and safety-first tools for modern parents.', 5);
+INSERT INTO CategoryTheme (`primary`, `secondary`, title, subtitle, seoTitle, seoIntro, categoryId) VALUES ('#914d00', '#f28c28', 'Electronics & Accessories', 'Elite Selection', 'Top 10 Best Electronics & Accessories (2026)', 'Performance-driven digital gear for the modern elite setup.', 6);
+INSERT INTO CategoryTheme (`primary`, `secondary`, title, subtitle, seoTitle, seoIntro, categoryId) VALUES ('#914d00', '#f28c28', 'Sports & Fitness', 'Elite Selection', 'Top 10 Best Sports & Fitness Products (2026)', 'Professional-grade equipment for peak athletic performance.', 7);
+
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Vegetable Chopper', 'vegetable-chopper-0-965', 'Saves time in meal preparation and easy to use.', 'Saves time in meal preparation and easy to use.', 39.99, '/assets/products/vegetable-chopper.png', 'Top Picks', 'https://amzn.to/4mgjKOK', 1, 0, 4.9, 1, '["Time Saver","Multi-Blade","Dishwasher Safe"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Electric Spin Scrubber', 'electric-spin-scrubber-1-539', 'Powerful cordless scrubber for deep cleaning.', 'Powerful cordless scrubber for deep cleaning.', 49.99, '/assets/products/electric_spin_scrubber.png', 'Top Picks', 'https://amzn.to/4vayOS5', 1, 1, 4.9, 1, '["Cordless","High Torque","Versatile Heads"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Vacuum Storage Bags', 'vacuum-storage-bags-2-489', 'Triple-seal technology for maximum compression.', 'Triple-seal technology for maximum compression.', 59.99, '/assets/products/vacuum-bags.png', 'Top Picks', 'https://amzn.to/3NQUaDg', 1, 2, 4.9, 1, '["80% Space Saved","Durable Plastic","Travel Sized"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Air Fryer Accessories Set', 'air-fryer-accessories-set-3-918', 'Compatible with most air fryers for gourmet results.', 'Compatible with most air fryers for gourmet results.', 69.99, '/assets/products/air-fryer-accessories.png', 'Top Picks', 'https://amzn.to/47J01RH', 1, 3, 4.9, 1, '["Teflon-Free","Dishwasher Safe","Elite Baking Kit"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Oil Spray Bottle', 'oil-spray-bottle-4-845', 'Uniform spray for healthy and efficient cooking.', 'Uniform spray for healthy and efficient cooking.', 79.99, '/assets/products/oil-spray-bottle.png', 'Trending Now', 'https://amzn.to/3OmAkQo', 1, 4, 4.9, 1, '["BPA-Free","Eco-Friendly","Perfect Mist"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Smart Plug', 'smart-plug-5-745', 'Voice control and schedule-based home automation.', 'Voice control and schedule-based home automation.', 39.99, '/assets/products/smart-plug.png', 'Trending Now', 'https://amzn.to/3PU7kzZ', 1, 5, 4.9, 1, '["Alexa Ready","Energy Monitor","Mini Design"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('LED Motion Sensor Lights', 'led-motion-sensor-lights-6-981', 'Rechargeable wireless lighting for cabinets.', 'Rechargeable wireless lighting for cabinets.', 49.99, '/assets/products/motion-lights.png', 'Trending Now', 'https://amzn.to/41hGtjS', 1, 6, 4.9, 1, '["USB-C Charging","Ultra-Thin","Magnetic Mount"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Microfiber Cleaning Cloth Pack', 'microfiber-cleaning-cloth-pack-7-120', 'Lint-free and ultra-absorbent for all surfaces.', 'Lint-free and ultra-absorbent for all surfaces.', 59.99, '/assets/products/microfiber-cloths.png', 'Trending Now', 'https://amzn.to/4cdP3Fi', 1, 7, 4.9, 1, '["Scratch-Free","Washable","Great Value"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Digital Kitchen Scale', 'digital-kitchen-scale-8-561', 'High-precision sensors for accurate measuring.', 'High-precision sensors for accurate measuring.', 69.99, '/assets/products/digital-scale.png', 'Editor''s Choice', 'https://amzn.to/3PSpaDq', 1, 8, 4.9, 1, '["Slim Profile","Easy Clean","Auto-Tare"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Under Sink Organizer', 'under-sink-organizer-9-698', 'Two-tier storage solution with pull-out drawers.', 'Two-tier storage solution with pull-out drawers.', 79.99, '/assets/products/under-sink-organizer.png', 'Editor''s Choice', 'https://amzn.to/3NQUTEu', 1, 9, 4.9, 1, '["Rust-Resistant","Sturdy Build","Space Saver"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Ice Face Roller', 'ice-face-roller-10-201', 'Reduces puffiness and refreshes skin instantly.', 'Reduces puffiness and refreshes skin instantly.', 39.99, '/assets/products/ice_face_roller.png', 'Top Picks', 'https://amzn.to/4sj2ytg', 1, 10, 4.9, 2, '["Soothing","Durable Refills","Travel Friendly"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Facial Cleansing Brush', 'facial-cleansing-brush-11-102', 'Deep ultrasonic cleaning for radiant skin.', 'Deep ultrasonic cleaning for radiant skin.', 49.99, '/assets/products/sonic-facial-cleansing-brush.jpg', 'Top Picks', 'https://amzn.to/4dwEOOH', 1, 11, 4.9, 2, '["Waterproof","Silicone Bristles","Compact"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Hair Straightener Brush', 'hair-straightener-brush-12-885', 'Quick heating and ceramic protection.', 'Quick heating and ceramic protection.', 59.99, '/assets/products/hair-straightener-brush.png', 'Top Picks', 'https://amzn.to/48jgyvP', 1, 12, 4.9, 2, '["Ionic Tech","No-Tangle","Auto Shut-off"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('LED Makeup Mirror', 'led-makeup-mirror-13-859', 'Adjustable brightness and high-definition clarity.', 'Adjustable brightness and high-definition clarity.', 69.99, '/assets/products/led-makeup-mirror.png', 'Top Picks', 'https://amzn.to/4vfzipZ', 1, 13, 4.9, 2, '["Touch Screen","3X Magnification","USB Powered"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Heatless Hair Curlers', 'heatless-hair-curlers-14-482', 'Damage-free styling while you sleep.', 'Damage-free styling while you sleep.', 79.99, '/assets/products/heatless-curlers.png', 'Trending Now', 'https://amzn.to/4migCSr', 1, 14, 4.9, 2, '["Silk Lining","Extra Long","No Heat needed"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Blackhead Remover Vacuum', 'blackhead-remover-vacuum-15-640', 'Professional pore vacuum with suction levels.', 'Professional pore vacuum with suction levels.', 39.99, '/assets/products/blackhead-remover.png', 'Trending Now', 'https://amzn.to/4ve7ylD', 1, 15, 4.9, 2, '["5 Probe Heads","Rechargeable","Pain-Free"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Electric Toothbrush', 'electric-toothbrush-16-300', 'Sonic vibration for a deeper clean.', 'Sonic vibration for a deeper clean.', 49.99, '/assets/products/electric-toothbrush.png', 'Trending Now', 'https://amzn.to/4vaA3AJ', 1, 16, 4.9, 2, '["Long Battery","Smart Timer","Soft Bristles"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Electric Eyebrow Trimmer', 'electric-eyebrow-trimmer-17-416', 'Pain-free precision trimming for daily use.', 'Pain-free precision trimming for daily use.', 59.99, '/assets/products/eyebrow-trimmer.png', 'Editor''s Choice', 'https://amzn.to/4seAiYR', 1, 17, 4.9, 2, '["Hypoallergenic","LED Light","Compact"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Makeup Brush Set', 'makeup-brush-set-18-526', 'Professional synthetic bristles for flawless application.', 'Professional synthetic bristles for flawless application.', 69.99, '/assets/products/makeup-brush-set.png', 'Editor''s Choice', 'https://amzn.to/4sW28dh', 1, 18, 4.9, 2, '["Vegan","Super Soft","Elite Holder"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Cosmetic Organizer', 'cosmetic-organizer-19-315', 'Rotating 360-degree vanity storage.', 'Rotating 360-degree vanity storage.', 79.99, '/assets/products/cosmetic-organizer.png', 'Editor''s Choice', 'https://amzn.to/4tytGFH', 1, 19, 4.9, 2, '["Space Efficient","Transparent","Adjustable"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Neck & Shoulder Massager', 'neck-shoulder-massager-20-48', 'Shiatsu massage with deep heat therapy.', 'Shiatsu massage with deep heat therapy.', 39.99, '/assets/products/neck-massager.png', 'Top Picks', 'https://amzn.to/4bUeFbj', 1, 20, 4.9, 3, '["Deep Recovery","Heat Mode","Auto-Reverse"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Posture Corrector', 'posture-corrector-21-931', 'Adjustable support for spine alignment.', 'Adjustable support for spine alignment.', 49.99, '/assets/products/posture-corrector.png', 'Top Picks', 'https://amzn.to/4mfhIhB', 1, 21, 4.9, 3, '["Breathable","Invisible Under","Quick Fix"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Massage Gun', 'massage-gun-22-481', 'Deep tissue percussion therapy for muscles.', 'Deep tissue percussion therapy for muscles.', 59.99, '/assets/products/massage-gun.png', 'Top Picks', 'https://amzn.to/41iIMTD', 1, 22, 4.9, 3, '["6 Speed Levels","Ultra-Quiet","4 Attachments"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Memory Foam Pillow', 'memory-foam-pillow-23-424', 'Ergonomic contour for neck support.', 'Ergonomic contour for neck support.', 69.99, '/assets/products/memory-foam-pillow.png', 'Top Picks', 'https://amzn.to/4sP2liu', 1, 23, 4.9, 3, '["Cooling Gel","Eco-Friendly","Perfect Softness"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Aromatherapy Diffuser', 'aromatherapy-diffuser-24-248', 'Essential oil diffuser with color LED lights.', 'Essential oil diffuser with color LED lights.', 79.99, '/assets/products/aromatherapy-diffuser-luxury.jpg', 'Trending Now', 'https://amzn.to/47JWi6m', 1, 24, 4.9, 3, '["BPA-Free","Auto Shut-off","Super Quiet"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Foam Roller', 'foam-roller-25-378', 'High-density trigger point therapy.', 'High-density trigger point therapy.', 39.99, '/assets/products/foam-roller.png', 'Trending Now', 'https://amzn.to/4vee8bR', 1, 25, 4.9, 3, '["Muscle Relief","Reinforced Core","Eco-PVC"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Weighted Blanket', 'weighted-blanket-26-669', 'Deep pressure stimulation for better sleep.', 'Deep pressure stimulation for better sleep.', 49.99, '/assets/products/weighted-blanket.png', 'Trending Now', 'https://amzn.to/4cuuq8Y', 1, 26, 4.9, 3, '["Glass Beads","Breathable","Elite Comfort"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Eye Massager', 'eye-massager-27-488', 'Stress and fatigue relief with heat therapy.', 'Stress and fatigue relief with heat therapy.', 59.99, '/assets/products/eye-massager.png', 'Editor''s Choice', 'https://amzn.to/4sjeTgW', 1, 27, 4.9, 3, '["Bluetooth Music","Warm Compress","Foldable"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('White Noise Machine', 'white-noise-machine-28-726', 'Variety of soothing sounds for relaxation.', 'Variety of soothing sounds for relaxation.', 69.99, '/assets/products/white-noise-machine.png', 'Editor''s Choice', 'https://amzn.to/3PWkxbo', 1, 28, 4.9, 3, '["Non-Looping","Night Light","Compact Design"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Lumbar Support Cushion', 'lumbar-support-cushion-29-305', 'Orthopedic design for ergonomic seating.', 'Orthopedic design for ergonomic seating.', 79.99, '/assets/products/lumbar-support-cushion.png', 'Editor''s Choice', 'https://amzn.to/4vdRQXB', 1, 29, 4.9, 3, '["100% Memory Foam","Breathable Cover","Strap-On Fix"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Pet Hair Remover Roller', 'pet-hair-remover-roller-30-134', 'Reusable lint roller for pet fur removal.', 'Reusable lint roller for pet fur removal.', 39.99, '/assets/products/pet-hair-remover-roller.png', 'Top Picks', 'https://amzn.to/4sCm3NL', 1, 30, 4.9, 4, '["No Tape Needed","Durable Handle","Instant Clean"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Self-Cleaning Grooming Brush', 'self-cleaning-grooming-brush-31-382', 'One-click hair removal for easy grooming.', 'One-click hair removal for easy grooming.', 49.99, '/assets/products/self-cleaning-grooming-brush.png', 'Top Picks', 'https://amzn.to/4mfdKWt', 1, 31, 4.9, 4, '["Gentle Bristles","No Skin Hurt","Quick Release"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Automatic Pet Feeder', 'automatic-pet-feeder-32-191', 'Scheduled smart portion control for pets.', 'Scheduled smart portion control for pets.', 59.99, '/assets/products/pet-feeder.png', 'Top Picks', 'https://amzn.to/41iJvEl', 1, 32, 4.9, 4, '["App Control","Dual Power","Stainless Bowl"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Pet Water Fountain', 'pet-water-fountain-33-110', 'Triple-filtered continuous flowing water.', 'Triple-filtered continuous flowing water.', 69.99, '/assets/products/pet-water-fountain.png', 'Top Picks', 'https://amzn.to/3PSASxU', 1, 33, 4.9, 4, '["BPA-Free","Silent Pump","Elite Filtration"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Interactive Dog Toy', 'interactive-dog-toy-34-683', 'Indestructible treat-dispensing smart toy.', 'Indestructible treat-dispensing smart toy.', 79.99, '/assets/products/interactive-dog-toy.png', 'Trending Now', 'https://amzn.to/4mfmbAR', 1, 34, 4.9, 4, '["Tough Rubber","Mental Health","Safe Material"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Cat Laser Toy', 'cat-laser-toy-35-849', 'Automatic rotating laser for cat exercise.', 'Automatic rotating laser for cat exercise.', 39.99, '/assets/products/cat-laser-toy.png', 'Trending Now', 'https://amzn.to/47Hm0bJ', 1, 35, 4.9, 4, '["Adjustable Speed","Timer Set","USB Charge"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Portable Pet Water Bottle', 'portable-pet-water-bottle-36-72', 'Leek-proof travel dispenser for walks.', 'Leek-proof travel dispenser for walks.', 49.99, '/assets/products/portable-pet-water-bottle.png', 'Trending Now', 'https://amzn.to/4drRB4S', 1, 36, 4.9, 4, '["One-Hand Seal","Carbon Filter","Elite Grade"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Slow Feeder Bowl', 'slow-feeder-bowl-37-794', 'Prevents choking and aids in healthy digestion.', 'Prevents choking and aids in healthy digestion.', 59.99, '/assets/products/slow-feeder-bowl.png', 'Editor''s Choice', 'https://amzn.to/4mbNWue', 1, 37, 4.9, 4, '["Anti-Slip","BPA-Free","Fun Design"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Pet Nail Clipper', 'pet-nail-clipper-38-484', 'Safe precision trimmer with safety guard.', 'Safe precision trimmer with safety guard.', 69.99, '/assets/products/pet-nail-clipper.png', 'Editor''s Choice', 'https://amzn.to/4sRqXHj', 1, 38, 4.9, 4, '["Sharp Blades","Lockable","Easy Grip"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Pet Bed', 'pet-bed-39-176', 'Orthopedic memory foam for maximum comfort.', 'Orthopedic memory foam for maximum comfort.', 79.99, '/assets/products/pet-bed.png', 'Editor''s Choice', 'https://amzn.to/4soPJh3', 1, 39, 4.9, 4, '["Washable Cover","Nonslip Base","Elite Softness"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Baby Nail Trimmer', 'baby-nail-trimmer-40-31', 'Safe electric file for infant nail care.', 'Safe electric file for infant nail care.', 39.99, '/assets/products/baby-clipper-premium.png', 'Top Picks', 'https://amzn.to/4sgYlpK', 1, 40, 4.9, 5, '["Ultra-Quiet","6 Heads","Night Light"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Silicone Feeding Set', 'silicone-feeding-set-41-206', 'BPA-free suction layout for baby transition.', 'BPA-free suction layout for baby transition.', 49.99, '/assets/products/silicone-feeding-set.png', 'Top Picks', 'https://amzn.to/48z3NNN', 1, 41, 4.9, 5, '["Microwave Safe","Unbreakable","Elite Comfort"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Baby Diaper Bag', 'baby-diaper-bag-42-728', 'Spacious diaper backpack with changing pad.', 'Spacious diaper backpack with changing pad.', 59.99, '/assets/products/baby-diaper-bag.png', 'Top Picks', 'https://amzn.to/3OkGAIp', 1, 42, 4.9, 5, '["Insulated Pockets","Waterproof","Stroller Straps"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Portable Changing Mat', 'portable-changing-mat-43-151', 'Waterproof travel mat for quick diaper swaps.', 'Waterproof travel mat for quick diaper swaps.', 69.99, '/assets/products/portable-changing-mat.png', 'Top Picks', 'https://amzn.to/4c8AHWJ', 1, 43, 4.9, 5, '["Foldable","Cushioned","Easy Clean"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Cabinet Safety Locks', 'cabinet-safety-locks-44-892', 'Childproofing magnetic locks for furniture.', 'Childproofing magnetic locks for furniture.', 79.99, '/assets/products/cabinet-safety-locks.png', 'Trending Now', 'https://amzn.to/4t1fyF2', 1, 44, 4.9, 5, '["No Tools Required","Invisible","Safe Glue"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Baby Bottle Warmer', 'baby-bottle-warmer-45-165', 'Quick and even heat for milk and food.', 'Quick and even heat for milk and food.', 39.99, '/assets/products/baby-bottle-warmer.png', 'Trending Now', 'https://amzn.to/4sP3vdQ', 1, 45, 4.9, 5, '["LCD Display","Steam Clean","Auto Shut-off"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Baby Bath Support', 'baby-bath-support-46-339', 'Ergonomic tub insert for infant safety.', 'Ergonomic tub insert for infant safety.', 49.99, '/assets/products/baby-bath-support.png', 'Trending Now', 'https://amzn.to/4ve9vOZ', 1, 46, 4.9, 5, '["Anti-Slip","Soft Touch","Mold Resistant"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Stroller Organizer', 'stroller-organizer-47-42', 'Universal storage with insulated cup holders.', 'Universal storage with insulated cup holders.', 59.99, '/assets/products/stroller-organizer.png', 'Editor''s Choice', 'https://amzn.to/4cuvnhy', 1, 47, 4.9, 5, '["Fast Install","Elite Design","Durable Mesh"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Baby Toy Set', 'baby-toy-set-48-449', 'Sensory and developmental learning toys.', 'Sensory and developmental learning toys.', 69.99, '/assets/products/baby-toy-set.png', 'Editor''s Choice', 'https://amzn.to/3PTsPkm', 1, 48, 4.9, 5, '["Non-Toxic","Soft Edges","Colorful"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Baby Grooming Kit', 'baby-grooming-kit-49-668', 'Complete set for baby health and hygiene.', 'Complete set for baby health and hygiene.', 79.99, '/assets/products/baby-grooming-kit.png', 'Editor''s Choice', 'https://amzn.to/4cbFKFG', 1, 49, 4.9, 5, '["Travel Case","Precision Tools","BPA-Free"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Wireless Earbuds', 'wireless-earbuds-50-831', 'Active noise cancelling and deep bass.', 'Active noise cancelling and deep bass.', 39.99, '/assets/products/wireless_earbuds.png', 'Top Picks', 'https://amzn.to/4ccwbqa', 1, 50, 4.9, 6, '["40H Playtime","Hi-Res Audio","IPX7 Water"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Fast Wireless Charger', 'fast-wireless-charger-51-379', '15W rapid charging for all Qi devices.', '15W rapid charging for all Qi devices.', 49.99, '/assets/products/3-in-1-charging-station.png', 'Top Picks', 'https://amzn.to/4dQO28H', 1, 51, 4.9, 6, '["Case Friendly","Sleep Mode","Overheat Protect"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Power Bank', 'power-bank-52-785', 'Portable high-capacity charging block.', 'Portable high-capacity charging block.', 59.99, '/assets/products/power-bank.png', 'Top Picks', 'https://amzn.to/4tCD5w5', 1, 52, 4.9, 6, '["20W Fast Out","Dual Port","Slim Tech"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Bluetooth Speaker', 'bluetooth-speaker-53-492', 'Crystal clear sound with long-range BT.', 'Crystal clear sound with long-range BT.', 69.99, '/assets/products/bluetooth-speaker.png', 'Top Picks', 'https://amzn.to/4mbyWMO', 1, 53, 4.9, 6, '["Rugged Build","RGB Lights","Extreme Bass"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Smart LED Strip Lights', 'smart-led-strip-lights-54-941', 'Sync with music and remote app control.', 'Sync with music and remote app control.', 79.99, '/assets/products/smart-led-strip-lights.png', 'Trending Now', 'https://amzn.to/41hOMvW', 1, 54, 4.9, 6, '["Wifi Link","Dimmable","16M Colors"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Car Phone Mount', 'car-phone-mount-55-514', 'Universal magnetic phone holder for cars.', 'Universal magnetic phone holder for cars.', 39.99, '/assets/products/magnetic-phone-mount.png', 'Trending Now', 'https://amzn.to/4teXqb3', 1, 55, 4.9, 6, '["360 Rotation","N52 Magnet","Dashboard Fit"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Charging Hub', 'charging-hub-56-157', 'Multi-port USB desktop power station.', 'Multi-port USB desktop power station.', 49.99, '/assets/products/carbon-fiber-charging-hub.jpg', 'Trending Now', 'https://amzn.to/4mkil9Y', 1, 56, 4.9, 6, '["GaN Tech","Compact","Safe Load"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Mini Projector', 'mini-projector-57-496', 'Portable home theater for bedroom or travel.', 'Portable home theater for bedroom or travel.', 59.99, '/assets/products/mini-projector.png', 'Editor''s Choice', 'https://amzn.to/4sgFueI', 1, 57, 4.9, 6, '["1080P Support","Big Screen","Elite Lenses"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Laptop Stand', 'laptop-stand-58-175', 'Ergonomic aluminum cooling riser.', 'Ergonomic aluminum cooling riser.', 69.99, '/assets/products/laptop-stand.png', 'Editor''s Choice', 'https://amzn.to/41PFXcP', 1, 58, 4.9, 6, '["Heat Dissipation","Adjustable Height","Solid Metal"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Phone Stand', 'phone-stand-59-544', 'Universal adjustable foldable holder.', 'Universal adjustable foldable holder.', 79.99, '/assets/products/magnetic-phone-mount.png', 'Editor''s Choice', 'https://amzn.to/47KCkbN', 1, 59, 4.9, 6, '["Nonslip","Tablet Ready","Elite Quality"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Resistance Bands', 'resistance-bands-60-93', 'Heavy-duty latex-free fitness bands.', 'Heavy-duty latex-free fitness bands.', 39.99, '/assets/products/resistance_bands.png', 'Top Picks', 'https://amzn.to/4csnjxL', 1, 60, 4.9, 7, '["Elite Tension","Non-Snap","Travel Pouch"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Massage Gun', 'massage-gun-61-483', 'Percussion tissue therapy for deep relief.', 'Percussion tissue therapy for deep relief.', 49.99, '/assets/products/massage-gun.png', 'Top Picks', 'https://amzn.to/4t2EnR8', 1, 61, 4.9, 7, '["Pro-Grade","8 Heads","Quiet Glide"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Yoga Mat', 'yoga-mat-62-804', 'Non-slip high-density eco-friendly mat.', 'Non-slip high-density eco-friendly mat.', 59.99, '/assets/products/yoga-mat.png', 'Top Picks', 'https://amzn.to/47KcdSc', 1, 62, 4.9, 7, '["6mm Thick","Eco-TPE","Body Alignment"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Adjustable Dumbbells', 'adjustable-dumbbells-63-597', 'Rapid weight selection for compact gyms.', 'Rapid weight selection for compact gyms.', 69.99, '/assets/products/adjustable-dumbbells.png', 'Top Picks', 'https://amzn.to/4vggOWa', 1, 63, 4.9, 7, '["Space Saving","Locking Grip","Durable Steel"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Ab Roller', 'ab-roller-64-534', 'Core strengthening with ergonomic handles.', 'Core strengthening with ergonomic handles.', 79.99, '/assets/products/ab-roller.png', 'Trending Now', 'https://amzn.to/3OpiNHd', 1, 64, 4.9, 7, '["Steady Base","Knee Pad Included","No Noise"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Jump Rope', 'jump-rope-65-534', 'Weighted speed rope for cardio training.', 'Weighted speed rope for cardio training.', 39.99, '/assets/products/weighted-jump-rope.png', 'Trending Now', 'https://amzn.to/4bUqYV0', 1, 65, 4.9, 7, '["Ball Bearing","Adjustable","Tangle-Free"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Foam Roller', 'foam-roller-66-737', 'Trigger point therapy for fast recovery.', 'Trigger point therapy for fast recovery.', 49.99, '/assets/products/foam-roller.png', 'Trending Now', 'https://amzn.to/3PLBzJp', 1, 66, 4.9, 7, '["Elite Grid","Tough Core","Portable"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Push-Up Board', 'push-up-board-67-624', 'Color-coded muscle target system.', 'Color-coded muscle target system.', 59.99, '/assets/products/push-up-board.png', 'Editor''s Choice', 'https://amzn.to/4trnFKQ', 1, 67, 4.9, 7, '["Easy Fold","Nonslip","Chest Specific"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Gym Gloves', 'gym-gloves-68-440', 'Weightlifting protection with wrist support.', 'Weightlifting protection with wrist support.', 69.99, '/assets/products/gym-gloves.png', 'Editor''s Choice', 'https://amzn.to/4cbGYAM', 1, 68, 4.9, 7, '["Padded Palm","Breathable","Elite Grip"]', NOW(), NOW());
+INSERT INTO Product (name, slug, description, shortBenefit, price, image, badge, affiliateUrl, isActive, sortOrder, ratingValue, categoryId, keyBenefits, createdAt, updatedAt) VALUES ('Water Bottle', 'water-bottle-69-291', 'Insulated stainless steel for extreme tasks.', 'Insulated stainless steel for extreme tasks.', 79.99, '/assets/products/insulated-water-bottle.png', 'Editor''s Choice', 'https://amzn.to/41MUm9M', 1, 69, 4.9, 7, '["24H Cold","Leak Proof","BPA-Free"]', NOW(), NOW());
+
+INSERT INTO Testimonial (name, location, text, region, rating, isActive, sortOrder, createdAt) VALUES ('Michael T.', 'Texas, USA', 'I was not expecting this level of quality at this price point. Everything arrived in perfect condition.', 'us', 5, 1, 1, NOW());
+INSERT INTO Testimonial (name, location, text, region, rating, isActive, sortOrder, createdAt) VALUES ('Jessica L.', 'California, USA', 'The ordering process was simple, and the delivery was faster than expected. Great service overall.', 'us', 5, 1, 2, NOW());
+INSERT INTO Testimonial (name, location, text, region, rating, isActive, sortOrder, createdAt) VALUES ('David R.', 'New York, USA', 'I have tried several online stores, but this one stands out for its professionalism. Highly recommended.', 'us', 5, 1, 3, NOW());
+INSERT INTO Testimonial (name, location, text, region, rating, isActive, sortOrder, createdAt) VALUES ('Emily S.', 'Florida, USA', 'Affordable pricing without compromising on quality. Exactly what I was looking for.', 'us', 5, 1, 4, NOW());
+INSERT INTO Testimonial (name, location, text, region, rating, isActive, sortOrder, createdAt) VALUES ('Ahmed K.', 'Abu Dhabi, UAE', 'The team was very responsive, and the entire process was handled professionally.', 'ae', 5, 1, 5, NOW());
+INSERT INTO Testimonial (name, location, text, region, rating, isActive, sortOrder, createdAt) VALUES ('Sara M.', 'Dubai, UAE', 'Product quality exceeded expectations, and delivery was on time. Will recommend to others.', 'ae', 5, 1, 6, NOW());
+INSERT INTO Testimonial (name, location, text, region, rating, isActive, sortOrder, createdAt) VALUES ('Hassan A.', 'Sharjah, UAE', 'Everything was exactly as described. A company that delivers what it promises.', 'ae', 5, 1, 7, NOW());
+INSERT INTO Testimonial (name, location, text, region, rating, isActive, sortOrder, createdAt) VALUES ('Fatima R.', 'Al Ain, UAE', 'Easy to navigate website and smooth checkout process. Very satisfied.', 'ae', 5, 1, 8, NOW());

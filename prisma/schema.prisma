@@ -1,0 +1,166 @@
+// MRT International - Professional Data Model (v7.7.0)
+// Datasource configuration managed via prisma.config.ts
+
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-1.1.x", "debian-openssl-3.0.x", "linux-musl", "linux-musl-openssl-3.0.x"]
+  engineType = "binary"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  slug      String   @unique
+  image     String?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  products  Product[]
+  theme     CategoryTheme?
+}
+
+model CategoryTheme {
+  id         Int      @id @default(autoincrement())
+  primary    String
+  secondary  String
+  title      String
+  subtitle   String
+  seoTitle   String?
+  seoIntro   String?
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId Int      @unique
+}
+
+model Product {
+  id           Int      @id @default(autoincrement())
+  name         String
+  slug         String   @unique
+  description  String?
+  shortBenefit String?
+  price        Float
+  image        String?
+  badge        String?
+  affiliateUrl String?
+  isActive     Boolean  @default(true)
+  sortOrder    Int      @default(0)
+  ratingValue  Float    @default(5.0)
+  tags         String   @default("[]") // JSON array
+  keyBenefits  String   @default("[]") // JSON array
+  category     Category @relation(fields: [categoryId], references: [id])
+  categoryId   Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  wishlistItems WishlistItem[]
+  comparisons   ComparisonItem[]
+  clicks       AffiliateClick[]
+  reviews      Review[]
+}
+
+model Review {
+  id         Int      @id @default(autoincrement())
+  userName   String
+  rating     Int      @default(5)
+  comment    String?
+  isVerified Boolean  @default(false)
+  product    Product  @relation(fields: [productId], references: [id])
+  productId  Int
+  createdAt  DateTime @default(now())
+}
+
+model Testimonial {
+  id        Int      @id @default(autoincrement())
+  name      String
+  location  String?
+  quote     String?
+  text      String?
+  region    String?
+  isActive  Boolean  @default(true)
+  rating    Int      @default(5)
+  sortOrder Int      @default(1)
+  createdAt DateTime @default(now())
+}
+
+model AffiliateClick {
+  id         Int      @id @default(autoincrement())
+  productId  Int
+  product    Product  @relation(fields: [productId], references: [id])
+  clickedAt  DateTime @default(now())
+  ip         String?
+  userAgent  String?
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  role         String   @default("USER")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model WishlistItem {
+  id        Int      @id @default(autoincrement())
+  userId    Int?
+  deviceId  String?
+  product   Product  @relation(fields: [productId], references: [id])
+  productId Int
+  createdAt DateTime @default(now())
+}
+
+model ComparisonItem {
+  id        Int      @id @default(autoincrement())
+  userId    Int?
+  deviceId  String?
+  product   Product  @relation(fields: [productId], references: [id])
+  productId Int
+  createdAt DateTime @default(now())
+}
+
+model NewsletterSub {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
+
+model ContactMessage {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  phone     String?
+  subject   String?
+  message   String
+  status    String   @default("new")
+  createdAt DateTime @default(now())
+}
+
+model MediaFile {
+  id           String   @id @default(cuid())
+  filename     String
+  originalName String
+  mimeType     String
+  size         Int
+  url          String
+  altText      String   @default("")
+  uploadedBy   String?
+  createdAt    DateTime @default(now())
+}
+
+model BlogPost {
+  id          Int      @id @default(autoincrement())
+  title       String
+  slug        String   @unique
+  excerpt     String?
+  content     String
+  coverImage  String?
+  author      String   @default("MRT Editorial")
+  isPublished Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

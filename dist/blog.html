@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Blog | MRT International Holding LLC</title>
+    <meta name="description" content="Explore insights, product guides, and lifestyle tips from MRT International — curated stories for a modern life.">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,400;1,600&family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@300,0..1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" crossorigin href="/assets/style-TAxyNDwi.css">
+</head>
+<body onload="document.body.classList.add('loaded')">
+
+    <header class="mrt-nav">
+        <a href="index.html" class="mrt-nav-logo">MRT International</a>
+        <nav class="mrt-nav-links">
+            <a href="index.html">Home</a>
+            <a href="categories.html">Shop / Collections</a>
+            <div class="nav-dropdown-container">
+                <a href="categories.html" style="display:flex;align-items:center;gap:3px;">
+                    Categories <span class="material-symbols-outlined" style="font-size:17px;">expand_more</span>
+                </a>
+                <div class="nav-dropdown">
+                    <a href="category.html?c=home-kitchen" class="nav-dropdown-item">Home &amp; Kitchen</a>
+                    <a href="category.html?c=beauty-personal-care" class="nav-dropdown-item">Beauty &amp; Personal Care</a>
+                    <a href="category.html?c=health-wellness" class="nav-dropdown-item">Health &amp; Wellness</a>
+                    <a href="category.html?c=pet-supplies" class="nav-dropdown-item">Pet Supplies</a>
+                    <a href="category.html?c=baby-kids-essentials" class="nav-dropdown-item">Baby &amp; Kids Essentials</a>
+                    <a href="category.html?c=electronics-accessories" class="nav-dropdown-item">Electronics &amp; Accessories</a>
+                </div>
+            </div>
+            <a href="about.html">About</a>
+            <a href="blog.html" class="active">Blog</a>
+            <a href="contact.html">Contact</a>
+        </nav>
+        <div class="mrt-nav-right">
+            <a href="categories.html" class="nav-cta">EXPLORE COLLECTIONS</a>
+            <button class="nav-menu-btn" id="mobileMenuToggle" aria-label="Open menu">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Mobile Nav -->
+    <div class="mobile-nav" id="mobileNav">
+        <div class="mobile-nav-backdrop" id="mobileNavBackdrop"></div>
+        <div class="mobile-nav-panel">
+            <button class="mobile-nav-close" id="mobileNavClose">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+            <a href="index.html"><span class="material-symbols-outlined" style="font-size:18px;">home</span> Home</a>
+            <a href="categories.html"><span class="material-symbols-outlined" style="font-size:18px;">storefront</span> Shop / Collections</a>
+            <a href="about.html"><span class="material-symbols-outlined" style="font-size:18px;">info</span> About</a>
+            <a href="blog.html" class="active"><span class="material-symbols-outlined" style="font-size:18px;">book</span> Blog</a>
+            <a href="contact.html"><span class="material-symbols-outlined" style="font-size:18px;">mail</span> Contact</a>
+        </div>
+    </div>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="blog-hero">
+            <img src="/assets/editorial_v3/discovery_bg.png" alt="MRT Blog" class="about-hero-bg" style="filter: brightness(0.2) grayscale(1);">
+            <div class="about-hero-overlay"></div>
+            <div class="blog-hero-content">
+                <p class="about-hero-tag">The MRT Editorial</p>
+                <h1 class="about-hero-title">Insights & Stories</h1>
+                <p class="about-hero-desc">Curated explorations into design, wellness, and the art of global sourcing.</p>
+            </div>
+        </section>
+
+        <!-- Blog Grid Section -->
+        <section class="blog-section reveal" id="blogListContainer">
+            <div class="blog-grid" id="blogGrid">
+                <!-- Fallback/Loading state -->
+                <div style="grid-column: 1/-1; text-align: center; padding: 100px 0;">
+                    <span class="material-symbols-outlined animate-spin" style="font-size: 48px; color: var(--orange); opacity: 0.3;">refresh</span>
+                    <p style="margin-top: 20px; color: var(--muted);">Loading editorial archive...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Post Reading Section (hidden by default) -->
+        <section id="blogPostContainer" style="display: none; padding: 100px 5%; max-width: 900px; margin: 0 auto;">
+            <button onclick="window.location.href='blog.html'" style="background:none; border:none; display:flex; align-items:center; gap:8px; font-weight:700; cursor:pointer; margin-bottom:40px; color:var(--orange);">
+                <span class="material-symbols-outlined">arrow_back</span> BACK TO BLOG
+            </button>
+            <div id="postContent"></div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="mrt-footer">
+        <div class="footer-grid">
+            <div>
+                <p class="footer-col-title">Collections</p>
+                <ul class="footer-links">
+                    <li><a href="category.html?c=home-kitchen"><span class="material-symbols-outlined">arrow_forward</span> Home &amp; Kitchen</a></li>
+                    <li><a href="category.html?c=beauty-personal-care"><span class="material-symbols-outlined">arrow_forward</span> Beauty &amp; Care</a></li>
+                    <li><a href="category.html?c=health-wellness"><span class="material-symbols-outlined">arrow_forward</span> Health &amp; Wellness</a></li>
+                    <li><a href="category.html?c=pet-supplies"><span class="material-symbols-outlined">arrow_forward</span> Pet Supplies</a></li>
+                </ul>
+            </div>
+            <div>
+                <p class="footer-col-title">Company</p>
+                <ul class="footer-links">
+                    <li><a href="index.html"><span class="material-symbols-outlined">arrow_forward</span> Home</a></li>
+                    <li><a href="about.html"><span class="material-symbols-outlined">arrow_forward</span> About Us</a></li>
+                    <li><a href="blog.html"><span class="material-symbols-outlined">arrow_forward</span> Blog</a></li>
+                    <li><a href="contact.html"><span class="material-symbols-outlined">arrow_forward</span> Contact</a></li>
+                </ul>
+            </div>
+            <div>
+                <p class="footer-col-title">Follow Us</p>
+                <div class="footer-socials">
+                    <a href="https://facebook.com/MRTInternational" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+                    <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg></a>
+                </div>
+            </div>
+            <div>
+                <p class="footer-brand-logo">MRT International</p>
+                <p class="footer-brand-desc">MRT International Holding LLC — Wyoming, USA. Your trusted partner for global sourcing and smart shopping.</p>
+                <p style="font-size: 0.85rem; color: var(--muted); margin-top: 1rem;">Info@mrtinternationalholding.com</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 MRT International Holding LLC. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Mobile Nav
+            const toggle = document.getElementById('mobileMenuToggle');
+            const nav = document.getElementById('mobileNav');
+            const close = document.getElementById('mobileNavClose');
+            if (toggle) toggle.addEventListener('click', () => nav.classList.add('open'));
+            if (close) close.addEventListener('click', () => nav.classList.remove('open'));
+
+            // Check URL for single post
+            const params = new URLSearchParams(window.location.search);
+            const slug = params.get('post');
+
+            if (slug) {
+                await loadSinglePost(slug);
+            } else {
+                await loadBlogGrid();
+            }
+        });
+
+        async function loadBlogGrid() {
+            const grid = document.getElementById('blogGrid');
+            try {
+                const res = await fetch('/api/blog');
+                const posts = await res.json();
+                
+                if (posts.length === 0) {
+                    grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:100px 0; color:var(--muted);">No articles found.</p>';
+                    return;
+                }
+
+                grid.innerHTML = posts.map(post => `
+                    <a href="blog.html?post=${post.slug}" class="blog-card">
+                        <div class="blog-card-img">
+                            <img src="${post.coverImage}" alt="${post.title}">
+                        </div>
+                        <div class="blog-card-body">
+                            <span style="font-size:0.75rem; font-weight:700; color:var(--orange); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:15px; display:block;">${post.author}</span>
+                            <h3 class="blog-card-title">${post.title}</h3>
+                            <p class="blog-card-excerpt">${post.excerpt}</p>
+                            <span style="margin-top:20px; font-size:0.8rem; font-weight:700; color:var(--orange); display:flex; align-items:center; gap:5px;">READ STORY <span class="material-symbols-outlined" style="font-size:16px;">arrow_forward</span></span>
+                        </div>
+                    </a>
+                `).join('');
+            } catch (err) {
+                grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:100px 0; color:var(--muted);">Failed to load blog posts. Please check back later.</p>';
+            }
+        }
+
+        async function loadSinglePost(slug) {
+            document.getElementById('blogListContainer').style.display = 'none';
+            document.querySelector('.blog-hero').style.display = 'none';
+            document.getElementById('blogPostContainer').style.display = 'block';
+            
+            const content = document.getElementById('postContent');
+            try {
+                const res = await fetch('/api/blog/post/' + slug);
+                const post = await res.json();
+
+                content.innerHTML = `
+                    <img src="${post.coverImage}" style="width:100%; border-radius:24px; margin-bottom:40px;">
+                    <div style="font-family:'Plus Jakarta Sans', sans-serif; font-size:0.9rem; color:var(--orange); font-weight:700; margin-bottom:15px; text-transform:uppercase; letter-spacing:0.1em;">${post.author} · ${new Date(post.createdAt).toLocaleDateString()}</div>
+                    <h1 style="font-family:'Playfair Display', serif; font-size:3.5rem; color:var(--ink); line-height:1.2; margin-bottom:40px;">${post.title}</h1>
+                    <div style="font-size:1.15rem; line-height:1.8; color:var(--muted);">${post.content}</div>
+                `;
+            } catch (err) {
+                content.innerHTML = '<h2>Post not found.</h2>';
+            }
+        }
+    </script>
+</body>
+</html>

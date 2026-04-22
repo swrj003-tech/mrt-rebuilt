@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "slug": "elevating-your-home-decor",
+    "title": "Elevating Your Home: The Art of Timeless Decor",
+    "excerpt": "Discover how the right selection of textiles and lighting can transform a simple living space into a sanctuary of elegance.",
+    "content": "<h2>Creating Harmony</h2><p>Home decor is more than just placing furniture; it's about creating an atmosphere that reflects your personality. At MRT International, we believe in the power of curated finds...</p>",
+    "author": "MRT Editorial",
+    "coverImage": "/assets/editorial_v3/cat_home.png",
+    "createdAt": "2026-04-15T10:00:00Z"
+  },
+  {
+    "id": 2,
+    "slug": "global-sourcing-secrets",
+    "title": "Global Sourcing Secrets: Quality Over Quantity",
+    "excerpt": "A behind-the-scenes look at how we vet international suppliers to ensure only the finest products reach our collections.",
+    "content": "<h2>The Hunt for Quality</h2><p>Our team travels virtually and physically to identify manufacturers who share our commitment to craftsmanship. From the artisans of the UAE to the design houses of Europe...</p>",
+    "author": "Sourcing Team",
+    "coverImage": "/assets/editorial_v3/discovery_bg.png",
+    "createdAt": "2026-04-10T14:30:00Z"
+  }
+]

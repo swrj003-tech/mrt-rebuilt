@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>mrt International | Curated Luxury Finds</title>
+    <meta name="description" content="Discover beautifully handpicked home, beauty, health, and lifestyle pieces from global marketplaces — all curated in one elegant space.">
+    <meta name="keywords" content="Global sourcing company, Online shopping UAE, E-commerce store international, Affordable online products, Dropshipping store UAE, Buy trending products online, Best online deals UAE, International trading company">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,400;1,600&family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@300,0..1&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/src/style.css">
+    <script type="module" src="/src/main.js"></script>
+</head>
+<body onload="document.body.classList.add('loaded')">
+
+    <header class="mrt-nav">
+        <a href="index.html" class="mrt-nav-logo">MRT</a>
+
+        <nav class="mrt-nav-links">
+            <a href="index.html" class="active">Home</a>
+            <a href="categories.html">Shop / Collections</a>
+            <div class="nav-dropdown-container">
+                <a href="categories.html" style="display:flex;align-items:center;gap:3px;">
+                    Categories <span class="material-symbols-outlined" style="font-size:17px;">expand_more</span>
+                </a>
+                <div class="nav-dropdown">
+                    <a href="category.html?c=home-kitchen"         class="nav-dropdown-item">Home &amp; Kitchen</a>
+                    <a href="category.html?c=beauty-personal-care" class="nav-dropdown-item">Beauty &amp; Personal Care</a>
+                    <a href="category.html?c=health-wellness"      class="nav-dropdown-item">Health &amp; Wellness</a>
+                    <a href="category.html?c=pet-supplies"         class="nav-dropdown-item">Pet Supplies</a>
+                    <a href="category.html?c=baby-kids-essentials" class="nav-dropdown-item">Baby &amp; Kids Essentials</a>
+                    <a href="category.html?c=electronics-accessories" class="nav-dropdown-item">Electronics &amp; Accessories</a>
+                    <a href="category.html?c=sports-fitness"       class="nav-dropdown-item">Sports &amp; Fitness</a>
+                </div>
+            </div>
+            <a href="about.html">About</a>
+            <a href="contact.html">Contact</a>
+        </nav>
+
+        <div class="mrt-nav-right">
+            <a href="categories.html" class="nav-cta" id="nav-explore-btn">
+                EXPLORE COLLECTIONS
+                <span class="material-symbols-outlined">arrow_forward</span>
+            </a>
+            <button class="nav-menu-btn" id="mobileMenuToggle" aria-label="Open menu">
+                <span class="material-symbols-outlined">menu</span>
+            </button>
+        </div>
+    </header>
+
+    <div class="mobile-nav" id="mobileNav">
+        <div class="mobile-nav-panel">
+            <button class="mobile-nav-close" id="mobileNavClose">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+            <a href="index.html" class="active">
+                <span class="material-symbols-outlined" style="font-size:18px;color:var(--orange)">home</span> Home
+            </a>
+            <a href="categories.html">
+                <span class="material-symbols-outlined" style="font-size:18px;">storefront</span> Shop / Collections
+            </a>
+            <a href="category.html?c=home-kitchen">
+                <span class="material-symbols-outlined" style="font-size:18px;">chair</span> Home &amp; Kitchen
+            </a>
+            <a href="category.html?c=beauty-personal-care">
+                <span class="material-symbols-outlined" style="font-size:18px;">spa</span> Beauty &amp; Personal Care
+            </a>
+            <a href="category.html?c=health-wellness">
+                <span class="material-symbols-outlined" style="font-size:18px;">favorite</span> Health &amp; Wellness
+            </a>
+            <a href="category.html?c=pet-supplies">
+                <span class="material-symbols-outlined" style="font-size:18px;">pets</span> Pet Supplies
+            </a>
+            <a href="category.html?c=baby-kids-essentials">
+                <span class="material-symbols-outlined" style="font-size:18px;">child_care</span> Baby &amp; Kids
+            </a>
+            <a href="category.html?c=electronics-accessories">
+                <span class="material-symbols-outlined" style="font-size:18px;">devices</span> Electronics
+            </a>
+            <a href="category.html?c=sports-fitness">
+                <span class="material-symbols-outlined" style="font-size:18px;">fitness_center</span> Sports &amp; Fitness
+            </a>
+            <a href="about.html">
+                <span class="material-symbols-outlined" style="font-size:18px;">info</span> About
+            </a>
+            <a href="contact.html">
+                <span class="material-symbols-outlined" style="font-size:18px;">mail</span> Contact
+            </a>
+        </div>
+        <div style="flex:1" id="mobileNavBackdrop"></div>
+    </div>
+
+    <main>
+        <section class="hero-section">
+            <!-- Using our high-end generated hero image (Person-free version) -->
+            <img src="/assets/editorial_v3/hero_v4_no_people.png" alt="Luxury Interior" class="hero-bg" loading="eager">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <p class="hero-eyebrow">Welcome to mrt International</p>
+                <h1 class="hero-title">mrt International</h1>
+                <p class="hero-subtitle">Your Gateway to Global Shopping</p>
+                <p class="hero-desc">
+                    Your trusted partner for smart online shopping and global sourcing.<br>
+                    We bring together quality products, competitive pricing, and a seamless digital experience.
+                </p>
+                <a href="categories.html" class="hero-cta">
+                    DISCOVER SMARTER SHOPPING
+                    <span class="material-symbols-outlined">arrow_forward</span>
+                </a>
+            </div>
+        </section>
+
+        <section class="py-24 px-6 md:px-12 max-w-[1600px] mx-auto bg-white" id="featured">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-heading font-bold text-[#1e293b]">Featured Categories</h2>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                
+                <a href="category.html?c=home-kitchen" class="avory-cat-card group">
+                    <div class="avory-cat-bg" style="background-image: url('/assets/categories/home-kitchen.png');"></div>
+                    <div class="avory-cat-overlay"></div>
+                    <div class="avory-cat-content">
+                        <h3 class="avory-cat-title">Home & Kitchen</h3>
+                        <p class="avory-cat-desc">Premium essentials to elevate your lifestyle — from smart gadgets to elegant kitchenware.</p>
+                        <span class="avory-cat-btn">Explore Now</span>
+                    </div>
+                </a>
+
+                <a href="category.html?c=beauty-personal-care" class="avory-cat-card group">
+                    <div class="avory-cat-bg" style="background-image: url('/assets/categories/beauty-skincare.png');"></div>
+                    <div class="avory-cat-overlay"></div>
+                    <div class="avory-cat-content">
+                        <h3 class="avory-cat-title">Beauty & Personal Care</h3>
+                        <p class="avory-cat-desc">Pristine formulas and artisanal tools for a radiant, global aesthetic. Curated for performance.</p>
+                        <span class="avory-cat-btn">Explore Now</span>
+                    </div>
+                </a>
+
+                <a href="category.html?c=health-wellness" class="avory-cat-card group">
+                    <div class="avory-cat-bg" style="background-image: url('/assets/categories/health-wellness.png');"></div>
+                    <div class="avory-cat-overlay"></div>
+                    <div class="avory-cat-content">
+                        <h3 class="avory-cat-title">Health & Wellness</h3>
+                        <p class="avory-cat-desc">Advanced recovery tools and wellness essentials designed for vitality and refined standards.</p>
+                        <span class="avory-cat-btn">Explore Now</span>
+                    </div>
+                </a>
+
+                <a href="category.html?c=pet-supplies" class="avory-cat-card group">
+                    <div class="avory-cat-bg" style="background-image: url('/assets/categories/pet-supplies.png');"></div>
+                    <div class="avory-cat-overlay"></div>
+                    <div class="avory-cat-content">
+                        <h3 class="avory-cat-title">Pet Supplies</h3>
+                        <p class="avory-cat-desc">Sophisticated gear and essentials for your most loyal companions. Tested for safety and comfort.</p>
+                        <span class="avory-cat-btn">Explore Now</span>
+                    </div>
+                </a>
+
+                <a href="category.html?c=baby-kids-essentials" class="avory-cat-card group">
+                    <div class="avory-cat-bg" style="background-image: url('/assets/categories/baby-products.png');"></div>
+                    <div class="avory-cat-overlay"></div>
+                    <div class="avory-cat-content">
+                        <h3 class="avory-cat-title">Baby & Kids Essentials</h3>
+                        <p class="avory-cat-desc">Ergonomic designs and safety-first grooming tools for modern parents and their little ones.</p>
+                        <span class="avory-cat-btn">Explore Now</span>
+                    </div>
+                </a>
+
+                <a href="category.html?c=electronics-accessories" class="avory-cat-card group">
+                    <div class="avory-cat-bg" style="background-image: url('/assets/categories/electronics.png');"></div>
+                    <div class="avory-cat-overlay"></div>
+                    <div class="avory-cat-content">
+                        <h3 class="avory-cat-title">Electronics & Accessories</h3>
+                        <p class="avory-cat-desc">Performance-driven digital gear and high-performance accessories for the modern elite tech setup.</p>
+                        <span class="avory-cat-btn">Explore Now</span>
+                    </div>
+                </a>
+
+                <a href="category.html?c=sports-fitness" class="avory-cat-card group">
+                    <div class="avory-cat-bg" style="background-image: url('/assets/categories/sports-fitness.png');"></div>
+                    <div class="avory-cat-overlay"></div>
+                    <div class="avory-cat-content">
+                        <h3 class="avory-cat-title">Sports & Fitness</h3>
+                        <p class="avory-cat-desc">Professional-grade equipment and support gear selected for peak athletic performance.</p>
+                        <span class="avory-cat-btn">Explore Now</span>
+                    </div>
+                </a>
+
+            </div>
+        </section>
+
+        
+        <section class="avory-why-section">
+            <div class="avory-why-img-container">
+                <img src="/assets/editorial_v3/why_choose.png" alt="Premium Lifestyle">
+            </div>
+            <div class="avory-why-content">
+                <span class="avory-why-tag">Why Choose</span>
+                <h2 class="avory-why-title font-heading text-4xl mb-6">mrt International</h2>
+                <p class="avory-why-desc">
+                    At mrt International, we curate luxury, stylish, and functional products from multiple platforms to elevate your lifestyle. 
+                    Every collection reflects our commitment to quality, elegance, and timeless design.
+                </p>
+                
+                <div class="avory-benefits-grid">
+                    <div class="benefit-item">
+                        <span class="material-symbols-outlined benefit-icon">arrow_forward</span>
+                        Curated Collections
+                    </div>
+                    <div class="benefit-item">
+                        <span class="material-symbols-outlined benefit-icon">arrow_forward</span>
+                        Style & Elegance
+                    </div>
+                    <div class="benefit-item">
+                        <span class="material-symbols-outlined benefit-icon">arrow_forward</span>
+                        Quality-First Approach
+                    </div>
+                    <div class="benefit-item">
+                        <span class="material-symbols-outlined benefit-icon">arrow_forward</span>
+                        Global Inspiration
+                    </div>
+                    <div class="benefit-item">
+                        <span class="material-symbols-outlined benefit-icon">arrow_forward</span>
+                        Trusted Marketplaces
+                    </div>
+                    <div class="benefit-item">
+                        <span class="material-symbols-outlined benefit-icon">arrow_forward</span>
+                        Modern Lifestyle Focus
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ⭐ Customer Reviews & Testimonials -->
+        <section class="global-community-section">
+            <span class="avory-why-tag" style="color: var(--orange);">⭐ Customer Reviews & Testimonials</span>
+            <h2 class="text-4xl md:text-5xl font-heading font-bold mb-4">What Our Customers Say</h2>
+            <p class="text-lg opacity-80 max-w-[800px] mx-auto mb-16" style="color: var(--muted); line-height: 1.8;">
+                At mrt International, we take pride in serving customers across the globe. From the United States to the UAE, our commitment to quality, value, and reliability speaks through the experiences of our customers.
+            </p>
+            
+            <div id="community-grid" class="testimonial-grid layout-regions">
+                <!-- Fetching via main.js (Regional Segments) -->
+                <div class="w-full text-center py-20 opacity-30">
+                    <span class="material-symbols-outlined animate-spin" style="font-size: 40px;">refresh</span>
+                </div>
+            </div>
+
+            <!-- Trust Statement Footer -->
+            <div class="trust-statement-banner">
+                <h3 class="font-heading">Trusted by Customers Across the USA, UAE & Beyond</h3>
+                <p>We are committed to delivering quality, reliability, and value — no matter where you are in the world.</p>
+            </div>
+        </section>
+
+        <div class="explore-banner">
+            <h2>Explore Collections</h2>
+            <p>Curated luxury finds designed to elevate your everyday lifestyle.</p>
+            <a href="categories.html" class="hero-cta">
+                SHOP NOW
+                <span class="material-symbols-outlined">arrow_forward</span>
+            </a>
+        </div>
+    </main>
+
+    <footer class="mrt-footer">
+        <div class="footer-grid">
+            <div>
+                <p class="footer-col-title">Categories</p>
+                <ul class="footer-links">
+                    <li><a href="category.html?c=home-kitchen"><span class="material-symbols-outlined">arrow_forward</span> Home &amp; Kitchen</a></li>
+                    <li><a href="category.html?c=beauty-personal-care"><span class="material-symbols-outlined">arrow_forward</span> Beauty &amp; Personal Care</a></li>
+                    <li><a href="category.html?c=health-wellness"><span class="material-symbols-outlined">arrow_forward</span> Health &amp; Wellness</a></li>
+                    <li><a href="category.html?c=pet-supplies"><span class="material-symbols-outlined">arrow_forward</span> Pet Supplies</a></li>
+                    <li><a href="category.html?c=baby-kids-essentials"><span class="material-symbols-outlined">arrow_forward</span> Baby &amp; Kids Essentials</a></li>
+                    <li><a href="category.html?c=electronics-accessories"><span class="material-symbols-outlined">arrow_forward</span> Electronics &amp; Accessories</a></li>
+                    <li><a href="category.html?c=sports-fitness"><span class="material-symbols-outlined">arrow_forward</span> Sports &amp; Fitness</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <p class="footer-col-title">Customer Support</p>
+                <ul class="footer-links">
+                    <li><a href="mailto:Info@mrtinternationalholding.com"><span class="material-symbols-outlined">mail</span> Info@mrtinternationalholding.com</a></li>
+                    <li><a href="#"><span class="material-symbols-outlined">arrow_forward</span> Privacy Policy</a></li>
+                    <li><a href="#"><span class="material-symbols-outlined">arrow_forward</span> Terms &amp; Conditions</a></li>
+                    <li><a href="#"><span class="material-symbols-outlined">arrow_forward</span> Affiliate Disclosure</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <p class="footer-col-title">Company</p>
+                <ul class="footer-links">
+                    <li><a href="index.html"><span class="material-symbols-outlined">arrow_forward</span> Home</a></li>
+                    <li><a href="about.html"><span class="material-symbols-outlined">arrow_forward</span> About</a></li>
+                    <li><a href="categories.html"><span class="material-symbols-outlined">arrow_forward</span> Shop / Collections</a></li>
+                    <li><a href="contact.html"><span class="material-symbols-outlined">arrow_forward</span> Contact Us</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <p class="footer-brand-logo">mrt International</p>
+                <p class="footer-brand-desc">
+                    mrt International — Wyoming, USA. Your trusted partner for global sourcing and smart shopping.
+                </p>
+                <div style="margin-top: 15px; color: var(--gray-400); font-size: 0.9rem;">
+                    <p>Email: Info@mrtinternationalholding.com</p>
+                    <p>Phone: +1 904 459 4398</p>
+                </div>
+                <div class="footer-socials">
+                    <a href="https://facebook.com/MRTInternational" aria-label="Facebook"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+                    <a href="#" aria-label="Twitter"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 4l16 16M20 4L4 20" stroke="#fff" stroke-width="2.5" stroke-linecap="round" fill="none"/></svg></a>
+                    <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="2" width="20" height="20" rx="5" ry="5" fill="none" stroke="#fff" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="#fff" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1" fill="#fff"/></svg></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>© 2026 mrt International — All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

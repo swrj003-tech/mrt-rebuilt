@@ -1,0 +1,22 @@
+node_modules
+.env
+.env.local
+.env.production
+.DS_Store
+*.log
+.gemini
+.agent
+design-system
+/src/generated/prisma
+*.db
+*.db-journal
+public/assets/uploads/*
+!public/assets/uploads/.gitkeep
+prisma-error.txt
+seed-error.txt
+codebase.txt
+# dev files
+dev_html/
+node_modules
+.env
+.env.local
