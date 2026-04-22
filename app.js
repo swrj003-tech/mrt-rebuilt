@@ -63,6 +63,12 @@ function serveStatic(req, res) {
 }
 
 const server = http.createServer(async (req, res) => {
+  console.log(`[BRIDGE] Request: ${req.method} ${req.url}`);
+  const start = Date.now();
+  
+  res.on('finish', () => {
+    console.log(`[BRIDGE] Response: ${req.url} - ${res.statusCode} (${Date.now() - start}ms)`);
+  });
   // 1. Health
   if (req.url === '/health' || req.url === '/ping') {
     res.writeHead(200, { 'Content-Type': 'application/json' });

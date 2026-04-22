@@ -66,21 +66,6 @@ app.get('/health', (req, res) => {
   });
 });
 
-app.get('/debug-dist', async (req, res) => {
-  const fs = await import('fs');
-  const distPath = path.join(__dirname, '..', 'dist');
-  try {
-    if (fs.existsSync(distPath)) {
-      const files = fs.readdirSync(distPath, { recursive: true });
-      res.json({ exists: true, files });
-    } else {
-      res.json({ exists: false, message: 'Dist folder missing' });
-    }
-  } catch (err) {
-    res.json({ error: err.message });
-  }
-});
-
 // --- ADMIN & CRUD ROUTERS (Stability + Functionality) ---
 app.use('/api/auth', authRouter);
 app.use('/api/admin', adminRouter);
@@ -93,8 +78,8 @@ app.use('/api/media', mediaRouter);
 
 // --- CLIENT-SIDE ROUTING & STATIC ASSETS ---
 const distPath = path.join(__dirname, '..', 'dist');
-const publicPath = path.resolve(process.cwd(), 'public');
-const uploadsPath = path.resolve(process.cwd(), 'uploads');
+const publicPath = path.join(__dirname, '..', 'public');
+const uploadsPath = path.join(__dirname, '..', 'uploads');
 
 app.use(express.static(distPath));
 app.use(express.static(publicPath));
