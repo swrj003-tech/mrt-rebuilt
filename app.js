@@ -69,72 +69,34 @@ const server = http.createServer(async (req, res) => {
   res.on('finish', () => {
     console.log(`[BRIDGE] Response: ${req.url} - ${res.statusCode} (${Date.now() - start}ms)`);
   });
-  // 1. Health
-  if (req.url === '/health' || req.url === '/ping') {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify({ 
-      status: expressApp ? 'ready' : (loadError ? 'error' : 'booting'),
-      node: process.version
-    }));
-  }
 
-  // 2. Performance: Direct-serve static UI files
-  if (!req.url.startsWith('/api') && !req.url.startsWith('/debug-db') && !req.url.startsWith('/health')) {
-    let urlPath = req.url.split('?')[0];
-    
-    // Admin handling
-    if (urlPath.startsWith('/admin')) {
-      const adminFile = path.join(distDir, urlPath === '/admin' || urlPath === '/admin/' ? 'admin/index.html' : urlPath);
-      if (fs.existsSync(adminFile) && fs.statSync(adminFile).isFile()) {
-        const ext = path.extname(adminFile).toLowerCase();
-        const types = { '.html':'text/html', '.css':'text/css', '.js':'application/javascript', '.png':'image/png' };
-        res.writeHead(200, { 'Content-Type': types[ext] || 'application/octet-stream' });
-        return res.end(fs.readFileSync(adminFile));
-      }
-    }
-
-    const relativePath = urlPath.startsWith('/') ? urlPath.slice(1) : urlPath;
-    const fullPath = path.join(distDir, relativePath || 'index.html');
-
-    if (fs.existsSync(fullPath) && fs.statSync(fullPath).isFile()) {
-      const ext = path.extname(fullPath).toLowerCase();
-      const types = { '.html':'text/html', '.css':'text/css', '.js':'application/javascript', '.png':'image/png', '.jpg':'image/jpeg', '.svg':'image/svg+xml', '.webp':'image/webp' };
-      res.writeHead(200, { 'Content-Type': types[ext] || 'application/octet-stream' });
-      return res.end(fs.readFileSync(fullPath));
-    }
-
-    // Universal SPA Fallback (Admin or Main)
-    const isAdmin = urlPath.startsWith('/admin');
-    const indexPath = path.join(distDir, isAdmin ? 'admin/index.html' : 'index.html');
-    if (fs.existsSync(indexPath)) {
-      res.writeHead(200, { 'Content-Type': 'text/html' });
-      return res.end(fs.readFileSync(indexPath));
-    } else if (isAdmin) {
-      // Final fallback for admin if dist/admin missing
-      const rootAdmin = path.join(__dirname, 'admin/index.html');
-      if (fs.existsSync(rootAdmin)) {
-        res.writeHead(200, { 'Content-Type': 'text/html' });
-        return res.end(fs.readFileSync(rootAdmin));
-      }
-    }
-  }
-
-  // 3. Dynamic: Send to Express
   try {
+    // 1. Health
+    if (req.url === '/health' || req.url === '/ping') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ 
+        status: expressApp ? 'ready' : (loadError ? 'error' : 'booting'),
+        node: process.version
+      }));
+    }
+
+    // 2. Load and delegate to Express
     const app = await loadExpressApp();
     return app(req, res);
+
   } catch (err) {
+    console.error('[BRIDGE] Fatal Error:', err.message);
     if (req.url.startsWith('/api')) {
       res.writeHead(503, { 'Content-Type': 'application/json' });
-      return res.end(JSON.stringify({ error: 'Backend initializing', details: err.message }));
+      return res.end(JSON.stringify({ error: 'Backend error', details: err.message }));
     }
     res.writeHead(503, { 'Content-Type': 'text/html' });
     res.end(`
       <body style="font-family:sans-serif;padding:40px;background:#0f172a;color:#f8fafc;">
         <h1>503 Service Unavailable</h1>
-        <p>The backend failed to initialize.</p>
+        <p>The system encountered a critical error during initialization.</p>
         <pre style="background:#1e293b;padding:20px;border-radius:8px;color:#ef4444;">${err.stack || err.message}</pre>
-        <p>Check if DATABASE_URL is set and if 'prisma generate' was run.</p>
+        <p>This usually indicates missing build files (dist/) or database connectivity issues.</p>
       </body>
     `);
   }
