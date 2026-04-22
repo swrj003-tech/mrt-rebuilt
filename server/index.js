@@ -77,7 +77,7 @@ app.use('/api/upload', uploadRouter);
 app.use('/api/media', mediaRouter);
 
 // --- CLIENT-SIDE ROUTING & STATIC ASSETS ---
-const distPath = path.resolve(process.cwd(), 'dist');
+const distPath = path.join(__dirname, '..', 'dist');
 const publicPath = path.resolve(process.cwd(), 'public');
 const uploadsPath = path.resolve(process.cwd(), 'uploads');
 

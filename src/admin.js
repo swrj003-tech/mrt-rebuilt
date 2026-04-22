@@ -48,10 +48,10 @@ class MRTCMS {
             const password = loginForm.password.value;
 
             try {
-                const res = await fetch('/api/login', {
+                const res = await fetch('/api/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
+                    body: JSON.stringify({ email: username, password })
                 });
 
                 if (res.ok) {
@@ -187,7 +187,7 @@ class MRTCMS {
     }
 
     editCategory(id) {
-        const cat = this.categories.find(c => c.id === id);
+        const cat = this.categories.find(c => String(c.id) === String(id));
         if (!cat) return;
         const form = document.getElementById('category-form');
         form.id.value = cat.id;
@@ -257,7 +257,7 @@ class MRTCMS {
     }
 
     editProduct(id) {
-        const p = this.products.find(prod => prod.id === id);
+        const p = this.products.find(prod => String(prod.id) === String(id));
         if (!p) return;
         const form = document.getElementById('product-form');
         form.id.value = p.id;

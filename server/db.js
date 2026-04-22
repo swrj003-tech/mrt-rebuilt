@@ -7,7 +7,7 @@ import 'dotenv/config';
  */
 if (!global._prisma) {
   let url = process.env.DATABASE_URL;
-  if (!url.includes('connection_limit')) {
+  if (url && !url.includes('connection_limit')) {
     url += (url.includes('?') ? '&' : '?') + 'connection_limit=2';
   }
 
