@@ -23,10 +23,31 @@ export async function refreshInternalCache() {
     const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Database timeout (5s)')), 5000));
     
     const fetchData = async () => {
-      const [products] = await pool.query('SELECT p.*, c.slug as cat_slug, c.name as cat_name FROM Product p LEFT JOIN Category c ON p.categoryId = c.id ORDER BY p.sortOrder ASC');
-      const [categories] = await pool.query('SELECT c.*, t.seoIntro, t.seoTitle FROM Category c LEFT JOIN CategoryTheme t ON c.id = t.categoryId ORDER BY c.sortOrder ASC');
-      const [testimonials] = await pool.query('SELECT * FROM Testimonial WHERE isActive = 1 ORDER BY sortOrder ASC');
-      const [blog] = await pool.query('SELECT * FROM BlogPost WHERE isPublished = 1 ORDER BY createdAt DESC');
+      // Try uppercase first (Prisma default), then lowercase
+      let products, categories, testimonials, blog;
+      try {
+        [products] = await pool.query('SELECT p.*, c.slug as cat_slug, c.name as cat_name FROM Product p LEFT JOIN Category c ON p.categoryId = c.id ORDER BY p.sortOrder ASC');
+      } catch {
+        [products] = await pool.query('SELECT p.*, c.slug as cat_slug, c.name as cat_name FROM product p LEFT JOIN category c ON p.categoryId = c.id ORDER BY p.sortOrder ASC');
+      }
+
+      try {
+        [categories] = await pool.query('SELECT c.*, t.seoIntro, t.seoTitle FROM Category c LEFT JOIN CategoryTheme t ON c.id = t.categoryId ORDER BY c.sortOrder ASC');
+      } catch {
+        [categories] = await pool.query('SELECT c.*, t.seoIntro, t.seoTitle FROM category c LEFT JOIN category_theme t ON c.id = t.categoryId ORDER BY c.sortOrder ASC');
+      }
+
+      try {
+        [testimonials] = await pool.query('SELECT * FROM Testimonial WHERE isActive = 1 ORDER BY sortOrder ASC');
+      } catch {
+        [testimonials] = await pool.query('SELECT * FROM testimonial WHERE isActive = 1 ORDER BY sortOrder ASC');
+      }
+
+      try {
+        [blog] = await pool.query('SELECT * FROM BlogPost WHERE isPublished = 1 ORDER BY createdAt DESC');
+      } catch {
+        [blog] = await pool.query('SELECT * FROM blog_post WHERE isPublished = 1 ORDER BY createdAt DESC');
+      }
       
       return {
         products: products.map(p => ({ ...p, category: { slug: p.cat_slug, name: p.cat_name } })),
