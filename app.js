@@ -122,10 +122,15 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(503, { 'Content-Type': 'application/json' });
       return res.end(JSON.stringify({ error: 'Backend initializing', details: err.message }));
     }
-    const served = serveStatic(req, res);
-    if (served !== false) return;
-    res.writeHead(500);
-    res.end('System Maintenance - Please refresh in 30 seconds.');
+    res.writeHead(503, { 'Content-Type': 'text/html' });
+    res.end(`
+      <body style="font-family:sans-serif;padding:40px;background:#0f172a;color:#f8fafc;">
+        <h1>503 Service Unavailable</h1>
+        <p>The backend failed to initialize.</p>
+        <pre style="background:#1e293b;padding:20px;border-radius:8px;color:#ef4444;">${err.stack || err.message}</pre>
+        <p>Check if DATABASE_URL is set and if 'prisma generate' was run.</p>
+      </body>
+    `);
   }
 });
 
