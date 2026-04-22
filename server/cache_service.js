@@ -23,35 +23,32 @@ export async function refreshInternalCache() {
     const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Database timeout (5s)')), 5000));
     
     const fetchData = async () => {
-      // Try uppercase first (Prisma default), then lowercase
-      let products, categories, testimonials, blog;
-      try {
-        [products] = await pool.query('SELECT p.*, c.slug as cat_slug, c.name as cat_name FROM Product p LEFT JOIN Category c ON p.categoryId = c.id ORDER BY p.sortOrder ASC');
-      } catch {
-        [products] = await pool.query('SELECT p.*, c.slug as cat_slug, c.name as cat_name FROM product p LEFT JOIN category c ON p.categoryId = c.id ORDER BY p.sortOrder ASC');
-      }
+      // --- TABLE DISCOVERY LOGIC ---
+      const [tables] = await pool.query('SHOW TABLES');
+      const tableList = tables.map(t => Object.values(t)[0].toLowerCase());
+      
+      const getTableName = (base) => {
+        if (tableList.includes(base.toLowerCase())) {
+          return tables.find(t => Object.values(t)[0].toLowerCase() === base.toLowerCase())[Object.keys(tables[0])[0]];
+        }
+        return base;
+      };
 
-      try {
-        [categories] = await pool.query('SELECT c.*, t.seoIntro, t.seoTitle FROM Category c LEFT JOIN CategoryTheme t ON c.id = t.categoryId ORDER BY c.sortOrder ASC');
-      } catch {
-        [categories] = await pool.query('SELECT c.*, t.seoIntro, t.seoTitle FROM category c LEFT JOIN category_theme t ON c.id = t.categoryId ORDER BY c.sortOrder ASC');
-      }
+      const productTable = getTableName('Product');
+      const categoryTable = getTableName('Category');
+      const testimonialTable = getTableName('Testimonial');
+      const blogTable = getTableName('BlogPost');
 
-      try {
-        [testimonials] = await pool.query('SELECT * FROM Testimonial WHERE isActive = 1 ORDER BY sortOrder ASC');
-      } catch {
-        [testimonials] = await pool.query('SELECT * FROM testimonial WHERE isActive = 1 ORDER BY sortOrder ASC');
-      }
+      console.log(`[DB] Using tables: ${productTable}, ${categoryTable}`);
 
-      try {
-        [blog] = await pool.query('SELECT * FROM BlogPost WHERE isPublished = 1 ORDER BY createdAt DESC');
-      } catch {
-        [blog] = await pool.query('SELECT * FROM blog_post WHERE isPublished = 1 ORDER BY createdAt DESC');
-      }
+      const [products] = await pool.query(`SELECT p.*, c.slug as cat_slug, c.name as cat_name FROM ${productTable} p LEFT JOIN ${categoryTable} c ON p.categoryId = c.id ORDER BY p.sortOrder ASC`);
+      const [categories] = await pool.query(`SELECT * FROM ${categoryTable} ORDER BY sortOrder ASC`);
+      const [testimonials] = await pool.query(`SELECT * FROM ${testimonialTable} WHERE isActive = 1 ORDER BY sortOrder ASC`);
+      const [blog] = await pool.query(`SELECT * FROM ${blogTable} WHERE isPublished = 1 ORDER BY createdAt DESC`);
       
       return {
         products: products.map(p => ({ ...p, category: { slug: p.cat_slug, name: p.cat_name } })),
-        categories: categories.map(c => ({ ...c, theme: { seoIntro: c.seoIntro, seoTitle: c.seoTitle } })),
+        categories,
         testimonials,
         blog
       };
