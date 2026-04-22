@@ -2,7 +2,7 @@ import './style.css';
 import { FALLBACK_PRODUCTS } from './fallback-data.js';
 
 /**
- * MRTApp - Main application class for mrt International Storefront
+ * MRTApp - Main application class for MRT International Storefront
  * Manages navigation, product rendering, Quick View modal, and testimonials.
  */
 class MRTApp {
@@ -20,7 +20,6 @@ class MRTApp {
     this.setupMobileMenu();
     this.handleScroll();
     this.createQuickViewModal();
-    this.setupRevealAnimations();
 
     const homeGrid = document.getElementById('bestsellers-grid');
     const categoryGrid = document.getElementById('category-products-container');
@@ -64,26 +63,12 @@ class MRTApp {
     const nav = document.querySelector('.mrt-nav');
     if (!nav) return;
     window.addEventListener('scroll', () => {
-      if (window.scrollY > 40) {
+      if (window.scrollY > 50) {
         nav.classList.add('scrolled');
       } else {
         nav.classList.remove('scrolled');
       }
     });
-  }
-
-  setupRevealAnimations() {
-    const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('active');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, observerOptions);
-
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
   }
 
   // ── Quick View Modal ──
@@ -147,7 +132,7 @@ class MRTApp {
     // Rating stars
     const rating = product.ratingValue || 5;
     const starsHtml = Array(Math.round(rating))
-      .fill('<span class="material-symbols-outlined pc-star" style="color:#f59e0b; font-size:16px;">star</span>')
+      .fill('<span class="material-symbols-outlined testimonial-star">star</span>')
       .join('');
     document.getElementById('qv-rating').innerHTML = starsHtml + `<span class="qv-rating-text">${rating.toFixed(1)}</span>`;
 
@@ -168,7 +153,7 @@ class MRTApp {
     const benefits = Array.isArray(product.keyBenefits) ? product.keyBenefits : [];
     if (benefits.length > 0) {
       benefitsEl.innerHTML = benefits.map(b =>
-        `<div class="qv-benefit-item"><span class="material-symbols-outlined" style="color:var(--orange)">check_circle</span>${b}</div>`
+        `<div class="qv-benefit-item"><span class="material-symbols-outlined">check_circle</span>${b}</div>`
       ).join('');
       benefitsEl.style.display = 'block';
     } else {
@@ -263,27 +248,33 @@ class MRTApp {
     container.innerHTML = products.map(p => this.createProductCard(p)).join('');
   }
 
-  async fetchCategoryTheme(slug) {
-    try {
-      const res = await fetch('/api/categories');
-      const cats = await res.json();
-      const current = cats.find(c => c.slug === slug);
-      if (current) this.updateCategoryUI(current);
-    } catch (err) {
-      console.warn('Theme load failed');
-    }
-  }
-
   updateCategoryUI(categoryData) {
     const titleEl = document.getElementById('category-title-display');
     const descEl = document.getElementById('category-desc-display');
+
     if (categoryData && categoryData.theme) {
       const theme = categoryData.theme;
       if (titleEl) titleEl.innerText = theme.seoTitle || categoryData.name.toUpperCase();
       if (descEl)  descEl.innerText  = theme.seoIntro || theme.subtitle || '';
     }
+
+    const hero = document.getElementById('category-hero');
+    if (hero) {
+      const assetMap = {
+        'home-kitchen': '/assets/editorial_v3/cat_home.png',
+        'beauty-personal-care': '/assets/editorial_v3/cat_beauty.png',
+        'health-wellness': '/assets/editorial_v3/cat_health.png',
+        'baby-kids-essentials': '/assets/editorial_v3/cat_kids.png',
+        'electronics-accessories': '/assets/editorial_v3/cat_tech.png',
+        'sports-fitness': '/assets/editorial_v3/cat_men.png',
+        'pet-supplies': '/assets/editorial_v3/cat_pets.png'
+      };
+      const bg = assetMap[this.activeCategory] || '/assets/editorial_v3/hero.png';
+      hero.style.backgroundImage = `url('${bg}')`;
+    }
   }
 
+  // ── Product Card (Avory Style) ──
   createProductCard(p) {
     const isAffiliate = p.affiliateUrl && p.affiliateUrl.length > 5;
     const buyUrl = isAffiliate ? p.affiliateUrl : `#`;
@@ -302,7 +293,7 @@ class MRTApp {
       : '';
 
     return `
-      <article class="pc-card">
+      <article class="pc-card" data-id="${p.id}">
         <div class="pc-img-wrap">
           <img src="${p.image}" alt="${p.name}" loading="lazy">
           ${badgeHtml}
@@ -328,34 +319,74 @@ class MRTApp {
     `;
   }
 
+  // ── Testimonials ──
   async renderTestimonials(container) {
     try {
       const res = await fetch('/api/testimonials');
       const data = await res.json();
+
       if (data && data.length > 0) {
-        const usTestimonials = data.filter(t => t.region === 'us').slice(0, 3);
-        const uaeTestimonials = data.filter(t => t.region === 'ae').slice(0, 3);
+        const usTestimonials = data.filter(t => t.region === 'us');
+        const uaeTestimonials = data.filter(t => t.region === 'ae');
+
         let html = '';
+
         if (usTestimonials.length > 0) {
-          html += `<div class="testimonial-region"><h3 class="region-header">🇺🇸 USA</h3><div class="testimonial-grid">${usTestimonials.map(t => this.createTestimonialCard(t)).join('')}</div></div>`;
+          html += `
+            <div class="testimonial-region">
+              <h3 class="region-header">🇺🇸 United States Customers</h3>
+              <div class="testimonial-grid">
+                ${usTestimonials.map(t => this.createTestimonialCard(t)).join('')}
+              </div>
+            </div>
+          `;
         }
+
         if (uaeTestimonials.length > 0) {
-          html += `<div class="testimonial-region"><h3 class="region-header">🇦🇪 UAE</h3><div class="testimonial-grid">${uaeTestimonials.map(t => this.createTestimonialCard(t)).join('')}</div></div>`;
+          html += `
+            <div class="testimonial-region">
+              <h3 class="region-header">🇦🇪 United Arab Emirates Customers</h3>
+              <div class="testimonial-grid">
+                ${uaeTestimonials.map(t => this.createTestimonialCard(t)).join('')}
+              </div>
+            </div>
+          `;
         }
+
         container.innerHTML = html;
+        container.classList.remove('testimonial-grid');
       }
     } catch (err) {
-      console.warn('Testimonials not available');
+      console.error('Testimonials Error:', err);
     }
   }
 
   createTestimonialCard(t) {
-    const stars = Array(t.rating || 5).fill('<span class="material-symbols-outlined pc-star">star</span>').join('');
+    const flags = { 'us': '🇺🇸', 'ae': '🇦🇪', 'uk': '🇬🇧', 'ca': '🇨🇦' };
+    const flag = flags[(t.region || '').toLowerCase()] || '🌍';
+    const stars = Array(t.rating || 5)
+      .fill('<span class="material-symbols-outlined testimonial-star">star</span>')
+      .join('');
+
+    const quoteHtml = t.quote && t.quote !== 'null' ? `<p class="testimonial-quote">"${t.quote}"</p>` : '';
+    const textHtml = t.text && t.text !== 'null' ? `<p class="testimonial-text">${t.text}</p>` : '';
+
     return `
-      <div class="about-card testimonial-card">
-        <div style="color: #f59e0b; margin-bottom: 10px;">${stars}</div>
-        <p style="font-size: 0.95rem; line-height:1.6; color:var(--muted); font-style: italic; margin-bottom: 20px;">"${t.text || t.quote}"</p>
-        <div style="font-weight: 700; font-size: 0.9rem;">— ${t.name || 'Anonymous'}</div>
+      <div class="testimonial-card">
+        <div class="testimonial-badge">
+          <span class="material-symbols-outlined" style="font-size: 14px;">verified</span>
+          Verified Buyer
+        </div>
+        <div class="testimonial-stars-wrap">${stars}</div>
+        ${quoteHtml}
+        ${textHtml}
+        <div class="testimonial-author">
+          <div class="author-flag">${flag}</div>
+          <div class="author-info">
+            <h4>${t.name || 'Anonymous'}</h4>
+            <p>${t.location || ''}</p>
+          </div>
+        </div>
       </div>
     `;
   }

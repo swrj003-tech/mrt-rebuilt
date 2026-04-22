@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Blog | MRT International Holding LLC</title>
-    <meta name="description" content="Explore insights, product guides, and lifestyle tips from MRT International — curated stories for a modern life.">
+    <title>Blog — MRT International | Insights & Editorial</title>
+    <meta name="description" content="Explore our curated editorial — expert insights, product guides, lifestyle tips, and behind-the-scenes stories from MRT International.">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,400;1,600&family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@300,0..1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-25..200" rel="stylesheet">
     <link rel="stylesheet" href="/src/style.css">
+    <script type="module" src="/src/main.js"></script>
 </head>
 <body onload="document.body.classList.add('loaded')">
 
+    <!-- NAVBAR -->
     <header class="mrt-nav">
         <a href="index.html" class="mrt-nav-logo">MRT International</a>
         <nav class="mrt-nav-links">
@@ -21,12 +23,13 @@
                     Categories <span class="material-symbols-outlined" style="font-size:17px;">expand_more</span>
                 </a>
                 <div class="nav-dropdown">
-                    <a href="category.html?c=home-kitchen" class="nav-dropdown-item">Home &amp; Kitchen</a>
+                    <a href="category.html?c=home-kitchen"         class="nav-dropdown-item">Home &amp; Kitchen</a>
                     <a href="category.html?c=beauty-personal-care" class="nav-dropdown-item">Beauty &amp; Personal Care</a>
-                    <a href="category.html?c=health-wellness" class="nav-dropdown-item">Health &amp; Wellness</a>
-                    <a href="category.html?c=pet-supplies" class="nav-dropdown-item">Pet Supplies</a>
+                    <a href="category.html?c=health-wellness"      class="nav-dropdown-item">Health &amp; Wellness</a>
+                    <a href="category.html?c=pet-supplies"         class="nav-dropdown-item">Pet Supplies</a>
                     <a href="category.html?c=baby-kids-essentials" class="nav-dropdown-item">Baby &amp; Kids Essentials</a>
                     <a href="category.html?c=electronics-accessories" class="nav-dropdown-item">Electronics &amp; Accessories</a>
+                    <a href="category.html?c=sports-fitness"       class="nav-dropdown-item">Sports &amp; Fitness</a>
                 </div>
             </div>
             <a href="about.html">About</a>
@@ -41,9 +44,8 @@
         </div>
     </header>
 
-    <!-- Mobile Nav -->
+    <!-- MOBILE NAV -->
     <div class="mobile-nav" id="mobileNav">
-        <div class="mobile-nav-backdrop" id="mobileNavBackdrop"></div>
         <div class="mobile-nav-panel">
             <button class="mobile-nav-close" id="mobileNavClose">
                 <span class="material-symbols-outlined">close</span>
@@ -51,40 +53,50 @@
             <a href="index.html"><span class="material-symbols-outlined" style="font-size:18px;">home</span> Home</a>
             <a href="categories.html"><span class="material-symbols-outlined" style="font-size:18px;">storefront</span> Shop / Collections</a>
             <a href="about.html"><span class="material-symbols-outlined" style="font-size:18px;">info</span> About</a>
-            <a href="blog.html" class="active"><span class="material-symbols-outlined" style="font-size:18px;">book</span> Blog</a>
+            <a href="blog.html" class="active"><span class="material-symbols-outlined" style="font-size:18px;">article</span> Blog</a>
             <a href="contact.html"><span class="material-symbols-outlined" style="font-size:18px;">mail</span> Contact</a>
         </div>
+        <div style="flex:1" id="mobileNavBackdrop"></div>
     </div>
 
     <main>
-        <!-- Hero Section -->
+        <!-- Hero -->
         <section class="blog-hero">
-            <img src="/assets/editorial_v3/discovery_bg.png" alt="MRT Blog" class="about-hero-bg" style="filter: brightness(0.2) grayscale(1);">
-            <div class="about-hero-overlay"></div>
+            <div class="blog-hero-overlay"></div>
             <div class="blog-hero-content">
-                <p class="about-hero-tag">The MRT Editorial</p>
-                <h1 class="about-hero-title">Insights & Stories</h1>
-                <p class="about-hero-desc">Curated explorations into design, wellness, and the art of global sourcing.</p>
+                <p class="blog-hero-tag">The MRT Editorial</p>
+                <h1 class="blog-hero-title">Insights & Stories</h1>
+                <p class="blog-hero-desc">Expert guides, product discoveries, lifestyle tips, and behind-the-scenes stories from our curated world.</p>
             </div>
         </section>
 
-        <!-- Blog Grid Section -->
-        <section class="blog-section reveal" id="blogListContainer">
+        <!-- Blog Grid -->
+        <section class="blog-section">
             <div class="blog-grid" id="blogGrid">
-                <!-- Fallback/Loading state -->
-                <div style="grid-column: 1/-1; text-align: center; padding: 100px 0;">
-                    <span class="material-symbols-outlined animate-spin" style="font-size: 48px; color: var(--orange); opacity: 0.3;">refresh</span>
-                    <p style="margin-top: 20px; color: var(--muted);">Loading editorial archive...</p>
+                <!-- Loading state -->
+                <div class="blog-loading" id="blogLoading">
+                    <span class="material-symbols-outlined" style="font-size: 40px; opacity: 0.3; animation: spin 1s linear infinite;">refresh</span>
+                    <p style="color: var(--muted); margin-top: 1rem;">Loading posts...</p>
                 </div>
             </div>
+
+            <!-- Empty state (hidden by default) -->
+            <div class="blog-empty" id="blogEmpty" style="display: none;">
+                <span class="material-symbols-outlined" style="font-size: 64px; color: var(--orange); opacity:0.6;">edit_note</span>
+                <h3>No Articles Yet</h3>
+                <p>Our editorial team is crafting stories for you. <br>Check back soon for insights, guides, and inspiration.</p>
+            </div>
         </section>
 
-        <!-- Post Reading Section (hidden by default) -->
-        <section id="blogPostContainer" style="display: none; padding: 100px 5%; max-width: 900px; margin: 0 auto;">
-            <button onclick="window.location.href='blog.html'" style="background:none; border:none; display:flex; align-items:center; gap:8px; font-weight:700; cursor:pointer; margin-bottom:40px; color:var(--orange);">
-                <span class="material-symbols-outlined">arrow_back</span> BACK TO BLOG
-            </button>
-            <div id="postContent"></div>
+        <!-- Single Post View (hidden, shown via JS) -->
+        <section class="blog-post-view" id="blogPostView" style="display: none;">
+            <div class="blog-post-container">
+                <a href="blog.html" class="blog-back-link">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                    Back to all posts
+                </a>
+                <div id="blogPostContent"></div>
+            </div>
         </section>
     </main>
 
@@ -92,10 +104,10 @@
     <footer class="mrt-footer">
         <div class="footer-grid">
             <div>
-                <p class="footer-col-title">Collections</p>
+                <p class="footer-col-title">Categories</p>
                 <ul class="footer-links">
                     <li><a href="category.html?c=home-kitchen"><span class="material-symbols-outlined">arrow_forward</span> Home &amp; Kitchen</a></li>
-                    <li><a href="category.html?c=beauty-personal-care"><span class="material-symbols-outlined">arrow_forward</span> Beauty &amp; Care</a></li>
+                    <li><a href="category.html?c=beauty-personal-care"><span class="material-symbols-outlined">arrow_forward</span> Beauty</a></li>
                     <li><a href="category.html?c=health-wellness"><span class="material-symbols-outlined">arrow_forward</span> Health &amp; Wellness</a></li>
                     <li><a href="category.html?c=pet-supplies"><span class="material-symbols-outlined">arrow_forward</span> Pet Supplies</a></li>
                 </ul>
@@ -104,22 +116,22 @@
                 <p class="footer-col-title">Company</p>
                 <ul class="footer-links">
                     <li><a href="index.html"><span class="material-symbols-outlined">arrow_forward</span> Home</a></li>
-                    <li><a href="about.html"><span class="material-symbols-outlined">arrow_forward</span> About Us</a></li>
+                    <li><a href="about.html"><span class="material-symbols-outlined">arrow_forward</span> About</a></li>
                     <li><a href="blog.html"><span class="material-symbols-outlined">arrow_forward</span> Blog</a></li>
+                    <li><a href="categories.html"><span class="material-symbols-outlined">arrow_forward</span> Shop</a></li>
                     <li><a href="contact.html"><span class="material-symbols-outlined">arrow_forward</span> Contact</a></li>
                 </ul>
             </div>
             <div>
-                <p class="footer-col-title">Follow Us</p>
-                <div class="footer-socials">
-                    <a href="https://facebook.com/MRTInternational" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
-                    <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg></a>
-                </div>
+                <p class="footer-col-title">Support</p>
+                <ul class="footer-links">
+                    <li><a href="mailto:Info@mrtinternationalholding.com"><span class="material-symbols-outlined">mail</span> Info@mrtinternationalholding.com</a></li>
+                    <li><a href="tel:+19044594398"><span class="material-symbols-outlined">call</span> +1 904 459 4398</a></li>
+                </ul>
             </div>
             <div>
                 <p class="footer-brand-logo">MRT International</p>
                 <p class="footer-brand-desc">MRT International Holding LLC — Wyoming, USA. Your trusted partner for global sourcing and smart shopping.</p>
-                <p style="font-size: 0.85rem; color: var(--muted); margin-top: 1rem;">Info@mrtinternationalholding.com</p>
             </div>
         </div>
         <div class="footer-bottom">
@@ -128,74 +140,107 @@
     </footer>
 
     <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Mobile Nav
-            const toggle = document.getElementById('mobileMenuToggle');
-            const nav = document.getElementById('mobileNav');
-            const close = document.getElementById('mobileNavClose');
-            if (toggle) toggle.addEventListener('click', () => nav.classList.add('open'));
-            if (close) close.addEventListener('click', () => nav.classList.remove('open'));
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Mobile menu
+        const toggle = document.getElementById('mobileMenuToggle');
+        const nav = document.getElementById('mobileNav');
+        const close = document.getElementById('mobileNavClose');
+        const backdrop = document.getElementById('mobileNavBackdrop');
+        if (toggle) toggle.addEventListener('click', () => nav.classList.add('open'));
+        if (close) close.addEventListener('click', () => nav.classList.remove('open'));
+        if (backdrop) backdrop.addEventListener('click', () => nav.classList.remove('open'));
 
-            // Check URL for single post
-            const params = new URLSearchParams(window.location.search);
-            const slug = params.get('post');
+        // Check if viewing a single post
+        const urlParams = new URLSearchParams(window.location.search);
+        const postSlug = urlParams.get('post');
 
-            if (slug) {
-                await loadSinglePost(slug);
-            } else {
-                await loadBlogGrid();
-            }
-        });
-
-        async function loadBlogGrid() {
-            const grid = document.getElementById('blogGrid');
-            try {
-                const res = await fetch('/api/blog');
-                const posts = await res.json();
-                
-                if (posts.length === 0) {
-                    grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:100px 0; color:var(--muted);">No articles found.</p>';
-                    return;
-                }
-
-                grid.innerHTML = posts.map(post => `
-                    <a href="blog.html?post=${post.slug}" class="blog-card">
-                        <div class="blog-card-img">
-                            <img src="${post.coverImage}" alt="${post.title}">
-                        </div>
-                        <div class="blog-card-body">
-                            <span style="font-size:0.75rem; font-weight:700; color:var(--orange); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:15px; display:block;">${post.author}</span>
-                            <h3 class="blog-card-title">${post.title}</h3>
-                            <p class="blog-card-excerpt">${post.excerpt}</p>
-                            <span style="margin-top:20px; font-size:0.8rem; font-weight:700; color:var(--orange); display:flex; align-items:center; gap:5px;">READ STORY <span class="material-symbols-outlined" style="font-size:16px;">arrow_forward</span></span>
-                        </div>
-                    </a>
-                `).join('');
-            } catch (err) {
-                grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; padding:100px 0; color:var(--muted);">Failed to load blog posts. Please check back later.</p>';
-            }
+        if (postSlug) {
+            await loadSinglePost(postSlug);
+        } else {
+            await loadBlogGrid();
         }
+    });
 
-        async function loadSinglePost(slug) {
-            document.getElementById('blogListContainer').style.display = 'none';
-            document.querySelector('.blog-hero').style.display = 'none';
-            document.getElementById('blogPostContainer').style.display = 'block';
+    async function loadBlogGrid() {
+        const grid = document.getElementById('blogGrid');
+        const loading = document.getElementById('blogLoading');
+        const empty = document.getElementById('blogEmpty');
+        
+        try {
+            const res = await fetch('/api/blog');
+            const posts = await res.json();
             
-            const content = document.getElementById('postContent');
-            try {
-                const res = await fetch('/api/blog/post/' + slug);
-                const post = await res.json();
+            loading.style.display = 'none';
 
-                content.innerHTML = `
-                    <img src="${post.coverImage}" style="width:100%; border-radius:24px; margin-bottom:40px;">
-                    <div style="font-family:'Plus Jakarta Sans', sans-serif; font-size:0.9rem; color:var(--orange); font-weight:700; margin-bottom:15px; text-transform:uppercase; letter-spacing:0.1em;">${post.author} · ${new Date(post.createdAt).toLocaleDateString()}</div>
-                    <h1 style="font-family:'Playfair Display', serif; font-size:3.5rem; color:var(--ink); line-height:1.2; margin-bottom:40px;">${post.title}</h1>
-                    <div style="font-size:1.15rem; line-height:1.8; color:var(--muted);">${post.content}</div>
-                `;
-            } catch (err) {
-                content.innerHTML = '<h2>Post not found.</h2>';
+            if (!posts.length) {
+                empty.style.display = 'flex';
+                return;
             }
+
+            grid.innerHTML = posts.map((post, i) => `
+                <a href="blog.html?post=${post.slug}" class="blog-card ${i === 0 ? 'blog-card-featured' : ''}">
+                    <div class="blog-card-img">
+                        ${post.coverImage 
+                            ? `<img src="${post.coverImage}" alt="${post.title}" loading="lazy">`
+                            : `<div class="blog-card-img-placeholder"><span class="material-symbols-outlined">article</span></div>`
+                        }
+                    </div>
+                    <div class="blog-card-body">
+                        <div class="blog-card-meta">
+                            <span class="blog-card-author">${post.author || 'MRT Editorial'}</span>
+                            <span class="blog-card-dot">·</span>
+                            <span class="blog-card-date">${new Date(post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                        </div>
+                        <h3 class="blog-card-title">${post.title}</h3>
+                        <p class="blog-card-excerpt">${post.excerpt || ''}</p>
+                        <span class="blog-card-cta">Read More <span class="material-symbols-outlined" style="font-size:16px;">arrow_forward</span></span>
+                    </div>
+                </a>
+            `).join('');
+        } catch (err) {
+            console.error('Blog load error:', err);
+            loading.innerHTML = '<p style="color: #e74c3c;">Failed to load posts. Please try again later.</p>';
         }
+    }
+
+    async function loadSinglePost(slug) {
+        const heroEl = document.querySelector('.blog-hero');
+        const gridSection = document.querySelector('.blog-section');
+        const postView = document.getElementById('blogPostView');
+        const postContent = document.getElementById('blogPostContent');
+        
+        // Hide grid, show post view
+        if (heroEl) heroEl.style.display = 'none';
+        if (gridSection) gridSection.style.display = 'none';
+        postView.style.display = 'block';
+
+        try {
+            const res = await fetch(`/api/blog/post/${slug}`);
+            if (!res.ok) throw new Error('Post not found');
+            const post = await res.json();
+
+            document.title = `${post.title} — MRT International Blog`;
+
+            postContent.innerHTML = `
+                ${post.coverImage ? `<img src="${post.coverImage}" alt="${post.title}" class="blog-post-cover">` : ''}
+                <div class="blog-post-meta">
+                    <span>${post.author || 'MRT Editorial'}</span>
+                    <span>·</span>
+                    <span>${new Date(post.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                </div>
+                <h1 class="blog-post-title">${post.title}</h1>
+                <div class="blog-post-body">${post.content}</div>
+            `;
+        } catch (err) {
+            postContent.innerHTML = `
+                <div style="text-align:center; padding:4rem 0;">
+                    <span class="material-symbols-outlined" style="font-size:64px; color:var(--orange); opacity:0.5;">error</span>
+                    <h3 style="margin-top:1rem; color:var(--ink);">Post Not Found</h3>
+                    <p style="color:var(--muted);">The article you're looking for doesn't exist or has been removed.</p>
+                </div>
+            `;
+        }
+    }
     </script>
 </body>
 </html>
