@@ -17,6 +17,11 @@ class MRTApp {
   }
 
   async init() {
+    // FORCE CACHE CLEAR FOR NEW VERSION
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
+    }
+    
     this.setupMobileMenu();
     this.handleScroll();
     this.createQuickViewModal();
