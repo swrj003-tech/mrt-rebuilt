@@ -66,7 +66,7 @@ app.get('/health', (req, res) => {
   });
 });
 
-// --- ADMIN & CRUD ROUTERS (Stability + Functionality) ---
+// --- ADMIN & CRUD ROUTERS ---
 app.use('/api/auth', authRouter);
 app.use('/api/admin', adminRouter);
 app.use('/api/products', productsRouter);
@@ -76,22 +76,25 @@ app.use('/api/testimonials', testimonialRouter);
 app.use('/api/upload', uploadRouter);
 app.use('/api/media', mediaRouter);
 
-// --- CLIENT-SIDE ROUTING & STATIC ASSETS ---
+// --- STATIC ASSETS & SPA ROUTING ---
 const distPath = path.join(__dirname, '..', 'dist');
 const publicPath = path.join(__dirname, '..', 'public');
-const uploadsPath = path.join(__dirname, '..', 'uploads');
 
 app.use(express.static(distPath));
 app.use(express.static(publicPath));
-app.use('/uploads', express.static(uploadsPath));
+app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
-// Ensure /admin serves the admin dashboard
-app.get(/^\/admin(?:\/.*)?$/, (req, res) => {
+// Specific handler for /admin to ensure the dashboard loads
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(distPath, 'admin/index.html'));
+});
+app.get('/admin/*', (req, res) => {
   res.sendFile(path.join(distPath, 'admin/index.html'));
 });
 
-// Universal SPA Fallback
-app.get(/^(?!\/api).*/, (req, res) => {
+// Universal SPA Fallback for the main site
+app.get('*', (req, res, next) => {
+  if (req.url.startsWith('/api')) return next();
   res.sendFile(path.join(distPath, 'index.html'));
 });
 
