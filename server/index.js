@@ -26,7 +26,9 @@ app.use(cors());
 app.use(express.json({ limit: '5mb' }));
 
 // --- INITIALIZE NUCLEAR STABILITY CACHE ---
-cacheService.startBackgroundCacheLoop(5 * 60 * 1000); // 5 min interval
+cacheService.refreshInternalCache().then(() => {
+  cacheService.startBackgroundCacheLoop(5 * 60 * 1000); // 5 min interval
+});
 
 // --- PUBLIC HIGH-SPEED API (Served from Memory) ---
 
@@ -41,13 +43,12 @@ app.get('/api/products', (req, res) => {
   if (category) products = products.filter(p => p.category && p.category.slug === category);
   if (search) products = products.filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
 
-  // Ensure products is an array before processing
-  if (!Array.isArray(products)) {
-    console.error('[API] Cache mismatch: expected products array, got:', typeof products);
-    return res.json({ products: [], total: 0 });
-  }
-
-  res.json({ products: products.slice(0, parseInt(limit)), total: products.length });
+  // Ensure consistent response structure for frontend
+  res.json({ 
+    products: products.slice(0, parseInt(limit)), 
+    total: products.length,
+    status: cacheService.internalCache.status 
+  });
 });
 
 app.get('/api/testimonials', (req, res) => {

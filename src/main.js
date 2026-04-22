@@ -22,6 +22,9 @@ class MRTApp {
     this.createQuickViewModal();
 
     const categoriesGrid = document.getElementById('categories-grid');
+    const homeGrid = document.getElementById('products-home-grid') || document.getElementById('featured-products');
+    const categoryGrid = document.getElementById('category-products-container');
+    const communityGrid = document.getElementById('community-grid');
 
     if (categoriesGrid) {
       await this.fetchAndRenderCategories(categoriesGrid);
