@@ -245,15 +245,13 @@ class MRTApp {
           throw new Error('No products in DB');
         }
       } catch (innerErr) {
-        console.warn('[MRT] API Failed, switching to Fail-Safe:', innerErr.message);
-        this.useFallback(container, limit);
+        console.warn('[MRT] API Failed:', innerErr.message);
+        container.innerHTML = '<p class="no-products">Database connectivity issue. Please check back later.</p>';
       }
-
-      if (this.activeCategory) this.fetchCategoryTheme(this.activeCategory);
 
     } catch (err) {
       console.error('MRT CMS Error:', err);
-      this.useFallback(container, limit);
+      container.innerHTML = '<p class="no-products">Connection Error.</p>';
     }
   }
 
