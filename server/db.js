@@ -7,8 +7,10 @@ import 'dotenv/config';
  */
 if (!global._prisma) {
   let url = process.env.DATABASE_URL;
-  if (url && !url.includes('connection_limit')) {
-    url += (url.includes('?') ? '&' : '?') + 'connection_limit=2';
+  if (url) {
+    if (!url.includes('connection_limit')) url += (url.includes('?') ? '&' : '?') + 'connection_limit=2';
+    if (!url.includes('connect_timeout')) url += '&connect_timeout=5';
+    if (!url.includes('pool_timeout')) url += '&pool_timeout=5';
   }
 
   global._prisma = new PrismaClient({

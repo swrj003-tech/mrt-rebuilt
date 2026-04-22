@@ -1,5 +1,5 @@
 import './style.css';
-import { FALLBACK_PRODUCTS } from './fallback-data.js';
+import { FALLBACK_PRODUCTS, FALLBACK_CATEGORIES } from './fallback-data.js';
 
 /**
  * MRTApp - Main application class for MRT International Storefront
@@ -21,9 +21,11 @@ class MRTApp {
     this.handleScroll();
     this.createQuickViewModal();
 
-    const homeGrid = document.getElementById('bestsellers-grid');
-    const categoryGrid = document.getElementById('category-products-container');
-    const communityGrid = document.getElementById('community-grid');
+    const categoriesGrid = document.getElementById('categories-grid');
+
+    if (categoriesGrid) {
+      await this.fetchAndRenderCategories(categoriesGrid);
+    }
 
     if (homeGrid) {
       await this.fetchAndRender(homeGrid, 8);
@@ -178,7 +180,35 @@ class MRTApp {
   }
 
   // ── Data Fetching ──
-  async fetchAndRender(container, limit) {
+  async fetchAndRenderCategories(container) {
+    let categories = [];
+    try {
+      const response = await fetch('/api/categories');
+      if (response.ok) {
+        categories = await response.json();
+      }
+    } catch (err) {
+      console.warn('[MRT] Categories fetch failed, using fallback.');
+    }
+
+    if (!categories || categories.length === 0) {
+      categories = FALLBACK_CATEGORIES;
+    }
+
+    container.innerHTML = categories.map(cat => `
+      <a href="category.html?c=${cat.slug}" class="avory-cat-card group">
+        <div class="avory-cat-bg" style="background-image: url('${cat.image}');"></div>
+        <div class="avory-cat-overlay"></div>
+        <div class="avory-cat-content">
+          <h3 class="avory-cat-title">${cat.name}</h3>
+          <p class="avory-cat-desc">${cat.theme?.seoIntro || 'Explore our curated selection.'}</p>
+          <span class="avory-cat-btn">Explore Now</span>
+        </div>
+      </a>
+    `).join('');
+  }
+
+  async fetchAndRender(container, limit = 50) {
     try {
       this.showLoading(container);
       

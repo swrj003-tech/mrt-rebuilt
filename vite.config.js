@@ -1,11 +1,8 @@
 import { defineConfig } from 'vite';
-import { fileURLToPath } from 'url';
-import { dirname, resolve } from 'path';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
+import { resolve } from 'path';
+ 
 export default defineConfig({
+  root: './',
   base: '/',
   appType: 'mpa',
   build: {
@@ -24,11 +21,10 @@ export default defineConfig({
     },
   },
   server: {
-    host: true,          // Listen on all local IPs
-    port: 5174,          // Always use this port
-    strictPort: true,    // FAIL instead of jumping to 5174, 5175 etc.
-    allowedHosts: true,  // Allow tunnel hosts
-
+    host: true,
+    port: 5174,
+    strictPort: true,
+    allowedHosts: true,
     proxy: {
       '/api': {
         target: 'http://127.0.0.1:3001',
@@ -56,4 +52,3 @@ export default defineConfig({
     }
   ]
 });
-

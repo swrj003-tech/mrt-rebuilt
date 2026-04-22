@@ -20,11 +20,16 @@ export const internalCache = {
 export async function refreshInternalCache() {
   console.log('[CACHE] Refreshing in-memory data for 100% Stability...');
   try {
-    const [products, categories, testimonials, blog] = await Promise.all([
-      prisma.product.findMany({ include: { category: true }, orderBy: { sortOrder: 'asc' } }),
-      prisma.category.findMany({ include: { theme: true }, orderBy: { sortOrder: 'asc' } }),
-      prisma.testimonial.findMany({ where: { isActive: true }, orderBy: { sortOrder: 'asc' } }),
-      prisma.blogPost.findMany({ where: { isPublished: true }, orderBy: { createdAt: 'desc' } })
+    const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error('Database connection timeout (5s)')), 5000));
+    
+    const [products, categories, testimonials, blog] = await Promise.race([
+      Promise.all([
+        prisma.product.findMany({ include: { category: true }, orderBy: { sortOrder: 'asc' } }),
+        prisma.category.findMany({ include: { theme: true }, orderBy: { sortOrder: 'asc' } }),
+        prisma.testimonial.findMany({ where: { isActive: true }, orderBy: { sortOrder: 'asc' } }),
+        prisma.blogPost.findMany({ where: { isPublished: true }, orderBy: { createdAt: 'desc' } })
+      ]),
+      timeout
     ]);
 
     internalCache.products = products;
