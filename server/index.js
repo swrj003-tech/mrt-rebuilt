@@ -59,6 +59,15 @@ app.get('/api/blog', (req, res) => {
   res.json(cacheService.internalCache.blog || []);
 });
 
+app.get('/api/test-db', async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT 1 + 1 AS result');
+    res.json({ status: 'connected', result: rows[0].result, db: process.env.DATABASE_URL?.split('@')[1] });
+  } catch (err) {
+    res.status(500).json({ status: 'error', message: err.message, stack: err.stack });
+  }
+});
+
 app.get('/health', (req, res) => {
   res.json({ 
     status: 'OK', 
