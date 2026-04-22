@@ -245,17 +245,75 @@ class MRTApp {
   }
 
   renderProducts(container, products) {
-    container.innerHTML = products.map(p => this.createProductCard(p)).join('');
+    if (this.activeCategory) {
+      // Group products by badge for category pages
+      const sections = {
+        'Top Pick': products.filter(p => p.badge === 'Top Pick'),
+        'Trending Now': products.filter(p => p.badge === 'Trending Now'),
+        'Editor’s Choice': products.filter(p => p.badge === 'Editor’s Choice')
+      };
+
+      let html = '';
+      if (sections['Top Pick'].length > 0) {
+        html += `
+          <div class="category-section">
+            <h2 class="section-heading">⭐ Top Picks</h2>
+            <div class="products-grid">
+              ${sections['Top Pick'].map(p => this.createProductCard(p)).join('')}
+            </div>
+          </div>
+        `;
+      }
+      if (sections['Trending Now'].length > 0) {
+        html += `
+          <div class="category-section">
+            <h2 class="section-heading">🔥 Trending Now</h2>
+            <div class="products-grid">
+              ${sections['Trending Now'].map(p => this.createProductCard(p)).join('')}
+            </div>
+          </div>
+        `;
+      }
+      if (sections['Editor’s Choice'].length > 0) {
+        html += `
+          <div class="category-section">
+            <h2 class="section-heading">💡 Editor’s Choice</h2>
+            <div class="products-grid">
+              ${sections['Editor’s Choice'].map(p => this.createProductCard(p)).join('')}
+            </div>
+          </div>
+        `;
+      }
+      container.innerHTML = html || '<p class="no-products">No products found in this category.</p>';
+    } else {
+      // Standard grid for homepage
+      container.innerHTML = `<div class="products-grid">${products.map(p => this.createProductCard(p)).join('')}</div>`;
+    }
   }
 
   updateCategoryUI(categoryData) {
     const titleEl = document.getElementById('category-title-display');
     const descEl = document.getElementById('category-desc-display');
 
-    if (categoryData && categoryData.theme) {
-      const theme = categoryData.theme;
-      if (titleEl) titleEl.innerText = theme.seoTitle || categoryData.name.toUpperCase();
-      if (descEl)  descEl.innerText  = theme.seoIntro || theme.subtitle || '';
+    const categoryNames = {
+      'home-kitchen': 'Home & Kitchen',
+      'beauty-personal-care': 'Beauty & Personal Care',
+      'health-wellness': 'Health & Wellness',
+      'pet-supplies': 'Pet Supplies',
+      'baby-kids-essentials': 'Baby & Kids Essentials',
+      'electronics-accessories': 'Electronics & Accessories',
+      'sports-fitness': 'Sports & Fitness'
+    };
+
+    const catName = categoryNames[this.activeCategory] || 'Products';
+    
+    if (titleEl) {
+      titleEl.innerText = `Top 10 Best ${catName} Products (2026)`;
+      titleEl.classList.add('seo-title');
+    }
+    if (descEl) {
+      descEl.innerText = `Discover the most useful, trending, and top-rated ${catName.toLowerCase()} products carefully selected for quality and value.`;
+      descEl.classList.add('seo-intro');
     }
 
     const hero = document.getElementById('category-hero');
@@ -274,46 +332,50 @@ class MRTApp {
     }
   }
 
-  // ── Product Card (Avory Style) ──
+  // ── Product Card (Affiliate Style) ──
   createProductCard(p) {
-    const isAffiliate = p.affiliateUrl && p.affiliateUrl.length > 5;
-    const buyUrl = isAffiliate ? p.affiliateUrl : `#`;
-    const rating = p.ratingValue || 5;
-    const stars = Array(Math.round(rating))
-      .fill('<span class="material-symbols-outlined pc-star">star</span>')
-      .join('');
-    const priceHtml = p.price && p.price > 0 
-      ? `<span class="pc-price">$${p.price.toFixed(2)}</span>` 
-      : '';
+    const buyUrl = p.affiliateUrl || '#';
+    const secondaryUrl = p.secondaryUrl || buyUrl;
+    const ratingText = p.ratingText || '4.8/5 Recommended';
+    
     const badgeHtml = p.badge 
-      ? `<span class="pc-badge">${p.badge}</span>` 
+      ? `<span class="pc-badge ${p.badge.toLowerCase().replace(/\s+/g, '-')}">${p.badge}</span>` 
       : '';
-    const benefitHtml = p.shortBenefit 
-      ? `<p class="pc-benefit">${p.shortBenefit}</p>` 
+      
+    const benefits = Array.isArray(p.keyBenefits) ? p.keyBenefits : [];
+    const benefitsHtml = benefits.length > 0 
+      ? `<ul class="pc-benefits-list">
+          ${benefits.map(b => `<li><span class="material-symbols-outlined">check_circle</span> ${b}</li>`).join('')}
+         </ul>`
       : '';
 
     return `
-      <article class="pc-card" data-id="${p.id}">
+      <article class="pc-card affiliate-card" data-id="${p.id}">
         <div class="pc-img-wrap">
           <img src="${p.image}" alt="${p.name}" loading="lazy">
           ${badgeHtml}
-          <div class="pc-hover-actions">
-            <button class="pc-quickview-btn" onclick="openQuickView(${p.id})" title="Quick View">
-              <span class="material-symbols-outlined">visibility</span>
-            </button>
-          </div>
         </div>
         <div class="pc-info">
-          <div class="pc-rating">${stars}<span class="pc-rating-num">${rating.toFixed(1)}</span></div>
-          <h3 class="pc-name">${p.name}</h3>
-          ${benefitHtml}
-          <div class="pc-footer">
-            ${priceHtml}
-            <a href="${buyUrl}" target="_blank" rel="noopener" class="pc-buy-btn">
-              <span class="material-symbols-outlined" style="font-size:16px">shopping_bag</span>
-              Buy Now
+          <div class="pc-header">
+            <div class="pc-rating-tag">⭐ ${ratingText}</div>
+            <h3 class="pc-name">${p.name}</h3>
+          </div>
+          
+          <p class="pc-description">${p.shortDescription || ''}</p>
+          
+          ${benefitsHtml}
+          
+          <div class="pc-actions">
+            <a href="${buyUrl}" target="_blank" rel="noopener" class="pc-btn primary-btn">
+              Check Latest Price
+              <span class="material-symbols-outlined">open_in_new</span>
+            </a>
+            <a href="${secondaryUrl}" target="_blank" rel="noopener" class="pc-btn secondary-btn">
+              View Deal
             </a>
           </div>
+          
+          <p class="pc-disclaimer">Price and availability may vary. As an Amazon Associate, we earn from qualifying purchases.</p>
         </div>
       </article>
     `;

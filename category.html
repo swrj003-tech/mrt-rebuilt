@@ -43,30 +43,60 @@
     <div class="mobile-nav" id="mobileNav">
         <div class="mobile-nav-panel">
             <button class="mobile-nav-close" id="mobileNavClose"><span class="material-symbols-outlined">close</span></button>
-            <a href="index.html">Home</a>
-            <a href="categories.html">Shop / Collections</a>
-            <a href="about.html">About</a>
-            <a href="contact.html">Contact</a>
+            <a href="index.html">
+                <span class="material-symbols-outlined" style="font-size:18px;color:var(--orange)">home</span> Home
+            </a>
+            <a href="categories.html">
+                <span class="material-symbols-outlined" style="font-size:18px;">storefront</span> Shop / Collections
+            </a>
+            <a href="category.html?c=home-kitchen">
+                <span class="material-symbols-outlined" style="font-size:18px;">chair</span> Home &amp; Kitchen
+            </a>
+            <a href="category.html?c=beauty-personal-care">
+                <span class="material-symbols-outlined" style="font-size:18px;">spa</span> Beauty &amp; Personal Care
+            </a>
+            <a href="category.html?c=health-wellness">
+                <span class="material-symbols-outlined" style="font-size:18px;">favorite</span> Health &amp; Wellness
+            </a>
+            <a href="category.html?c=pet-supplies">
+                <span class="material-symbols-outlined" style="font-size:18px;">pets</span> Pet Supplies
+            </a>
+            <a href="category.html?c=baby-kids-essentials">
+                <span class="material-symbols-outlined" style="font-size:18px;">child_care</span> Baby &amp; Kids
+            </a>
+            <a href="category.html?c=electronics-accessories">
+                <span class="material-symbols-outlined" style="font-size:18px;">devices</span> Electronics
+            </a>
+            <a href="category.html?c=sports-fitness">
+                <span class="material-symbols-outlined" style="font-size:18px;">fitness_center</span> Sports &amp; Fitness
+            </a>
+            <a href="about.html">
+                <span class="material-symbols-outlined" style="font-size:18px;">info</span> About
+            </a>
+            <a href="blog.html">
+                <span class="material-symbols-outlined" style="font-size:18px;">article</span> Blog
+            </a>
+            <a href="contact.html">
+                <span class="material-symbols-outlined" style="font-size:18px;">mail</span> Contact
+            </a>
         </div>
         <div style="flex:1" id="mobileNavBackdrop"></div>
     </div>
 
     <main>
-        <!-- Avory Category Hero -->
-        <section class="category-hero-v2" id="category-hero">
-            <div class="category-hero-overlay"></div>
-            <div class="category-hero-content">
-                <p class="avory-why-tag" style="color: #fff; opacity: 0.8;">Curated Collection</p>
-                <h1 id="category-title-display" class="text-5xl md:text-7xl font-heading font-bold mb-6">COLLECTIONS</h1>
-                <p id="category-desc-display" class="text-lg opacity-90 max-width-[600px] mx-auto">
-                    Discover our handpicked selection of premium finds for your high-end lifestyle.
-                </p>
-            </div>
+        <!-- SEO Title & Intro (Very Top) -->
+        <section class="category-header-clean pt-12 pb-8 px-6 md:px-12 max-w-[1400px] mx-auto text-center">
+            <h1 id="category-title-display" class="text-4xl md:text-6xl font-heading font-bold text-[#1e293b] mb-4">
+                Top 10 Best Collection Products (2026)
+            </h1>
+            <p id="category-desc-display" class="text-lg text-gray-600 max-w-[800px] mx-auto leading-relaxed">
+                Discover the most useful, trending, and top-rated products carefully selected for quality and value.
+            </p>
         </section>
 
-        <!-- Product Grid Overlay -->
-        <section class="py-20 bg-white">
-            <div id="category-products-container" class="avory-product-grid">
+        <!-- Product Sections (Top Picks, Trending, Editor's Choice) -->
+        <section class="pb-20 bg-white">
+            <div id="category-products-container" class="max-w-[1400px] mx-auto px-5">
                 <!-- Data populated via MRTApp.fetchAndRender in main.js -->
                 <div class="w-full text-center py-40 opacity-20 col-span-full">
                     <span class="material-symbols-outlined animate-spin" style="font-size: 64px;">refresh</span>

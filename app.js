@@ -35,6 +35,7 @@ function serveStatic(req, res) {
   const distDir = path.join(__dirname, 'dist');
   let urlPath = req.url.split('?')[0];
   if (urlPath === '/' || urlPath === '') urlPath = '/index.html';
+  if (urlPath === '/admin' || urlPath === '/admin/') urlPath = '/admin/index.html';
   
   const fullPath = path.join(distDir, urlPath);
   
@@ -51,7 +52,8 @@ function serveStatic(req, res) {
   
   // SPA Fallback (Only for UI routes)
   if (!req.url.startsWith('/api') && !req.url.startsWith('/debug-db') && !req.url.startsWith('/health')) {
-    const indexPath = path.join(distDir, 'index.html');
+    const isAdmin = req.url.startsWith('/admin');
+    const indexPath = path.join(distDir, isAdmin ? 'admin/index.html' : 'index.html');
     if (fs.existsSync(indexPath)) {
       res.writeHead(200, { 'Content-Type': 'text/html' });
       return res.end(fs.readFileSync(indexPath));
@@ -71,9 +73,44 @@ const server = http.createServer(async (req, res) => {
   }
 
   // 2. Performance: Direct-serve static UI files
-  if (!req.url.startsWith('/api')) {
-    const served = serveStatic(req, res);
-    if (served !== false) return;
+  if (!req.url.startsWith('/api') && !req.url.startsWith('/debug-db') && !req.url.startsWith('/health')) {
+    let urlPath = req.url.split('?')[0];
+    
+    // Admin handling
+    if (urlPath.startsWith('/admin')) {
+      const adminFile = path.join(distDir, urlPath === '/admin' || urlPath === '/admin/' ? 'admin/index.html' : urlPath);
+      if (fs.existsSync(adminFile) && fs.statSync(adminFile).isFile()) {
+        const ext = path.extname(adminFile).toLowerCase();
+        const types = { '.html':'text/html', '.css':'text/css', '.js':'application/javascript', '.png':'image/png' };
+        res.writeHead(200, { 'Content-Type': types[ext] || 'application/octet-stream' });
+        return res.end(fs.readFileSync(adminFile));
+      }
+    }
+
+    const relativePath = urlPath.startsWith('/') ? urlPath.slice(1) : urlPath;
+    const fullPath = path.join(distDir, relativePath || 'index.html');
+
+    if (fs.existsSync(fullPath) && fs.statSync(fullPath).isFile()) {
+      const ext = path.extname(fullPath).toLowerCase();
+      const types = { '.html':'text/html', '.css':'text/css', '.js':'application/javascript', '.png':'image/png', '.jpg':'image/jpeg', '.svg':'image/svg+xml', '.webp':'image/webp' };
+      res.writeHead(200, { 'Content-Type': types[ext] || 'application/octet-stream' });
+      return res.end(fs.readFileSync(fullPath));
+    }
+
+    // Universal SPA Fallback (Admin or Main)
+    const isAdmin = urlPath.startsWith('/admin');
+    const indexPath = path.join(distDir, isAdmin ? 'admin/index.html' : 'index.html');
+    if (fs.existsSync(indexPath)) {
+      res.writeHead(200, { 'Content-Type': 'text/html' });
+      return res.end(fs.readFileSync(indexPath));
+    } else if (isAdmin) {
+      // Final fallback for admin if dist/admin missing
+      const rootAdmin = path.join(__dirname, 'admin/index.html');
+      if (fs.existsSync(rootAdmin)) {
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        return res.end(fs.readFileSync(rootAdmin));
+      }
+    }
   }
 
   // 3. Dynamic: Send to Express
