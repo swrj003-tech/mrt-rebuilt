@@ -788,30 +788,29 @@ export const FALLBACK_PRODUCTS = [
   }
 ];
 
-e x p o r t   c o n s t   F A L L B A C K _ C A T E G O R I E S   =   [ 
-     { 
-         n a m e :   ' H o m e   &   K i t c h e n ' , 
-         s l u g :   ' h o m e - k i t c h e n ' , 
-         i m a g e :   ' / a s s e t s / c a t e g o r i e s / h o m e - k i t c h e n . p n g ' , 
-         t h e m e :   {   s e o I n t r o :   ' C u r a t e d   l u x u r y   p i e c e s   t o   e l e v a t e   y o u r   l i v i n g   s p a c e      e l e g a n t   f u r n i t u r e ,   t e x t i l e s ,   a n d   t i m e l e s s   a c c e n t s . '   } 
-     } , 
-     { 
-         n a m e :   ' B e a u t y   &   C a r e ' , 
-         s l u g :   ' b e a u t y - p e r s o n a l - c a r e ' , 
-         i m a g e :   ' / a s s e t s / c a t e g o r i e s / b e a u t y - s k i n c a r e . p n g ' , 
-         t h e m e :   {   s e o I n t r o :   ' H i g h - e n d   s k i n c a r e ,   p e r f u m e s ,   a n d   w e l l n e s s   e s s e n t i a l s   f o r   y o u r   r e f i n e d   d a i l y   s e l f - c a r e   r i t u a l . '   } 
-     } , 
-     { 
-         n a m e :   ' H e a l t h   &   W e l l n e s s ' , 
-         s l u g :   ' h e a l t h - w e l l n e s s ' , 
-         i m a g e :   ' / a s s e t s / c a t e g o r i e s / h e a l t h - w e l l n e s s . p n g ' , 
-         t h e m e :   {   s e o I n t r o :   ' A d v a n c e d   w e l l n e s s   t o o l s   a n d   r e c o v e r y   e s s e n t i a l s   d e s i g n e d   f o r   v i t a l i t y   a n d   r e f i n e d   s t a n d a r d s . '   } 
-     } , 
-     { 
-         n a m e :   ' P e t   S u p p l i e s ' , 
-         s l u g :   ' p e t - s u p p l i e s ' , 
-         i m a g e :   ' / a s s e t s / c a t e g o r i e s / p e t - s u p p l i e s . p n g ' , 
-         t h e m e :   {   s e o I n t r o :   ' L u x u r y   c o m p a n i o n   n e e d s   a n d   p r e m i u m   a c c e s s o r i e s   f o r   y o u r   b e l o v e d   p e t s . '   } 
-     } 
- ] ;  
- 
+export const FALLBACK_CATEGORIES = [
+  {
+    name: 'Home & Kitchen',
+    slug: 'home-kitchen',
+    image: '/assets/categories/home-kitchen.png',
+    theme: { seoIntro: 'Curated luxury pieces to elevate your living space — elegant furniture, textiles, and timeless accents.' }
+  },
+  {
+    name: 'Beauty & Care',
+    slug: 'beauty-personal-care',
+    image: '/assets/categories/beauty-skincare.png',
+    theme: { seoIntro: 'High-end skincare, perfumes, and wellness essentials for your refined daily self-care ritual.' }
+  },
+  {
+    name: 'Health & Wellness',
+    slug: 'health-wellness',
+    image: '/assets/categories/health-wellness.png',
+    theme: { seoIntro: 'Advanced wellness tools and recovery essentials designed for vitality and refined standards.' }
+  },
+  {
+    name: 'Pet Supplies',
+    slug: 'pet-supplies',
+    image: '/assets/categories/pet-supplies.png',
+    theme: { seoIntro: 'Luxury companion needs and premium accessories for your beloved pets.' }
+  }
+];
