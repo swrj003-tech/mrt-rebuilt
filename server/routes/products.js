@@ -38,7 +38,7 @@ function parseJsonFields(p) {
 // Public: List products with filters
 router.get('/', async (req, res) => {
   try {
-    const { category, search, limit = 50, page = 1 } = req.query;
+    const { category, search, limit = 200, page = 1 } = req.query;
     const { product, category: catTable } = await getTables();
     
     let query = `SELECT p.*, c.name as categoryName, c.slug as categorySlug 
