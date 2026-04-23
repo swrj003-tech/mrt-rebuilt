@@ -1,66 +1,51 @@
 import express from 'express';
-import prisma from '../db.js';
+import pool from '../db.js';
 import { authMiddleware, adminOnly } from '../middleware/auth.js';
 import { refreshInternalCache } from '../cache_service.js';
 
 const router = express.Router();
 
-// Public: List active testimonials (WITH DB FALLBACK)
+// Helper: Get table names dynamically
+async function getTables() {
+  const [tables] = await pool.query('SHOW TABLES');
+  const list = tables.map(t => Object.values(t)[0].toLowerCase());
+  return {
+    testimonial: list.includes('testimonial') ? tables.find(t => Object.values(t)[0].toLowerCase() === 'testimonial')[Object.keys(tables[0])[0]] : 'Testimonial'
+  };
+}
+
+// Public: List all active testimonials
 router.get('/', async (req, res) => {
   try {
-    const testimonials = await prisma.testimonial.findMany({
-      where: { isActive: true },
-      orderBy: { sortOrder: 'asc' },
-    });
-    res.json(testimonials);
+    const { testimonial } = await getTables();
+    const [rows] = await pool.query(`SELECT * FROM ${testimonial} WHERE isActive = 1 ORDER BY sortOrder ASC`);
+    res.json(rows);
   } catch (err) {
-    console.warn('[DB FALLBACK] Could not fetch testimonials, using starter set.');
-    try {
-      const { FALLBACK_TESTIMONIALS } = await import('./fallbackData.js');
-      res.json(FALLBACK_TESTIMONIALS);
-    } catch(e) {
-      res.status(500).json({ error: 'Server error' });
-    }
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
-// Admin: Create
+// Admin: Create testimonial
 router.post('/', authMiddleware, adminOnly, async (req, res) => {
   try {
-    const t = await prisma.testimonial.create({ data: req.body });
+    const { testimonial } = await getTables();
+    const { name, location, quote, text, region, isActive, sortOrder } = req.body;
+    const [result] = await pool.query(
+      `INSERT INTO ${testimonial} (name, location, quote, text, region, isActive, sortOrder) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [name, location, quote, text, region || 'us', isActive !== false ? 1 : 0, sortOrder || 0]
+    );
     refreshInternalCache();
-    res.status(201).json(t);
+    res.status(201).json({ id: result.insertId, name });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// Admin: Update
-router.put('/:id', authMiddleware, adminOnly, async (req, res) => {
-  try {
-    // FIXED: parseInt — Prisma expects Int, req.params.id is always a string
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) return res.status(400).json({ error: 'Invalid testimonial ID' });
-
-    const t = await prisma.testimonial.update({
-      where: { id },
-      data: req.body,
-    });
-    refreshInternalCache();
-    res.json(t);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Admin: Delete
+// Admin: Delete testimonial
 router.delete('/:id', authMiddleware, adminOnly, async (req, res) => {
   try {
-    // FIXED: parseInt — Prisma expects Int, req.params.id is always a string
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) return res.status(400).json({ error: 'Invalid testimonial ID' });
-
-    await prisma.testimonial.delete({ where: { id } });
+    const { testimonial } = await getTables();
+    await pool.query(`DELETE FROM ${testimonial} WHERE id = ?`, [req.params.id]);
     refreshInternalCache();
     res.json({ success: true });
   } catch (err) {

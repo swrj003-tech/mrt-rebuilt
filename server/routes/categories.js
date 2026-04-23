@@ -1,33 +1,50 @@
 import express from 'express';
-import prisma from '../db.js';
+import pool from '../db.js';
 import { authMiddleware, adminOnly } from '../middleware/auth.js';
 import { refreshInternalCache } from '../cache_service.js';
 
 const router = express.Router();
 
-// Helper: safely parse product JSON fields that exist in the Product schema
-function parseProductFields(p) {
+// Helper: Get table names dynamically
+async function getTables() {
+  const [tables] = await pool.query('SHOW TABLES');
+  const list = tables.map(t => Object.values(t)[0].toLowerCase());
   return {
-    ...p,
-    keyBenefits: safeJsonParse(p.keyBenefits, []),
-    tags: safeJsonParse(p.tags, []),
-    // REMOVED: pros / cons — not fields on Product model
+    category: list.includes('category') ? tables.find(t => Object.values(t)[0].toLowerCase() === 'category')[Object.keys(tables[0])[0]] : 'Category',
+    theme: list.includes('categorytheme') ? tables.find(t => Object.values(t)[0].toLowerCase() === 'categorytheme')[Object.keys(tables[0])[0]] : 'CategoryTheme',
+    product: list.includes('product') ? tables.find(t => Object.values(t)[0].toLowerCase() === 'product')[Object.keys(tables[0])[0]] : 'Product'
   };
 }
 
-function safeJsonParse(val, fallback) {
-  try { return val ? JSON.parse(val) : fallback; } catch { return fallback; }
-}
-
-// Public: List all categories with themes
+// Public: List all categories
 router.get('/', async (req, res) => {
   try {
-    const categories = await prisma.category.findMany({
-      orderBy: { sortOrder: 'asc' },
-      include: { theme: true, _count: { select: { products: true } } },
-    });
-    res.json(categories);
+    const { category, theme, product } = await getTables();
+    const [categories] = await pool.query(`
+      SELECT c.*, t.title, t.subtitle, t.primary, t.secondary, t.seoTitle, t.seoIntro,
+      (SELECT COUNT(*) FROM ${product} p WHERE p.categoryId = c.id) as productCount
+      FROM ${category} c 
+      LEFT JOIN ${theme} t ON c.id = t.categoryId 
+      ORDER BY c.sortOrder ASC
+    `);
+    
+    // Format to match old Prisma structure for frontend compatibility
+    const formatted = categories.map(c => ({
+      ...c,
+      theme: {
+        title: c.title,
+        subtitle: c.subtitle,
+        primary: c.primary,
+        secondary: c.secondary,
+        seoTitle: c.seoTitle,
+        seoIntro: c.seoIntro
+      },
+      _count: { products: c.productCount }
+    }));
+
+    res.json(formatted);
   } catch (err) {
+    console.error('[CATEGORIES] Fetch Error:', err.message);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -35,19 +52,26 @@ router.get('/', async (req, res) => {
 // Public: Get category by slug with products
 router.get('/:slug', async (req, res) => {
   try {
-    const category = await prisma.category.findUnique({
-      where: { slug: req.params.slug },
-      include: {
-        theme: true,
-        products: { where: { isActive: true }, orderBy: { sortOrder: 'asc' } },
-      },
-    });
-    if (!category) return res.status(404).json({ error: 'Category not found' });
+    const { category, theme, product } = await getTables();
+    const [rows] = await pool.query(`SELECT * FROM ${category} WHERE slug = ?`, [req.params.slug]);
+    const cat = rows[0];
+    
+    if (!cat) return res.status(404).json({ error: 'Category not found' });
 
-    // Only parse fields that actually exist on Product
-    category.products = category.products.map(parseProductFields);
+    const [themes] = await pool.query(`SELECT * FROM ${theme} WHERE categoryId = ?`, [cat.id]);
+    const [products] = await pool.query(`SELECT * FROM ${product} WHERE categoryId = ? AND isActive = 1 ORDER BY sortOrder ASC`, [cat.id]);
 
-    res.json(category);
+    const result = {
+      ...cat,
+      theme: themes[0] || null,
+      products: products.map(p => ({
+        ...p,
+        keyBenefits: p.keyBenefits ? JSON.parse(p.keyBenefits) : [],
+        tags: p.tags ? JSON.parse(p.tags) : []
+      }))
+    };
+
+    res.json(result);
   } catch (err) {
     res.status(500).json({ error: 'Server error' });
   }
@@ -57,76 +81,24 @@ router.get('/:slug', async (req, res) => {
 router.post('/', authMiddleware, adminOnly, async (req, res) => {
   try {
     const { name, slug, image, sortOrder, theme } = req.body;
-    // REMOVED from data: description, parentId, metaTitle, metaDescription
-    // — none of these exist on the Category model in schema.prisma.
-    // To add them, uncomment in schema.prisma and run: npx prisma migrate dev
-    const category = await prisma.category.create({
-      data: {
-        name,
-        slug: slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-        image: image || null,
-        sortOrder: sortOrder || 0,
-        ...(theme ? {
-          theme: {
-            create: {
-              title: theme.title || name,
-              subtitle: theme.subtitle || '',
-              primary: theme.primary || '#914d00',
-              secondary: theme.secondary || '#f28c28',
-              seoTitle: theme.seoTitle || null,
-              seoIntro: theme.seoIntro || null,
-            },
-          },
-        } : {}),
-      },
-      include: { theme: true },
-    });
-    refreshInternalCache();
-    res.status(201).json(category);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+    const finalSlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const { category, theme: themeTable } = await getTables();
 
-// Admin: Update category
-router.put('/:id', authMiddleware, adminOnly, async (req, res) => {
-  try {
-    const { name, slug, image, sortOrder, theme } = req.body;
-    const id = parseInt(req.params.id);
-
-    // REMOVED: description, parentId, metaTitle, metaDescription — not in Category schema
-    const updateData = {};
-    if (name !== undefined)      updateData.name      = name;
-    if (slug !== undefined)      updateData.slug      = slug;
-    if (image !== undefined)     updateData.image     = image;
-    if (sortOrder !== undefined) updateData.sortOrder = sortOrder;
-
-    const category = await prisma.category.update({
-      where: { id },
-      data: updateData,
-    });
+    const [result] = await pool.query(
+      `INSERT INTO ${category} (name, slug, image, sortOrder) VALUES (?, ?, ?, ?)`,
+      [name, finalSlug, image || null, sortOrder || 0]
+    );
+    const catId = result.insertId;
 
     if (theme) {
-      await prisma.categoryTheme.upsert({
-        where: { categoryId: id },
-        update: { ...theme },
-        create: {
-          categoryId: id,
-          title: theme.title || category.name,
-          subtitle: theme.subtitle || '',
-          primary: theme.primary || '#914d00',
-          secondary: theme.secondary || '#f28c28',
-          ...theme,
-        },
-      });
+      await pool.query(
+        `INSERT INTO ${themeTable} (categoryId, title, subtitle, \`primary\`, \`secondary\`, seoTitle, seoIntro) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [catId, theme.title || name, theme.subtitle || '', theme.primary || '#914d00', theme.secondary || '#f28c28', theme.seoTitle || null, theme.seoIntro || null]
+      );
     }
 
     refreshInternalCache();
-    const full = await prisma.category.findUnique({
-      where: { id },
-      include: { theme: true },
-    });
-    res.json(full);
+    res.status(201).json({ id: catId, name, slug: finalSlug });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -135,7 +107,8 @@ router.put('/:id', authMiddleware, adminOnly, async (req, res) => {
 // Admin: Delete category
 router.delete('/:id', authMiddleware, adminOnly, async (req, res) => {
   try {
-    await prisma.category.delete({ where: { id: parseInt(req.params.id) } });
+    const { category } = await getTables();
+    await pool.query(`DELETE FROM ${category} WHERE id = ?`, [req.params.id]);
     refreshInternalCache();
     res.json({ success: true });
   } catch (err) {
