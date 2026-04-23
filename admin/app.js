@@ -313,8 +313,8 @@ async function renderDashboard(main) {
             <tr>
               <td>
                 <div class="flex gap-1" style="align-items:center">
-                  <img src="${c.product?.image || ''}" class="product-thumb" alt="">
-                  <span>${c.product?.name || 'Unknown'}</span>
+                  <img src="${c.productImage || c.product?.image || '/assets/placeholder.png'}" class="product-thumb" alt="" onerror="this.src='/assets/placeholder.png'">
+                  <span>${c.productName || c.product?.name || 'Unknown'}</span>
                 </div>
               </td>
               <td><span class="badge badge-info">Affiliate Click</span></td>
@@ -345,7 +345,7 @@ async function renderProducts(main) {
         <tbody>
           ${products.map(p => `
             <tr>
-              <td><img src="${p.image || ''}" class="product-thumb" alt="${p.name}" onerror="this.style.opacity='0.2'"></td>
+              <td><img src="${p.image || '/assets/placeholder.png'}" class="product-thumb" alt="${p.name}" onerror="this.src='/assets/placeholder.png'"></td>
               <td>
                 <strong>${p.name}</strong>
                 <br><span class="text-muted text-sm">${p.slug}</span>
