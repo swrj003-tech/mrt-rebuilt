@@ -60,6 +60,8 @@ class MRTApp {
     const categoryGrid = document.getElementById('category-products-container');
     const communityGrid = document.getElementById('community-grid');
 
+    const blogGrid = document.getElementById('blog-posts-container');
+
     if (homeGrid) {
       await this.fetchAndRender(homeGrid, 8);
     } else if (categoryGrid) {
@@ -71,6 +73,8 @@ class MRTApp {
         const active = cats.find(c => c.slug === this.activeCategory);
         if (active) this.updateCategoryUI(active);
       } catch {}
+    } else if (blogGrid) {
+      await this.fetchAndRenderBlog(blogGrid);
     }
 
     if (communityGrid) {
@@ -479,6 +483,40 @@ class MRTApp {
         </div>
       </article>
     `;
+  }
+
+  async fetchAndRenderBlog(container) {
+    try {
+      this.showLoading(container);
+      const res = await fetch('/api/blog?_t=' + Date.now());
+      const posts = await res.json();
+      
+      if (!posts || posts.length === 0) {
+        container.innerHTML = '<p class="no-products">Our editorial team is curating new stories. Check back soon!</p>';
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="blog-grid">
+          ${posts.map(post => `
+            <article class="blog-card">
+              <div class="blog-card-img">
+                <img src="${post.coverImage || '/assets/editorial_v3/hero.png'}" alt="${post.title}" onerror="this.src='/assets/editorial_v3/hero.png'">
+              </div>
+              <div class="blog-card-content">
+                <span class="blog-date">${new Date(post.createdAt).toLocaleDateString()}</span>
+                <h3 class="blog-title">${post.title}</h3>
+                <p class="blog-excerpt">${post.excerpt || ''}</p>
+                <a href="blog-post.html?slug=${post.slug}" class="blog-read-more">Read Full Story</a>
+              </div>
+            </article>
+          `).join('')}
+        </div>
+      `;
+    } catch (err) {
+      console.error('Blog Fetch Error:', err);
+      container.innerHTML = '<p class="no-products">Connection issue. Please try again later.</p>';
+    }
   }
 
   // ── Testimonials ──

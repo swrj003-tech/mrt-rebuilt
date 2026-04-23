@@ -82,11 +82,12 @@ router.post('/', authMiddleware, adminOnly, async (req, res) => {
   try {
     const { product } = await getTables();
     const d = req.body;
+    const slug = d.slug || d.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     
     const [result] = await pool.query(
-      `INSERT INTO ${product} (name, description, price, image, categoryId, affiliateUrl, secondaryUrl, badge, ratingValue, ratingText, shortDescription, keyBenefits)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [d.name, d.description || '', d.price, d.image, d.categoryId, d.affiliateUrl, d.secondaryUrl, d.badge, d.ratingValue || 5.0, d.ratingText || '4.8/5 Recommended', d.shortDescription, typeof d.keyBenefits === 'object' ? JSON.stringify(d.keyBenefits) : d.keyBenefits]
+      `INSERT INTO ${product} (name, slug, description, price, image, categoryId, affiliateUrl, secondaryUrl, badge, ratingValue, ratingText, shortDescription, keyBenefits)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [d.name, slug, d.description || '', parseFloat(d.price) || 0, d.image, parseInt(d.categoryId), d.affiliateUrl, d.secondaryUrl, d.badge, parseFloat(d.ratingValue) || 5.0, d.ratingText || '4.8/5 Recommended', d.shortDescription, typeof d.keyBenefits === 'object' ? JSON.stringify(d.keyBenefits) : (d.keyBenefits || '[]')]
     );
     
     refreshInternalCache();
@@ -101,10 +102,11 @@ router.put('/:id', authMiddleware, adminOnly, async (req, res) => {
   try {
     const { product } = await getTables();
     const d = req.body;
+    const slug = d.slug || d.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     
     await pool.query(
-      `UPDATE ${product} SET name=?, description=?, price=?, image=?, categoryId=?, affiliateUrl=?, secondaryUrl=?, badge=?, ratingValue=?, ratingText=?, shortDescription=?, keyBenefits=? WHERE id=?`,
-      [d.name, d.description, d.price, d.image, d.categoryId, d.affiliateUrl, d.secondaryUrl, d.badge, d.ratingValue, d.ratingText, d.shortDescription, typeof d.keyBenefits === 'object' ? JSON.stringify(d.keyBenefits) : d.keyBenefits, req.params.id]
+      `UPDATE ${product} SET name=?, slug=?, description=?, price=?, image=?, categoryId=?, affiliateUrl=?, secondaryUrl=?, badge=?, ratingValue=?, ratingText=?, shortDescription=?, keyBenefits=? WHERE id=?`,
+      [d.name, slug, d.description, parseFloat(d.price) || 0, d.image, parseInt(d.categoryId), d.affiliateUrl, d.secondaryUrl, d.badge, parseFloat(d.ratingValue) || 5.0, d.ratingText, d.shortDescription, typeof d.keyBenefits === 'object' ? JSON.stringify(d.keyBenefits) : (d.keyBenefits || '[]'), req.params.id]
     );
     
     refreshInternalCache();
