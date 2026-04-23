@@ -208,6 +208,15 @@ router.get('/force-sync-products', async (req, res) => {
     const catMap = {};
     cats.forEach(c => catMap[c.slug.toLowerCase()] = c.id);
 
+    // Auto-Heal Database Schema (Create missing columns if needed)
+    const [cols] = await pool.query(`SHOW COLUMNS FROM ${productTable}`);
+    const colNames = cols.map(c => c.Field);
+    
+    if (!colNames.includes('ratingText')) await pool.query(`ALTER TABLE ${productTable} ADD COLUMN ratingText VARCHAR(255) DEFAULT '4.8/5 Recommended'`);
+    if (!colNames.includes('shortDescription')) await pool.query(`ALTER TABLE ${productTable} ADD COLUMN shortDescription TEXT`);
+    if (!colNames.includes('secondaryUrl')) await pool.query(`ALTER TABLE ${productTable} ADD COLUMN secondaryUrl TEXT`);
+    if (!colNames.includes('keyBenefits')) await pool.query(`ALTER TABLE ${productTable} ADD COLUMN keyBenefits TEXT`);
+
     // Force Unlock Database Constraints for Cleanup
     await pool.query('SET FOREIGN_KEY_CHECKS = 0');
 
