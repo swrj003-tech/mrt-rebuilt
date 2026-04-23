@@ -281,46 +281,11 @@ class MRTApp {
   }
 
   renderProducts(container, products) {
-    if (this.activeCategory) {
-      // Group products by badge for category pages
-      const sections = {
-        'Top Pick': products.filter(p => p.badge === 'Top Pick'),
-        'Trending Now': products.filter(p => p.badge === 'Trending Now'),
-        'Editor’s Choice': products.filter(p => p.badge === 'Editor’s Choice')
-      };
-
-      let html = '';
-      if (sections['Top Pick'].length > 0) {
-        html += `
-          <div class="category-section">
-            <h2 class="section-heading">⭐ Top Picks</h2>
-            <div class="products-grid">
-              ${sections['Top Pick'].map(p => this.createProductCard(p)).join('')}
-            </div>
-          </div>
-        `;
-      }
-      if (sections['Trending Now'].length > 0) {
-        html += `
-          <div class="category-section">
-            <h2 class="section-heading">🔥 Trending Now</h2>
-            <div class="products-grid">
-              ${sections['Trending Now'].map(p => this.createProductCard(p)).join('')}
-            </div>
-          </div>
-        `;
-      }
-      if (sections['Editor’s Choice'].length > 0) {
-        html += `
-          <div class="category-section">
-            <h2 class="section-heading">💡 Editor’s Choice</h2>
-            <div class="products-grid">
-              ${sections['Editor’s Choice'].map(p => this.createProductCard(p)).join('')}
-            </div>
-          </div>
-        `;
-      }
-      container.innerHTML = html || '<p class="no-products">No products found in this category.</p>';
+      container.innerHTML = `
+        <div class="products-grid">
+          ${products.map(p => this.createProductCard(p)).join('')}
+        </div>
+      `;
     } else {
       // Standard grid for homepage
       container.innerHTML = `<div class="products-grid">${products.map(p => this.createProductCard(p)).join('')}</div>`;
