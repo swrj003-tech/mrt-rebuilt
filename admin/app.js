@@ -333,6 +333,7 @@ async function renderProducts(main) {
   const cats = await api('/categories');
   if (!data) return;
   const products = data.products || [];
+  window._allProducts = products; // Essential for global delegator
 
   main.innerHTML = `
     <div class="page-header">
@@ -377,34 +378,30 @@ async function renderProducts(main) {
     </div>
   `;
 
-  // Re-attach listeners with context preservation
-  const addBtn = document.getElementById('btn-add-product');
-  if (addBtn) {
-    const freshBtn = addBtn.cloneNode(true);
-    addBtn.parentNode.replaceChild(freshBtn, addBtn);
-    freshBtn.addEventListener('click', () => showProductModal(null, cats));
+  // --- GLOBAL EVENT DELEGATION (Bulletproof Fix) ---
+  const appContainer = document.getElementById('app');
+  if (appContainer && !window._delegatorSet) {
+    appContainer.addEventListener('click', async (e) => {
+      const editBtn = e.target.closest('.btn-edit-product');
+      const deleteBtn = e.target.closest('.btn-delete-product');
+
+      if (editBtn) {
+        e.preventDefault();
+        const p = window._allProducts?.find(x => String(x.id) === String(editBtn.dataset.id));
+        if (p) showProductModal(p, cats);
+      }
+
+      if (deleteBtn) {
+        e.preventDefault();
+        if (!confirm('Delete this product?')) return;
+        const res = await api(`/products/${deleteBtn.dataset.id}`, { method: 'DELETE' });
+        if (res?.error) return toast('Delete failed', 'error');
+        toast('Product deleted');
+        renderView();
+      }
+    });
+    window._delegatorSet = true;
   }
-
-  // Use delegation for list items to ensure they never freeze
-  document.querySelectorAll('.btn-edit-product').forEach(b => {
-    b.onclick = (e) => {
-      e.preventDefault();
-      const p = products.find(x => String(x.id) === String(b.dataset.id));
-      if (p) showProductModal(p, cats);
-    };
-  });
-
-  document.querySelectorAll('.btn-delete-product').forEach(b => {
-    b.onclick = async (e) => {
-      e.preventDefault();
-      if (!confirm('Delete this product?')) return;
-      const productId = b.dataset.id;
-      const res = await api(`/products/${productId}`, { method: 'DELETE' });
-      if (res?.error) return toast('Delete failed: ' + res.error, 'error');
-      toast('Product deleted');
-      renderView(); // Refresh the current view
-    };
-  });
 }
 
 function showProductModal(product, categories) {
