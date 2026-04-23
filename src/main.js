@@ -16,6 +16,34 @@ class MRTApp {
     window.closeQuickView = () => this.closeQuickView();
   }
 
+  async syncCollectionsGrid() {
+    const grid = document.getElementById('categories-grid');
+    if (!grid) return;
+
+    try {
+      const response = await fetch('/api/categories?_t=' + Date.now());
+      const categories = await response.json();
+      
+      grid.innerHTML = categories.map(cat => `
+        <a href="category.html?c=${cat.slug}" class="category-card-v2" id="cat-card-${cat.id}">
+          <div class="category-card-v2-img">
+            <img src="${cat.image || '/assets/placeholder-category.jpg'}" alt="${cat.name}" onerror="this.src='/assets/editorial_v3/discovery_bg.png'">
+          </div>
+          <div class="category-card-v2-content">
+            <h3>${cat.name}</h3>
+            <p>${cat.description || 'Discover our curated selection of ' + cat.name + ' products.'}</p>
+            <div class="category-card-v2-footer">
+              <span>EXPLORE</span>
+              <span class="material-symbols-outlined">arrow_forward</span>
+            </div>
+          </div>
+        </a>
+      `).join('');
+    } catch (err) {
+      console.error('Failed to sync collections grid:', err);
+    }
+  }
+
   async init() {
     // FORCE CACHE CLEAR FOR NEW VERSION
     if ('serviceWorker' in navigator) {
