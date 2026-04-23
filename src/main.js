@@ -329,11 +329,35 @@ class MRTApp {
   }
 
   renderProducts(container, products) {
-      container.innerHTML = `
-        <div class="products-grid">
-          ${products.map(p => this.createProductCard(p)).join('')}
-        </div>
-      `;
+    if (this.activeCategory && container.id === 'category-products-container') {
+      // 3-SECTION LAYOUT for Category Pages
+      const topPicks = products.filter(p => p.badge === 'Top Pick');
+      const trending = products.filter(p => p.badge === 'Trending Now');
+      const editor   = products.filter(p => p.badge === "Editor's Choice");
+      const others   = products.filter(p => !['Top Pick', 'Trending Now', "Editor's Choice"].includes(p.badge));
+
+      let html = '';
+
+      if (topPicks.length > 0) {
+        html += `<div class="category-section-title">⭐ Top Picks</div>`;
+        html += `<div class="products-grid">${topPicks.map(p => this.createProductCard(p)).join('')}</div>`;
+      }
+
+      if (trending.length > 0) {
+        html += `<div class="category-section-title">🔥 Trending Now</div>`;
+        html += `<div class="products-grid">${trending.map(p => this.createProductCard(p)).join('')}</div>`;
+      }
+
+      if (editor.length > 0) {
+        html += `<div class="category-section-title">💡 Editor’s Choice</div>`;
+        html += `<div class="products-grid">${editor.map(p => this.createProductCard(p)).join('')}</div>`;
+      }
+
+      if (others.length > 0 && html === '') {
+        html += `<div class="products-grid">${others.map(p => this.createProductCard(p)).join('')}</div>`;
+      }
+
+      container.innerHTML = html || '<p class="no-products">No products found in this selection.</p>';
     } else {
       // Standard grid for homepage
       container.innerHTML = `<div class="products-grid">${products.map(p => this.createProductCard(p)).join('')}</div>`;

@@ -8,18 +8,29 @@ const router = express.Router();
 // Helper: Get table names dynamically
 async function getTables() {
   const [tables] = await pool.query('SHOW TABLES');
-  const list = tables.map(t => Object.values(t)[0].toLowerCase());
+  const rawList = tables.map(t => Object.values(t)[0]);
+  const lowerList = rawList.map(t => t.toLowerCase());
+  
+  const findTable = (target) => {
+    const idx = lowerList.indexOf(target.toLowerCase());
+    return idx !== -1 ? rawList[idx] : target;
+  };
+
   return {
-    product: list.includes('product') ? tables.find(t => Object.values(t)[0].toLowerCase() === 'product')[Object.keys(tables[0])[0]] : 'Product',
-    category: list.includes('category') ? tables.find(t => Object.values(t)[0].toLowerCase() === 'category')[Object.keys(tables[0])[0]] : 'Category'
+    product: findTable('Product'),
+    category: findTable('Category')
   };
 }
 
 function parseJsonFields(p) {
   if (!p) return null;
+  let keyBenefits = p.keyBenefits;
+  if (typeof keyBenefits === 'string') {
+    try { keyBenefits = JSON.parse(keyBenefits); } catch { keyBenefits = []; }
+  }
   return {
     ...p,
-    keyBenefits: typeof p.keyBenefits === 'string' ? JSON.parse(p.keyBenefits) : (p.keyBenefits || []),
+    keyBenefits: keyBenefits || [],
     tags: typeof p.tags === 'string' ? JSON.parse(p.tags) : (p.tags || [])
   };
 }
@@ -41,16 +52,19 @@ router.get('/', async (req, res) => {
       params.push(category);
     }
     if (search) {
-      query += ` AND (p.name LIKE ? OR p.description LIKE ?)`;
+      query += ` AND (p.name LIKE ? OR p.shortDescription LIKE ?)`;
       params.push(`%${search}%`, `%${search}%`);
     }
 
-    query += ` ORDER BY p.sortOrder ASC LIMIT ? OFFSET ?`;
+    query += ` ORDER BY p.id DESC LIMIT ? OFFSET ?`;
     const offset = (parseInt(page) - 1) * parseInt(limit);
     params.push(parseInt(limit), offset);
 
     const [products] = await pool.query(query, params);
-    const [[{ total }]] = await pool.query(`SELECT COUNT(*) as total FROM ${product} p LEFT JOIN ${catTable} c ON p.categoryId = c.id WHERE 1=1 ${category ? 'AND c.slug = ?' : ''}`, category ? [category] : []);
+    
+    let countQuery = `SELECT COUNT(*) as total FROM ${product} p LEFT JOIN ${catTable} c ON p.categoryId = c.id WHERE 1=1`;
+    if (category) countQuery += ` AND c.slug = ?`;
+    const [[{ total }]] = await pool.query(countQuery, category ? [category] : []);
 
     res.json({
       products: products.map(parseJsonFields),
@@ -63,63 +77,34 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Public: Get product by slug
-router.get('/by-slug/:slug', async (req, res) => {
-  try {
-    const { product, category: catTable } = await getTables();
-    const [rows] = await pool.query(`SELECT p.*, c.name as categoryName FROM ${product} p LEFT JOIN ${catTable} c ON p.categoryId = c.id WHERE p.slug = ?`, [req.params.slug]);
-    if (!rows[0]) return res.status(404).json({ error: 'Product not found' });
-    res.json(parseJsonFields(rows[0]));
-  } catch (err) {
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
 // Admin: Create product
 router.post('/', authMiddleware, adminOnly, async (req, res) => {
   try {
     const { product } = await getTables();
     const d = req.body;
-    const slug = d.slug || d.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
     
     const [result] = await pool.query(
-      `INSERT INTO ${product} (name, slug, shortBenefit, description, price, image, badge, ratingValue, categoryId, tags, keyBenefits, affiliateUrl, isActive, sortOrder)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [d.name, slug, d.shortBenefit || '', d.description || '', d.price, d.image, d.badge, d.ratingValue || 5.0, d.categoryId, JSON.stringify(d.tags || []), JSON.stringify(d.keyBenefits || []), d.affiliateUrl, 1, d.sortOrder || 0]
+      `INSERT INTO ${product} (name, description, price, image, categoryId, affiliateUrl, secondaryUrl, badge, ratingValue, ratingText, shortDescription, keyBenefits)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [d.name, d.description || '', d.price, d.image, d.categoryId, d.affiliateUrl, d.secondaryUrl, d.badge, d.ratingValue || 5.0, d.ratingText || '4.8/5 Recommended', d.shortDescription, typeof d.keyBenefits === 'object' ? JSON.stringify(d.keyBenefits) : d.keyBenefits]
     );
     
     refreshInternalCache();
-    res.status(201).json({ id: result.insertId, name: d.name, slug });
+    res.status(201).json({ id: result.insertId, name: d.name });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// Admin: Update product
+// Admin: Update product (Unified Route)
 router.put('/:id', authMiddleware, adminOnly, async (req, res) => {
   try {
     const { product } = await getTables();
     const d = req.body;
-    await pool.query(
-      `UPDATE ${product} SET name=?, shortBenefit=?, description=?, price=?, image=?, badge=?, categoryId=?, tags=?, keyBenefits=?, affiliateUrl=?, sortOrder=? WHERE id=?`,
-      [d.name, d.shortBenefit, d.description, d.price, d.image, d.badge, d.categoryId, JSON.stringify(d.tags || []), JSON.stringify(d.keyBenefits || []), d.affiliateUrl, d.sortOrder, req.params.id]
-    );
-    refreshInternalCache();
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Admin: Update product
-router.put('/:id', authMiddleware, adminOnly, async (req, res) => {
-  try {
-    const { product } = await getTables();
-    const { name, description, price, image, categoryId, affiliateUrl, secondaryUrl, badge, ratingValue, ratingText, shortDescription, keyBenefits } = req.body;
     
     await pool.query(
       `UPDATE ${product} SET name=?, description=?, price=?, image=?, categoryId=?, affiliateUrl=?, secondaryUrl=?, badge=?, ratingValue=?, ratingText=?, shortDescription=?, keyBenefits=? WHERE id=?`,
-      [name, description, price, image, categoryId, affiliateUrl, secondaryUrl, badge, ratingValue, ratingText, shortDescription, typeof keyBenefits === 'object' ? JSON.stringify(keyBenefits) : keyBenefits, req.params.id]
+      [d.name, d.description, d.price, d.image, d.categoryId, d.affiliateUrl, d.secondaryUrl, d.badge, d.ratingValue, d.ratingText, d.shortDescription, typeof d.keyBenefits === 'object' ? JSON.stringify(d.keyBenefits) : d.keyBenefits, req.params.id]
     );
     
     refreshInternalCache();
