@@ -68,6 +68,21 @@ app.get('/api/test-db', async (req, res) => {
   }
 });
 
+app.get('/api/debug-db', async (req, res) => {
+  try {
+    const [tables] = await pool.query('SHOW TABLES');
+    const tableNames = tables.map(t => Object.values(t)[0]);
+    const stats = {};
+    for (const name of tableNames) {
+      const [[{ count }]] = await pool.query(`SELECT COUNT(*) as count FROM ${name}`);
+      stats[name] = count;
+    }
+    res.json({ tables: stats, env: process.env.NODE_ENV, port: PORT });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get('/health', (req, res) => {
   res.json({
     status: 'OK',
