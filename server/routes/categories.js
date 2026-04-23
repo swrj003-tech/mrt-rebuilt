@@ -104,6 +104,24 @@ router.post('/', authMiddleware, adminOnly, async (req, res) => {
   }
 });
 
+// Admin: Update category
+router.put('/:id', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const { category } = await getTables();
+    const { name, slug, image, description, theme } = req.body;
+    
+    await pool.query(
+      `UPDATE ${category} SET name = ?, slug = ?, image = ?, description = ?, theme = ? WHERE id = ?`,
+      [name, slug, image, description, typeof theme === 'object' ? JSON.stringify(theme) : theme, req.params.id]
+    );
+    
+    refreshInternalCache();
+    res.json({ success: true, id: req.params.id });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Admin: Delete category
 router.delete('/:id', authMiddleware, adminOnly, async (req, res) => {
   try {

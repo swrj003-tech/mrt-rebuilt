@@ -111,6 +111,24 @@ router.put('/:id', authMiddleware, adminOnly, async (req, res) => {
   }
 });
 
+// Admin: Update product
+router.put('/:id', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const { product } = await getTables();
+    const { name, description, price, image, categoryId, affiliateUrl, secondaryUrl, badge, ratingValue, ratingText, shortDescription, keyBenefits } = req.body;
+    
+    await pool.query(
+      `UPDATE ${product} SET name=?, description=?, price=?, image=?, categoryId=?, affiliateUrl=?, secondaryUrl=?, badge=?, ratingValue=?, ratingText=?, shortDescription=?, keyBenefits=? WHERE id=?`,
+      [name, description, price, image, categoryId, affiliateUrl, secondaryUrl, badge, ratingValue, ratingText, shortDescription, typeof keyBenefits === 'object' ? JSON.stringify(keyBenefits) : keyBenefits, req.params.id]
+    );
+    
+    refreshInternalCache();
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Admin: Delete product
 router.delete('/:id', authMiddleware, adminOnly, async (req, res) => {
   try {
