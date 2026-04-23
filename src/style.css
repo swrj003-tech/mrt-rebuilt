@@ -968,8 +968,6 @@ body { overflow-x: hidden; }
         grid-template-columns: 1fr;
     }
 }
-    pointer-events: all;
-}
 
 .qv-panel {
     background: #fff;
