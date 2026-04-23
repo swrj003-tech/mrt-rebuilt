@@ -377,29 +377,34 @@ async function renderProducts(main) {
     </div>
   `;
 
-  document.getElementById('btn-add-product')?.addEventListener('click', () => showProductModal(null, cats));
+  // Re-attach listeners with context preservation
+  const addBtn = document.getElementById('btn-add-product');
+  if (addBtn) {
+    const freshBtn = addBtn.cloneNode(true);
+    addBtn.parentNode.replaceChild(freshBtn, addBtn);
+    freshBtn.addEventListener('click', () => showProductModal(null, cats));
+  }
 
-  document.querySelectorAll('.btn-edit-product').forEach(b => b.addEventListener('click', () => {
-    const p = products.find(x => String(x.id) === String(b.dataset.id));
-    if (p) showProductModal(p, cats);
-  }));
+  // Use delegation for list items to ensure they never freeze
+  document.querySelectorAll('.btn-edit-product').forEach(b => {
+    b.onclick = (e) => {
+      e.preventDefault();
+      const p = products.find(x => String(x.id) === String(b.dataset.id));
+      if (p) showProductModal(p, cats);
+    };
+  });
 
-  // FIXED: Delete now works properly with error handling
-  document.querySelectorAll('.btn-delete-product').forEach(b => b.addEventListener('click', async () => {
-    if (!confirm('Delete this product? This cannot be undone.')) return;
-    const productId = b.dataset.id;
-    b.disabled = true;
-    b.innerHTML = '<div class="loading-spinner" style="width:14px;height:14px"></div>';
-    const res = await api(`/products/${productId}`, { method: 'DELETE' });
-    if (res?.error) {
-      toast('Delete failed: ' + res.error, 'error');
-      b.disabled = false;
-      b.innerHTML = '<span class="material-symbols-outlined">delete</span>';
-      return;
-    }
-    toast('Product deleted');
-    await renderView();
-  }));
+  document.querySelectorAll('.btn-delete-product').forEach(b => {
+    b.onclick = async (e) => {
+      e.preventDefault();
+      if (!confirm('Delete this product?')) return;
+      const productId = b.dataset.id;
+      const res = await api(`/products/${productId}`, { method: 'DELETE' });
+      if (res?.error) return toast('Delete failed: ' + res.error, 'error');
+      toast('Product deleted');
+      renderView(); // Refresh the current view
+    };
+  });
 }
 
 function showProductModal(product, categories) {
