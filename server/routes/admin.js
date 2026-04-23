@@ -81,20 +81,13 @@ router.get('/force-sync-products', async (req, res) => {
     await pool.query('SET FOREIGN_KEY_CHECKS = 0');
     await pool.query(`DELETE FROM ${t.product}`);
     
-    // Update Category Images
-    const categoryImages = {
-      'home-kitchen': 'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&q=80&w=1000',
-      'beauty-personal-care': 'https://images.unsplash.com/photo-1596462502278-27bfad450216?auto=format&fit=crop&q=80&w=1000',
-      'health-wellness': 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=1000',
-      'pet-supplies': 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&q=80&w=1000',
-      'baby-kids-essentials': 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&q=80&w=1000',
-      'electronics-accessories': 'https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&q=80&w=1000',
-      'sports-fitness': 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&q=80&w=1000'
-    };
-
+    /* 
+    DISABLED: Category Image Overwrite (Preserving user's old category images)
+    const categoryImages = { ... };
     for (const slug in categoryImages) {
       await pool.query(`UPDATE ${t.category} SET image = ? WHERE slug = ?`, [categoryImages[slug], slug]);
     }
+    */
 
     const [cats] = await pool.query(`SELECT id, slug FROM ${t.category}`);
     const catMap = {};
