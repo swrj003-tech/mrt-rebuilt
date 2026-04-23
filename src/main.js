@@ -25,25 +25,73 @@ class MRTApp {
     this.setupMobileMenu();
     this.handleScroll();
     this.createQuickViewModal();
+    this.syncGlobalNavigation(); // 👈 New: Auto-sync menus
 
     const categoriesGrid = document.getElementById('categories-grid');
     const homeGrid = document.getElementById('products-home-grid') || document.getElementById('featured-products');
     const categoryGrid = document.getElementById('category-products-container');
     const communityGrid = document.getElementById('community-grid');
 
-    if (categoriesGrid) {
-      await this.fetchAndRenderCategories(categoriesGrid);
-    }
-
     if (homeGrid) {
       await this.fetchAndRender(homeGrid, 8);
     } else if (categoryGrid) {
       await this.fetchAndRender(categoryGrid, 50);
-      this.updateCategoryUI();
+      // If we're on a category page, fetch its metadata
+      try {
+        const res = await fetch('/api/categories');
+        const cats = await res.json();
+        const active = cats.find(c => c.slug === this.activeCategory);
+        if (active) this.updateCategoryUI(active);
+      } catch {}
     }
 
     if (communityGrid) {
       this.renderTestimonials(communityGrid);
+    }
+  }
+
+  // ── Global Navigation Sync ──
+  async syncGlobalNavigation() {
+    try {
+      const response = await fetch('/api/categories?_t=' + Date.now());
+      const categories = await response.json();
+      if (!categories || categories.length === 0) return;
+
+      // 1. Sync Desktop Dropdown
+      const navDropdown = document.getElementById('nav-categories-dropdown');
+      if (navDropdown) {
+        navDropdown.innerHTML = categories.map(c => `
+          <a href="category.html?c=${c.slug}" class="nav-dropdown-item">${c.name}</a>
+        `).join('');
+      }
+
+      // 2. Sync Mobile Menu
+      const mobileList = document.getElementById('mobile-categories-list');
+      if (mobileList) {
+        mobileList.innerHTML = categories.map(c => `
+          <a href="category.html?c=${c.slug}">
+            <span class="material-symbols-outlined" style="font-size:18px;">label</span> ${c.name}
+          </a>
+        `).join('');
+      }
+
+      // 3. Sync Categories Grid (if on categories.html)
+      const categoriesGrid = document.getElementById('categories-grid');
+      if (categoriesGrid) {
+        categoriesGrid.innerHTML = categories.map(cat => `
+          <a href="category.html?c=${cat.slug}" class="avory-cat-card">
+            <div class="cat-img-wrapper">
+              <img src="${cat.image || '/assets/editorial_v3/hero.png'}" alt="${cat.name}" class="cat-img">
+            </div>
+            <div class="cat-meta">
+              <h3 class="cat-title">${cat.name}</h3>
+              <p class="cat-subtitle">${cat.theme?.subtitle || cat.description || 'Explore our curated selection.'}</p>
+            </div>
+          </a>
+        `).join('');
+      }
+    } catch (err) {
+      console.warn('[MRT] Navigation sync failed:', err);
     }
   }
 

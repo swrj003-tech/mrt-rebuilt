@@ -22,14 +22,8 @@
                 <a href="categories.html" style="display:flex;align-items:center;gap:3px;">
                     Categories <span class="material-symbols-outlined" style="font-size:17px;">expand_more</span>
                 </a>
-                <div class="nav-dropdown">
-                    <a href="category.html?c=home-kitchen"         class="nav-dropdown-item">Home &amp; Kitchen</a>
-                    <a href="category.html?c=beauty-personal-care" class="nav-dropdown-item">Beauty &amp; Personal Care</a>
-                    <a href="category.html?c=health-wellness"      class="nav-dropdown-item">Health &amp; Wellness</a>
-                    <a href="category.html?c=pet-supplies"         class="nav-dropdown-item">Pet Supplies</a>
-                    <a href="category.html?c=baby-kids-essentials" class="nav-dropdown-item">Baby &amp; Kids Essentials</a>
-                    <a href="category.html?c=electronics-accessories" class="nav-dropdown-item">Electronics &amp; Accessories</a>
-                    <a href="category.html?c=sports-fitness"       class="nav-dropdown-item">Sports &amp; Fitness</a>
+                <div class="nav-dropdown" id="nav-categories-dropdown">
+                    <!-- Dynamically populated -->
                 </div>
             </div>
             <a href="about.html">About</a>
@@ -52,13 +46,9 @@
             </button>
             <a href="index.html"><span class="material-symbols-outlined" style="font-size:18px;">home</span> Home</a>
             <a href="categories.html" class="active"><span class="material-symbols-outlined" style="font-size:18px;">storefront</span> Shop / Collections</a>
-            <a href="category.html?c=home-kitchen"><span class="material-symbols-outlined" style="font-size:18px;">chair</span> Home &amp; Kitchen</a>
-            <a href="category.html?c=beauty-personal-care"><span class="material-symbols-outlined" style="font-size:18px;">spa</span> Beauty</a>
-            <a href="category.html?c=health-wellness"><span class="material-symbols-outlined" style="font-size:18px;">favorite</span> Health &amp; Wellness</a>
-            <a href="category.html?c=pet-supplies"><span class="material-symbols-outlined" style="font-size:18px;">pets</span> Pet Supplies</a>
-            <a href="category.html?c=baby-kids-essentials"><span class="material-symbols-outlined" style="font-size:18px;">child_care</span> Baby &amp; Kids</a>
-            <a href="category.html?c=electronics-accessories"><span class="material-symbols-outlined" style="font-size:18px;">devices</span> Electronics</a>
-            <a href="category.html?c=sports-fitness"><span class="material-symbols-outlined" style="font-size:18px;">fitness_center</span> Sports &amp; Fitness</a>
+            <div id="mobile-categories-list">
+                <!-- Dynamically populated -->
+            </div>
             <a href="about.html"><span class="material-symbols-outlined" style="font-size:18px;">info</span> About</a>
             <a href="blog.html">
                 <span class="material-symbols-outlined" style="font-size:18px;">article</span> Blog
@@ -82,78 +72,8 @@
 
         <!-- Category Grid -->
         <section style="padding: 80px 2rem; max-width: 1500px; margin: 0 auto;">
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px;">
-
-                <a href="category.html?c=home-kitchen" class="avory-cat-card">
-                    <div class="cat-img-wrapper">
-                        <img src="/assets/editorial_v3/cat_home.png" alt="Home &amp; Kitchen" class="cat-img">
-                    </div>
-                    <div class="cat-meta">
-                        <h3 class="cat-title">Home &amp; Kitchen</h3>
-                        <p class="cat-subtitle">Curated Space &amp; Culinary</p>
-                    </div>
-                </a>
-
-                <a href="category.html?c=beauty-personal-care" class="avory-cat-card">
-                    <div class="cat-img-wrapper">
-                        <img src="/assets/editorial_v3/cat_beauty.png" alt="Beauty" class="cat-img">
-                    </div>
-                    <div class="cat-meta">
-                        <h3 class="cat-title">Beauty &amp; Personal Care</h3>
-                        <p class="cat-subtitle">Refined Self-Care</p>
-                    </div>
-                </a>
-
-                <a href="category.html?c=health-wellness" class="avory-cat-card">
-                    <div class="cat-img-wrapper">
-                        <img src="/assets/editorial_v3/cat_health.png" alt="Health" class="cat-img">
-                    </div>
-                    <div class="cat-meta">
-                        <h3 class="cat-title">Health &amp; Wellness</h3>
-                        <p class="cat-subtitle">Mindful Living</p>
-                    </div>
-                </a>
-
-                <a href="category.html?c=pet-supplies" class="avory-cat-card">
-                    <div class="cat-img-wrapper">
-                        <img src="/assets/editorial_v3/cat_pets.png" alt="Pets" class="cat-img">
-                    </div>
-                    <div class="cat-meta">
-                        <h3 class="cat-title">Pet Supplies</h3>
-                        <p class="cat-subtitle">Luxury Companion Needs</p>
-                    </div>
-                </a>
-
-                <a href="category.html?c=baby-kids-essentials" class="avory-cat-card">
-                    <div class="cat-img-wrapper">
-                        <img src="/assets/editorial_v3/cat_kids.png" alt="Baby" class="cat-img">
-                    </div>
-                    <div class="cat-meta">
-                        <h3 class="cat-title">Baby &amp; Kids Essentials</h3>
-                        <p class="cat-subtitle">Early Discovery</p>
-                    </div>
-                </a>
-
-                <a href="category.html?c=electronics-accessories" class="avory-cat-card">
-                    <div class="cat-img-wrapper">
-                        <img src="/assets/editorial_v3/cat_tech.png" alt="Tech" class="cat-img">
-                    </div>
-                    <div class="cat-meta">
-                        <h3 class="cat-title">Electronics &amp; Accessories</h3>
-                        <p class="cat-subtitle">Modern Essentials</p>
-                    </div>
-                </a>
-
-                <a href="category.html?c=sports-fitness" class="avory-cat-card">
-                    <div class="cat-img-wrapper">
-                        <img src="/assets/editorial_v3/cat_men.png" alt="Sports" class="cat-img">
-                    </div>
-                    <div class="cat-meta">
-                        <h3 class="cat-title">Sports &amp; Fitness</h3>
-                        <p class="cat-subtitle">Active Performance</p>
-                    </div>
-                </a>
-
+            <div id="categories-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px;">
+                <!-- Dynamically populated from main.js -->
             </div>
         </section>
     </main>
