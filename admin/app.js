@@ -475,8 +475,8 @@ function showProductModal(product, categories) {
           </div>
         </div>
         <div class="form-group">
-          <label>Short Benefit</label>
-          <input type="text" name="shortBenefit" value="${product?.shortBenefit || ''}" placeholder="One-line selling point">
+          <label>Short Description</label>
+          <input type="text" name="shortDescription" value="${product?.shortDescription || ''}" placeholder="One-line selling point">
         </div>
 
         <!-- ENHANCED IMAGE SECTION with URL Fetch + Upload -->

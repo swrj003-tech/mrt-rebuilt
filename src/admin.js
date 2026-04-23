@@ -264,14 +264,14 @@ class MRTCMS {
         form.name.value = p.name;
         form.categoryId.value = p.categoryId;
         form.price.value = p.price;
-        form.badge.value = p.badge;
-        form.shortBenefit.value = p.shortBenefit || '';
-        form.keyBenefits.value = JSON.stringify(p.keyBenefits, null, 2);
-        form.affiliateLink.value = p.affiliateLink || '';
-        form.isFeatured.checked = p.isFeatured;
+        form.badge.value = p.badge || '';
+        form.shortDescription.value = p.shortDescription || '';
+        form.keyBenefits.value = typeof p.keyBenefits === 'object' ? JSON.stringify(p.keyBenefits, null, 2) : p.keyBenefits;
+        form.affiliateUrl.value = p.affiliateUrl || '';
+        form.secondaryUrl.value = p.secondaryUrl || '';
         form.image.value = p.image || '';
         document.getElementById('product-image-preview').src = p.image || '/assets/products/placeholder.png';
-        document.getElementById('product-modal-title').textContent = 'Edit Asset';
+        document.getElementById('product-modal-title').textContent = 'Edit Luxury Asset';
         document.getElementById('product-modal').classList.remove('hidden');
     }
 
