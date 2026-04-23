@@ -7,13 +7,21 @@ const router = express.Router();
 // Helper: Get table names dynamically
 async function getTables() {
   const [tables] = await pool.query('SHOW TABLES');
-  const list = tables.map(t => Object.values(t)[0].toLowerCase());
+  const rawList = tables.map(t => Object.values(t)[0]);
+  const lowerList = rawList.map(t => t.toLowerCase());
+  
+  const findTable = (target) => {
+    const idx = lowerList.indexOf(target.toLowerCase());
+    return idx !== -1 ? rawList[idx] : target;
+  };
+
   return {
-    product: list.includes('product') ? tables.find(t => Object.values(t)[0].toLowerCase() === 'product')[Object.keys(tables[0])[0]] : 'Product',
-    category: list.includes('category') ? tables.find(t => Object.values(t)[0].toLowerCase() === 'category')[Object.keys(tables[0])[0]] : 'Category',
-    click: list.includes('affiliateclick') ? tables.find(t => Object.values(t)[0].toLowerCase() === 'affiliateclick')[Object.keys(tables[0])[0]] : 'AffiliateClick',
-    sub: list.includes('newslettersub') ? tables.find(t => Object.values(t)[0].toLowerCase() === 'newslettersub')[Object.keys(tables[0])[0]] : 'NewsletterSub',
-    testimonial: list.includes('testimonial') ? tables.find(t => Object.values(t)[0].toLowerCase() === 'testimonial')[Object.keys(tables[0])[0]] : 'Testimonial'
+    product: findTable('Product'),
+    category: findTable('Category'),
+    click: findTable('AffiliateClick'),
+    sub: findTable('NewsletterSub'),
+    testimonial: findTable('Testimonial'),
+    message: findTable('ContactMessage')
   };
 }
 
@@ -23,14 +31,15 @@ router.get('/', (req, res) => res.json({ status: 'MRT Admin API Active', version
 // GET /api/admin/stats - Consolidated dashboard metrics (REWRITTEN FOR SQL)
 router.get('/stats', authMiddleware, async (req, res) => {
   try {
-    const { product, category, click, sub, testimonial } = await getTables();
+    const { product, category, click, sub, testimonial, message } = await getTables();
     
-    const [[{ pCount }], [{ cCount }], [{ clCount }], [{ sCount }], [{ tCount }]] = await Promise.all([
+    const [[{ pCount }], [{ cCount }], [{ clCount }], [{ sCount }], [{ tCount }], [{ mCount }]] = await Promise.all([
       pool.query(`SELECT COUNT(*) as pCount FROM ${product}`),
       pool.query(`SELECT COUNT(*) as cCount FROM ${category}`),
       pool.query(`SELECT COUNT(*) as clCount FROM ${click}`),
       pool.query(`SELECT COUNT(*) as sCount FROM ${sub}`),
-      pool.query(`SELECT COUNT(*) as tCount FROM ${testimonial}`)
+      pool.query(`SELECT COUNT(*) as tCount FROM ${testimonial}`),
+      pool.query(`SELECT COUNT(*) as mCount FROM ${message}`).catch(() => [[{ mCount: 0 }]])
     ]);
 
     // Simplified recent clicks for dashboard
@@ -39,7 +48,7 @@ router.get('/stats', authMiddleware, async (req, res) => {
       FROM ${click} c 
       LEFT JOIN ${product} p ON c.productId = p.id 
       ORDER BY c.clickedAt DESC LIMIT 10
-    `);
+    `).catch(() => [[]]);
 
     res.json({
       productCount: pCount,
@@ -47,6 +56,7 @@ router.get('/stats', authMiddleware, async (req, res) => {
       clickCount: clCount,
       subscriberCount: sCount,
       testimonialCount: tCount,
+      messageCount: mCount,
       recentClicks
     });
   } catch (err) {
