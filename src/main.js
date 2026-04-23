@@ -428,11 +428,13 @@ class MRTApp {
           ${benefits.map(b => `<li><span class="material-symbols-outlined">check_circle</span> ${b}</li>`).join('')}
          </ul>`
       : '';
+      
+    const imageUrl = p.image || '/assets/placeholder-product.jpg';
 
     return `
       <article class="pc-card affiliate-card" data-id="${p.id}">
         <div class="pc-img-wrap">
-          <img src="${p.image}" alt="${p.name}" loading="lazy">
+          <img src="${imageUrl}" alt="${p.name}" loading="lazy" onerror="this.src='/assets/placeholder-product.jpg';this.onerror=null;">
           ${badgeHtml}
         </div>
         <div class="pc-info">

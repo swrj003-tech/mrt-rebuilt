@@ -39,15 +39,15 @@ app.get('/api/categories', (req, res) => {
 app.get('/api/products', (req, res) => {
   const { category, search, limit = 50 } = req.query;
   let products = cacheService.internalCache.products || [];
-  
+
   if (category) products = products.filter(p => p.category && p.category.slug === category);
   if (search) products = products.filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
 
   // Ensure consistent response structure for frontend
-  res.json({ 
-    products: products.slice(0, parseInt(limit)), 
+  res.json({
+    products: products.slice(0, parseInt(limit)),
     total: products.length,
-    status: cacheService.internalCache.status 
+    status: cacheService.internalCache.status
   });
 });
 
@@ -69,8 +69,8 @@ app.get('/api/test-db', async (req, res) => {
 });
 
 app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
+  res.json({
+    status: 'OK',
     cache: cacheService.internalCache.status,
     lastRefresh: cacheService.internalCache.lastRefreshed
   });
@@ -107,5 +107,12 @@ app.get('*', (req, res, next) => {
   if (req.url.startsWith('/api')) return next();
   res.sendFile(path.join(distPath, 'index.html'));
 });
+
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 MRT Server running on http://localhost:${PORT}`);
+    console.log(`📁 Serving from: ${distPath}`);
+  });
+}
 
 export default app;
