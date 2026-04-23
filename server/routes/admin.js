@@ -208,11 +208,17 @@ router.get('/force-sync-products', async (req, res) => {
     const catMap = {};
     cats.forEach(c => catMap[c.slug.toLowerCase()] = c.id);
 
-    // Clean existing products
+    // Force Unlock Database Constraints for Cleanup
+    await pool.query('SET FOREIGN_KEY_CHECKS = 0');
+
+    // Clean existing products and metadata
     await pool.query(`DELETE FROM ${productTable}`);
     
-    // Clean up "Test Category" if it exists
+    // Clean up "Test Category" and related data
     await pool.query(`DELETE FROM ${categoryTable} WHERE slug = 'test-category' OR name LIKE '%Test%'`);
+
+    // Re-enable constraints
+    await pool.query('SET FOREIGN_KEY_CHECKS = 1');
 
     // Insert new
     for (const p of products) {
