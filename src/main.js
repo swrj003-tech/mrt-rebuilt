@@ -79,6 +79,24 @@ class MRTApp {
   }
 
   // ── Global Navigation Sync ──
+  async fetchProducts(category = null) {
+    try {
+      // FORCE CACHE BYPASS: Fetch directly from database for immediate sync
+      const url = category 
+        ? `/api/products?category=${category}&_t=${Date.now()}&limit=100` 
+        : `/api/products?_t=${Date.now()}&limit=100`;
+      
+      const response = await fetch(url);
+      const data = await response.json();
+      
+      // Handle unified response format
+      this.products = data.products || (Array.isArray(data) ? data : []);
+      this.renderProducts();
+    } catch (err) {
+      console.error('Fetch Error:', err);
+    }
+  }
+
   async syncGlobalNavigation() {
     try {
       const response = await fetch('/api/categories?_t=' + Date.now());
