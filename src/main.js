@@ -189,31 +189,31 @@ class MRTApp {
 
   // ── Data Fetching ──
   async fetchAndRenderCategories(container) {
-    let categories = [];
     try {
-      const response = await fetch('/api/categories');
-      if (response.ok) {
-        categories = await response.json();
+      this.showLoading(container);
+      const response = await fetch('/api/categories?_t=' + Date.now());
+      const categories = await response.json();
+
+      if (!categories || categories.length === 0) {
+        container.innerHTML = '<p class="no-products">No categories found in database.</p>';
+        return;
       }
+
+      container.innerHTML = categories.map(cat => `
+        <a href="category.html?c=${cat.slug}" class="avory-cat-card group">
+          <div class="avory-cat-bg" style="background-image: url('${cat.image || '/assets/editorial_v3/hero.png'}');"></div>
+          <div class="avory-cat-overlay"></div>
+          <div class="avory-cat-content">
+            <h3 class="avory-cat-title">${cat.name}</h3>
+            <p class="avory-cat-desc">${cat.theme?.seoIntro || cat.description || 'Explore our curated selection.'}</p>
+            <span class="avory-cat-btn">Explore Now</span>
+          </div>
+        </a>
+      `).join('');
     } catch (err) {
-      console.warn('[MRT] Categories fetch failed, using fallback.');
+      console.error('[MRT] Categories sync failed:', err);
+      container.innerHTML = '<p class="no-products">Database Syncing...</p>';
     }
-
-    if (!categories || categories.length === 0) {
-      categories = FALLBACK_CATEGORIES;
-    }
-
-    container.innerHTML = categories.map(cat => `
-      <a href="category.html?c=${cat.slug}" class="avory-cat-card group">
-        <div class="avory-cat-bg" style="background-image: url('${cat.image}');"></div>
-        <div class="avory-cat-overlay"></div>
-        <div class="avory-cat-content">
-          <h3 class="avory-cat-title">${cat.name}</h3>
-          <p class="avory-cat-desc">${cat.theme?.seoIntro || 'Explore our curated selection.'}</p>
-          <span class="avory-cat-btn">Explore Now</span>
-        </div>
-      </a>
-    `).join('');
   }
 
   async fetchAndRender(container, limit = 50) {
