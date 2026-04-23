@@ -330,41 +330,20 @@ class MRTApp {
   updateCategoryUI(categoryData) {
     const titleEl = document.getElementById('category-title-display');
     const descEl = document.getElementById('category-desc-display');
-
-    const categoryNames = {
-      'home-kitchen': 'Home & Kitchen',
-      'beauty-personal-care': 'Beauty & Personal Care',
-      'health-wellness': 'Health & Wellness',
-      'pet-supplies': 'Pet Supplies',
-      'baby-kids-essentials': 'Baby & Kids Essentials',
-      'electronics-accessories': 'Electronics & Accessories',
-      'sports-fitness': 'Sports & Fitness'
-    };
-
-    const catName = categoryNames[this.activeCategory] || 'Products';
-    
-    if (titleEl) {
-      titleEl.innerText = `Top 10 Best ${catName} Products (2026)`;
-      titleEl.classList.add('seo-title');
-    }
-    if (descEl) {
-      descEl.innerText = `Discover the most useful, trending, and top-rated ${catName.toLowerCase()} products carefully selected for quality and value.`;
-      descEl.classList.add('seo-intro');
-    }
-
     const hero = document.getElementById('category-hero');
-    if (hero) {
-      const assetMap = {
-        'home-kitchen': '/assets/editorial_v3/cat_home.png',
-        'beauty-personal-care': '/assets/editorial_v3/cat_beauty.png',
-        'health-wellness': '/assets/editorial_v3/cat_health.png',
-        'baby-kids-essentials': '/assets/editorial_v3/cat_kids.png',
-        'electronics-accessories': '/assets/editorial_v3/cat_tech.png',
-        'sports-fitness': '/assets/editorial_v3/cat_men.png',
-        'pet-supplies': '/assets/editorial_v3/cat_pets.png'
-      };
-      const bg = assetMap[this.activeCategory] || '/assets/editorial_v3/hero.png';
-      hero.style.backgroundImage = `url('${bg}')`;
+
+    if (categoryData) {
+      if (titleEl) {
+        titleEl.innerText = categoryData.theme?.title || categoryData.name;
+        titleEl.classList.add('seo-title');
+      }
+      if (descEl) {
+        descEl.innerText = categoryData.theme?.seoIntro || categoryData.description || 'Explore our curated selection.';
+        descEl.classList.add('seo-intro');
+      }
+      if (hero && categoryData.image) {
+        hero.style.backgroundImage = `url('${categoryData.image}')`;
+      }
     }
   }
 
