@@ -9,8 +9,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,400;1,600&family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@300,0..1&display=swap" rel="stylesheet">
   <script type="module" crossorigin src="/assets/modulepreload-polyfill-EeOZK34R.js"></script>
-  <script type="module" crossorigin src="/assets/main-BuSuWgTw.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/main-CIJFhuLX.css">
+  <script type="module" crossorigin src="/assets/main-CbQuetom.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/main-CscGwKRc.css">
 </head>
 <body onload="document.body.classList.add('loaded')">
 
@@ -88,6 +88,9 @@
             <a href="contact.html">
                 <span class="material-symbols-outlined" style="font-size:18px;">mail</span> Contact
             </a>
+            <a href="blog.html">
+                <span class="material-symbols-outlined" style="font-size:18px;">article</span> Blog
+            </a>
         </div>
         <div style="flex:1" id="mobileNavBackdrop"></div>
     </div>
@@ -117,89 +120,17 @@
                 <h2 class="text-4xl md:text-5xl font-heading font-bold text-[#1e293b]">Featured Categories</h2>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                
-                <a href="category.html?c=home-kitchen" class="avory-cat-card group">
-                    <div class="avory-cat-bg" style="background-image: url('/assets/editorial_v3/cat_home.png');"></div>
-                    <div class="avory-cat-overlay"></div>
-                    <div class="avory-cat-content">
-                        <h3 class="avory-cat-title">Home & Decor</h3>
-                        <p class="avory-cat-desc">Curated luxury pieces to elevate your living space — elegant furniture, textiles, lighting, and timeless home accents.</p>
-                        <span class="avory-cat-btn">Read More</span>
-                    </div>
-                </a>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="categories-grid"></div>
+        </section>
 
-                <a href="category.html?c=beauty-personal-care" class="avory-cat-card group">
-                    <div class="avory-cat-bg" style="background-image: url('/assets/editorial_v3/cat_women.png');"></div>
-                    <div class="avory-cat-overlay"></div>
-                    <div class="avory-cat-content">
-                        <h3 class="avory-cat-title">Women</h3>
-                        <p class="avory-cat-desc">Chic, modern, and premium fashion essentials for women — clothing, bags, shoes, jewelry, and statement accessories.</p>
-                        <span class="avory-cat-btn">Read More</span>
-                    </div>
-                </a>
-
-                <a href="category.html?c=sports-fitness" class="avory-cat-card group">
-                    <div class="avory-cat-bg" style="background-image: url('/assets/editorial_v3/cat_men.png');"></div>
-                    <div class="avory-cat-overlay"></div>
-                    <div class="avory-cat-content">
-                        <h3 class="avory-cat-title">Men</h3>
-                        <p class="avory-cat-desc">Sophisticated wardrobe staples and refined accessories crafted for the modern gentleman.</p>
-                        <span class="avory-cat-btn">Read More</span>
-                    </div>
-                </a>
-
-                <a href="category.html?c=beauty-personal-care" class="avory-cat-card group">
-                    <div class="avory-cat-bg" style="background-image: url('/assets/editorial_v3/cat_beauty.png');"></div>
-                    <div class="avory-cat-overlay"></div>
-                    <div class="avory-cat-content">
-                        <h3 class="avory-cat-title">Beauty</h3>
-                        <p class="avory-cat-desc">High-end skincare, perfumes, haircare, and wellness essentials to elevate your daily beauty ritual.</p>
-                        <span class="avory-cat-btn">Read More</span>
-                    </div>
-                </a>
-
-                <a href="category.html?c=home-kitchen" class="avory-cat-card group">
-                    <div class="avory-cat-bg" style="background-image: url('/assets/editorial_v3/cat_garden.png');"></div>
-                    <div class="avory-cat-overlay"></div>
-                    <div class="avory-cat-content">
-                        <h3 class="avory-cat-title">Garden & Outdoor</h3>
-                        <p class="avory-cat-desc">Stylish outdoor décor, lighting, and furniture to create the perfect serene and elegant outdoor space.</p>
-                        <span class="avory-cat-btn">Read More</span>
-                    </div>
-                </a>
-
-                <a href="category.html?c=baby-kids-essentials" class="avory-cat-card group">
-                    <div class="avory-cat-bg" style="background-image: url('/assets/editorial_v3/cat_kids.png');"></div>
-                    <div class="avory-cat-overlay"></div>
-                    <div class="avory-cat-content">
-                        <h3 class="avory-cat-title">Kids & Baby</h3>
-                        <p class="avory-cat-desc">Soft, safe, and beautifully designed clothing, toys, and essentials for little ones.</p>
-                        <span class="avory-cat-btn">Read More</span>
-                    </div>
-                </a>
-
-                <a href="category.html?c=electronics-accessories" class="avory-cat-card group">
-                    <div class="avory-cat-bg" style="background-image: url('/assets/editorial_v3/cat_tech.png');"></div>
-                    <div class="avory-cat-overlay"></div>
-                    <div class="avory-cat-content">
-                        <h3 class="avory-cat-title">Tech & Lifestyle</h3>
-                        <p class="avory-cat-desc">Smart gadgets, lifestyle must-haves, and modern accessories that enrich your daily routine.</p>
-                        <span class="avory-cat-btn">Read More</span>
-                    </div>
-                </a>
-
-                <a href="categories.html" class="avory-cat-card group">
-                    <div class="avory-cat-bg" style="background-image: url('/assets/editorial_v3/hero.png');"></div>
-                    <div class="avory-cat-overlay"></div>
-                    <div class="avory-cat-content">
-                        <h3 class="avory-cat-title">Gifts & Accs.</h3>
-                        <p class="avory-cat-desc">Timeless gift ideas and elegant accessories perfect for every occasion and personality.</p>
-                        <span class="avory-cat-btn">Read More</span>
-                    </div>
-                </a>
-
+        <section class="py-24 px-6 md:px-12 max-w-[1600px] mx-auto bg-gray-50">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-heading font-bold text-[#1e293b]">Featured Products</h2>
             </div>
+            <div id="products-home-grid">
+                <!-- Products populated via main.js -->
+            </div>
+        </section>
         </section>
 
         
