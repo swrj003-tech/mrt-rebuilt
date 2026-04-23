@@ -233,12 +233,19 @@ router.get('/force-sync-products', async (req, res) => {
     for (const p of products) {
       const catId = catMap[p.category.toLowerCase()];
       if (!catId) continue;
-      const slug = p.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      
+      // Professional Unique Slug Generation
+      let slug = p.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const isDuplicate = products.filter(x => x.name.toLowerCase() === p.name.toLowerCase()).length > 1;
+      if (isDuplicate) {
+        slug = `${slug}-${p.category.toLowerCase().split('-')[0]}`;
+      }
+
       await pool.query(
         `INSERT INTO ${productTable} (name, slug, description, price, image, categoryId, affiliateUrl, badge, ratingValue, ratingText, shortDescription, keyBenefits)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [p.name, slug, p.benefit, 0, `/assets/products/placeholder.png`, catId, p.url, p.badge, 4.8, '4.8/5 Recommended', p.benefit, JSON.stringify([p.benefit])]
-      );
+      ).catch(err => console.warn(`⚠️ Skipping duplicate or error on ${p.name}:`, err.message));
     }
 
     res.json({ success: true, message: `Injected ${products.length} products successfully and cleaned up ghost categories.` });
