@@ -313,7 +313,7 @@ async function renderDashboard(main) {
             <tr>
               <td>
                 <div class="flex gap-1" style="align-items:center">
-                  <img src="${c.productImage || c.product?.image || '/assets/placeholder.png'}" class="product-thumb" alt="" onerror="this.src='/assets/placeholder.png'">
+                  <img src="${c.productImage || c.product?.image || 'https://placehold.co/150x150?text=No+Image'}" class="product-thumb" alt="" onerror="this.src='https://placehold.co/150x150?text=No+Image'">
                   <span>${c.productName || c.product?.name || 'Unknown'}</span>
                 </div>
               </td>
@@ -346,7 +346,7 @@ async function renderProducts(main) {
         <tbody>
           ${products.map(p => `
             <tr>
-              <td><img src="${p.image || '/assets/placeholder.png'}" class="product-thumb" alt="${p.name}" onerror="this.src='/assets/placeholder.png'"></td>
+              <td><img src="${p.image || 'https://placehold.co/150x150?text=No+Image'}" class="product-thumb" alt="${p.name}" onerror="this.src='https://placehold.co/150x150?text=No+Image'"></td>
               <td>
                 <strong>${p.name}</strong>
                 <br><span class="text-muted text-sm">${p.slug}</span>
