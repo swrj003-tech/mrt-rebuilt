@@ -2,8 +2,11 @@ const API = '/api';
 let token = localStorage.getItem('mrt_admin_token');
 let currentView = 'dashboard';
 
-// === API Helper (FIXED: Handles 204 No Content for DELETE) ===
+// === API Helper (FIXED: Handles 204 No Content for DELETE + Added Timeout) ===
 async function api(path, opts = {}) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
+
   const headers = { 'Content-Type': 'application/json' };
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
@@ -15,7 +18,13 @@ async function api(path, opts = {}) {
   }
 
   try {
-    const res = await fetch(`${API}${finalPath}`, { ...opts, headers });
+    const res = await fetch(`${API}${finalPath}`, { 
+      ...opts, 
+      headers,
+      signal: controller.signal 
+    });
+    clearTimeout(timeoutId);
+    
     if (res.status === 401) { logout(); return null; }
 
     // CRITICAL FIX: Handle empty responses (204 No Content, typical for DELETE)
@@ -39,6 +48,11 @@ async function api(path, opts = {}) {
     }
     return data;
   } catch (err) {
+    clearTimeout(timeoutId);
+    if (err.name === 'AbortError') {
+      console.error(`API Timeout [${path}]`);
+      return { error: 'Request timed out. Please check your connection or server status.' };
+    }
     console.error(`API Fetch Error [${path}]:`, err);
     return { error: 'Network or parse error' };
   }
@@ -378,34 +392,7 @@ async function renderProducts(main) {
     </div>
   `;
 
-  // --- Direct Event Listeners (Resilient Pattern) ---
-  document.querySelectorAll('.btn-edit-product').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      const productId = btn.dataset.id;
-      const p = products.find(x => String(x.id) === String(productId));
-      if (p) showProductModal(p, cats);
-      else toast('Product not found in current list', 'error');
-    });
-  });
-
-  document.querySelectorAll('.btn-delete-product').forEach(btn => {
-    btn.addEventListener('click', async (e) => {
-      e.preventDefault();
-      const productId = btn.dataset.id;
-      if (!confirm('Are you sure you want to delete this product?')) return;
-      
-      const res = await api(`/products/${productId}`, { method: 'DELETE' });
-      if (res?.error) return toast('Delete failed: ' + res.error, 'error');
-      
-      toast('Product deleted');
-      renderView();
-    });
-  });
-
-  document.getElementById('btn-add-product')?.addEventListener('click', () => {
-    showProductModal(null, cats);
-  });
+  // Listeners moved to global delegator
 }
 
 function showProductModal(product, categories) {
@@ -1218,6 +1205,86 @@ function initDragAndDrop(dropzone, onUpload) {
     input.click();
   });
 }
+
+// === Global Event Delegator (Ensures listeners are never lost) ===
+document.addEventListener('click', async (e) => {
+  const target = e.target;
+  
+  // 1. PRODUCT ACTIONS
+  const editProdBtn = target.closest('.btn-edit-product');
+  if (editProdBtn) {
+    const p = (window._allProducts || []).find(x => String(x.id) === String(editProdBtn.dataset.id));
+    if (p) {
+      const cats = await api('/categories');
+      showProductModal(p, cats);
+    }
+    return;
+  }
+
+  const deleteProdBtn = target.closest('.btn-delete-product');
+  if (deleteProdBtn) {
+    if (!confirm('Are you sure you want to delete this product?')) return;
+    deleteProdBtn.disabled = true;
+    const res = await api(`/products/${deleteProdBtn.dataset.id}`, { method: 'DELETE' });
+    if (res?.error) { toast(res.error, 'error'); deleteProdBtn.disabled = false; return; }
+    toast('Product deleted');
+    renderView();
+    return;
+  }
+
+  const addProdBtn = target.closest('#btn-add-product');
+  if (addProdBtn) {
+    const cats = await api('/categories');
+    showProductModal(null, cats);
+    return;
+  }
+
+  // 2. CATEGORY ACTIONS
+  const editCatBtn = target.closest('.btn-edit-cat');
+  if (editCatBtn) {
+    const cats = await api('/categories');
+    const c = (cats || []).find(x => String(x.id) === String(editCatBtn.dataset.id));
+    if (c) showCategoryModal(c);
+    return;
+  }
+
+  const deleteCatBtn = target.closest('.btn-delete-cat');
+  if (deleteCatBtn) {
+    if (!confirm('Delete this category? This will also remove all associated products.')) return;
+    deleteCatBtn.disabled = true;
+    const res = await api(`/categories/${deleteCatBtn.dataset.id}`, { method: 'DELETE' });
+    if (res?.error) { toast(res.error, 'error'); deleteCatBtn.disabled = false; return; }
+    toast('Category deleted');
+    renderView();
+    return;
+  }
+
+  const addCatBtn = target.closest('#btn-add-cat');
+  if (addCatBtn) {
+    showCategoryModal(null);
+    return;
+  }
+
+  // 3. REVIEW ACTIONS
+  const verifyReviewBtn = target.closest('.btn-verify-review');
+  if (verifyReviewBtn) {
+    const res = await api(`/admin/reviews/${verifyReviewBtn.dataset.id}/verify`, { method: 'POST' });
+    if (res?.error) return toast(res.error, 'error');
+    toast('Review verified');
+    renderView();
+    return;
+  }
+
+  const deleteReviewBtn = target.closest('.btn-delete-review');
+  if (deleteReviewBtn) {
+    if (!confirm('Delete this review?')) return;
+    const res = await api(`/reviews/${deleteReviewBtn.dataset.id}`, { method: 'DELETE' });
+    if (res?.error) return toast(res.error, 'error');
+    toast('Review deleted');
+    renderView();
+    return;
+  }
+});
 
 // Boot
 render();
