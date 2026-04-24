@@ -1206,6 +1206,38 @@ function initDragAndDrop(dropzone, onUpload) {
   });
 }
 
+// === CUSTOM ASYNC CONFIRM MODAL ===
+function customConfirm(message) {
+  return new Promise((resolve) => {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.style.zIndex = '2000';
+    overlay.innerHTML = `
+      <div class="modal" style="max-width: 400px; text-align: center; padding: 2rem;">
+        <div class="stat-icon" style="background: var(--bg-secondary); margin: 0 auto 1.5rem; width: 64px; height: 64px; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
+          <span class="material-symbols-outlined" style="font-size: 32px; color: var(--accent);">help</span>
+        </div>
+        <h3 style="margin-bottom: 1rem;">Confirm Action</h3>
+        <p style="margin-bottom: 2rem; color: var(--text-secondary); line-height: 1.6;">${message}</p>
+        <div class="modal-actions" style="justify-content: center; gap: 1rem;">
+          <button class="btn btn-secondary" id="confirm-cancel">Cancel</button>
+          <button class="btn btn-danger" id="confirm-yes">Confirm</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    const cleanup = (val) => {
+      overlay.remove();
+      resolve(val);
+    };
+
+    overlay.querySelector('#confirm-cancel').addEventListener('click', () => cleanup(false));
+    overlay.querySelector('#confirm-yes').addEventListener('click', () => cleanup(true));
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) cleanup(false); });
+  });
+}
+
 // === Global Event Delegator (Ensures listeners are never lost) ===
 document.addEventListener('click', async (e) => {
   const target = e.target;
@@ -1223,7 +1255,7 @@ document.addEventListener('click', async (e) => {
 
   const deleteProdBtn = target.closest('.btn-delete-product');
   if (deleteProdBtn) {
-    if (!confirm('Are you sure you want to delete this product?')) return;
+    if (!await customConfirm('Are you sure you want to delete this product?')) return;
     deleteProdBtn.disabled = true;
     const res = await api(`/products/${deleteProdBtn.dataset.id}`, { method: 'DELETE' });
     if (res?.error) { toast(res.error, 'error'); deleteProdBtn.disabled = false; return; }
@@ -1250,7 +1282,7 @@ document.addEventListener('click', async (e) => {
 
   const deleteCatBtn = target.closest('.btn-delete-cat');
   if (deleteCatBtn) {
-    if (!confirm('Delete this category? This will also remove all associated products.')) return;
+    if (!await customConfirm('Delete this category? This will also remove all associated products.')) return;
     deleteCatBtn.disabled = true;
     const res = await api(`/categories/${deleteCatBtn.dataset.id}`, { method: 'DELETE' });
     if (res?.error) { toast(res.error, 'error'); deleteCatBtn.disabled = false; return; }
@@ -1277,7 +1309,7 @@ document.addEventListener('click', async (e) => {
 
   const deleteReviewBtn = target.closest('.btn-delete-review');
   if (deleteReviewBtn) {
-    if (!confirm('Delete this review?')) return;
+    if (!await customConfirm('Delete this review?')) return;
     const res = await api(`/reviews/${deleteReviewBtn.dataset.id}`, { method: 'DELETE' });
     if (res?.error) return toast(res.error, 'error');
     toast('Review deleted');

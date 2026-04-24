@@ -108,19 +108,16 @@ app.get('/api/blog', (req, res) => {
   res.json(cacheService.internalCache.blog || []);
 });
 
-  app.get('/api/debug-admin-html', async (req, res) => {
+if (!isProduction) {
+  app.get('/api/test-db', async (req, res) => {
     try {
-      const fs = await import('fs/promises');
-      const html = await fs.readFile(path.join(distPath, 'admin/index.html'), 'utf-8');
-      res.json({ 
-        html: html.substring(0, 1000), 
-        size: html.length,
-        modified: (await fs.stat(path.join(distPath, 'admin/index.html'))).mtime
-      });
-    } catch (err) {
-      res.status(500).json({ error: err.message });
+      const [rows] = await pool.query('SELECT 1 + 1 AS result');
+      res.json({ status: 'connected', result: rows[0].result });
+    } catch {
+      res.status(500).json({ status: 'error' });
     }
   });
+}
 
 app.get('/health', (req, res) => {
   res.json({
