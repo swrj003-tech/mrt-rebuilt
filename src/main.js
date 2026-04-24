@@ -358,17 +358,6 @@ class MRTApp {
     }
   }
 
-  useFallback(container, limit) {
-    let products = [...FALLBACK_PRODUCTS];
-    if (this.activeCategory) {
-      products = products.filter(p => p.category.slug === this.activeCategory);
-    }
-    if (products.length === 0) products = FALLBACK_PRODUCTS;
-    
-    this.allProducts = products;
-    this.renderProducts(container, products.slice(0, limit));
-  }
-
   showLoading(container) {
     container.innerHTML = `
       <div style="grid-column: 1/-1; padding: 100px 0; text-align: center; opacity: 0.4;">

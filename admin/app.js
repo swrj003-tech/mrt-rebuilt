@@ -378,30 +378,34 @@ async function renderProducts(main) {
     </div>
   `;
 
-  // --- GLOBAL EVENT DELEGATION (Bulletproof Fix) ---
-  const appContainer = document.getElementById('app');
-  if (appContainer && !window._delegatorSet) {
-    appContainer.addEventListener('click', async (e) => {
-      const editBtn = e.target.closest('.btn-edit-product');
-      const deleteBtn = e.target.closest('.btn-delete-product');
-
-      if (editBtn) {
-        e.preventDefault();
-        const p = window._allProducts?.find(x => String(x.id) === String(editBtn.dataset.id));
-        if (p) showProductModal(p, cats);
-      }
-
-      if (deleteBtn) {
-        e.preventDefault();
-        if (!confirm('Delete this product?')) return;
-        const res = await api(`/products/${deleteBtn.dataset.id}`, { method: 'DELETE' });
-        if (res?.error) return toast('Delete failed', 'error');
-        toast('Product deleted');
-        renderView();
-      }
+  // --- Direct Event Listeners (Resilient Pattern) ---
+  main.querySelectorAll('.btn-edit-product').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const productId = btn.dataset.id;
+      const p = products.find(x => String(x.id) === String(productId));
+      if (p) showProductModal(p, cats);
+      else toast('Product not found in current list', 'error');
     });
-    window._delegatorSet = true;
-  }
+  });
+
+  main.querySelectorAll('.btn-delete-product').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const productId = btn.dataset.id;
+      if (!confirm('Are you sure you want to delete this product?')) return;
+      
+      const res = await api(`/products/${productId}`, { method: 'DELETE' });
+      if (res?.error) return toast('Delete failed: ' + res.error, 'error');
+      
+      toast('Product deleted');
+      renderView();
+    });
+  });
+
+  document.getElementById('btn-add-product')?.addEventListener('click', () => {
+    showProductModal(null, cats);
+  });
 }
 
 function showProductModal(product, categories) {

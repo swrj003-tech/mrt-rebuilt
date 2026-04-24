@@ -43,9 +43,13 @@ export async function refreshInternalCache() {
 
       const [products] = await pool.query(`SELECT p.*, c.slug as cat_slug, c.name as cat_name FROM ${productTable} p LEFT JOIN ${categoryTable} c ON p.categoryId = c.id ORDER BY p.sortOrder ASC`);
       const [categories] = await pool.query(`SELECT * FROM ${categoryTable} ORDER BY sortOrder ASC`);
-      const [testimonials] = await pool.query(`SELECT * FROM ${testimonialTable} WHERE isActive = 1 ORDER BY sortOrder ASC`);
-      const [blog] = await pool.query(`SELECT * FROM ${blogTable} WHERE isPublished = 1 ORDER BY createdAt DESC`);
       
+      let testimonials = [];
+      try { testimonials = (await pool.query(`SELECT * FROM ${testimonialTable} WHERE isActive = 1 ORDER BY sortOrder ASC`))[0]; } catch(e) { console.warn('Testimonial table not found or empty'); }
+      
+      let blog = [];
+      try { blog = (await pool.query(`SELECT * FROM ${blogTable} WHERE isPublished = 1 ORDER BY createdAt DESC`))[0]; } catch(e) { console.warn('BlogPost table not found or empty'); }
+
       return {
         products: products.map(p => ({ ...p, category: { slug: p.cat_slug, name: p.cat_name } })),
         categories,
