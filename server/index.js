@@ -119,11 +119,18 @@ if (!isProduction) {
   });
 }
 
-app.get('/health', (req, res) => {
+app.get('/health', async (req, res) => {
+  // Trigger sync if query param provided
+  if (req.query.sync === 'true') {
+    const { syncDatabaseImages } = await import('./sync_data.js');
+    await syncDatabaseImages();
+    await cacheService.refreshInternalCache();
+  }
+
   res.json({
     status: cacheService.internalCache.status === 'ready' ? 'ready' : 'degraded',
     node: process.version,
-    deployedAt: '2026-04-24T22:50:00Z'
+    deployedAt: '2026-04-24T23:35:00Z'
   });
 });
 
