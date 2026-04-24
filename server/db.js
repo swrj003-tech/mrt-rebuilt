@@ -11,8 +11,10 @@ const url = new URL(process.env.DATABASE_URL);
  * Direct MySQL Connection Pool for Hostinger Business Hosting.
  * Bypasses Prisma to avoid binary dependency issues.
  */
+const host = (url.hostname === 'localhost' || url.hostname === '::1') ? '127.0.0.1' : (url.hostname || '127.0.0.1');
+
 const pool = mysql.createPool({
-  host: url.hostname || '127.0.0.1',
+  host,
   port: Number(url.port || 3306),
   user: decodeURIComponent(url.username),
   password: decodeURIComponent(url.password),
