@@ -121,7 +121,6 @@ app.get('/api/blog', (req, res) => {
       res.status(500).json({ error: err.message });
     }
   });
-}
 
 app.get('/health', (req, res) => {
   res.json({
