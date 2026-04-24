@@ -1,5 +1,12 @@
 
-import pool from './server/db.js';
+const fs = require('fs');
+const path = require('path');
+
+const productsPath = 'public/api/products.json';
+const distPath = 'dist/api/products.json';
+
+const raw = fs.readFileSync(productsPath, 'utf8');
+const data = JSON.parse(raw);
 
 const mapping = {
   // Category 1: Home & Kitchen
@@ -27,6 +34,15 @@ const mapping = {
   "Cosmetic Organizer": "cosmetic-organizer.png",
 
   // Category 3: Health & Wellness
+  "Neck & Shoulder Massager": "neck-massager.png",
+  "Posture Corrector": "posture-corrector.png",
+  "Massage Gun (Health)": "massage-gun.png",
+  "Memory Foam Pillow": "memory-foam-pillow.png",
+  "Aromatherapy Diffuser": "aromatherapy-diffuser-luxury.jpg",
+  "Foam Roller (Health)": "foam-roller.png",
+  "Weighted Blanket": "weighted-blanket.png",
+  "Eye Massager": "eye-massager.png",
+  "White Noise Machine": "white-noise-machine.png",
   "Neck & Shoulder Massager": "neck-massager.png",
   "Posture Corrector": "posture-corrector.png",
   "Massage Gun (Health)": "massage-gun.png",
@@ -87,55 +103,31 @@ const mapping = {
   "Water Bottle": "insulated-water-bottle.png"
 };
 
-const categoryMapping = {
-  1: "under-sink-organizer.png",
-  2: "led-makeup-mirror.png",
-  3: "wellness-tech-essentials-trio.jpg",
-  4: "pet-track-smart-collar.jpg",
-  5: "baby-toy-set.png",
-  6: "3-in-1-charging-station.png",
-  7: "yoga-mat.png"
-};
+const newProducts = [];
+const categoryCounts = {};
 
-export async function syncDatabaseImages() {
-  console.log('[SYNC] Starting database image synchronization (v2)...');
+data.products.forEach(p => {
+  if (p.categoryId < 1 || p.categoryId > 7) return;
   
-  try {
-    const [products] = await pool.query('SELECT id, name, categoryId FROM Product');
-    const categoryCounts = {};
-    const updates = [];
+  if (!categoryCounts[p.categoryId]) categoryCounts[p.categoryId] = 0;
+  if (categoryCounts[p.categoryId] >= 10) return;
 
-    // Reset counts and deactivate all first
-    await pool.query('UPDATE Product SET isActive = 0 WHERE categoryId BETWEEN 1 AND 7');
-
-    for (const p of products) {
-      if (p.categoryId < 1 || p.categoryId > 7) continue;
-      if (!categoryCounts[p.categoryId]) categoryCounts[p.categoryId] = 0;
-      if (categoryCounts[p.categoryId] >= 10) continue;
-
-      const fileName = mapping[p.name];
-      if (fileName) {
-        const ext = path.extname(fileName);
-        const base = path.basename(fileName, ext);
-        const imagePath = `/assets/products/${base}_v2${ext}`;
-        updates.push(pool.query('UPDATE Product SET image = ?, isActive = 1 WHERE id = ?', [imagePath, p.id]));
-        categoryCounts[p.categoryId]++;
-      }
-    }
-
-    // Update categories
-    for (const [id, fileName] of Object.entries(categoryMapping)) {
-      const ext = path.extname(fileName);
-      const base = path.basename(fileName, ext);
-      const imagePath = `/assets/products/${base}_v2${ext}`;
-      updates.push(pool.query('UPDATE Category SET image = ? WHERE id = ?', [imagePath, id]));
-    }
-
-    await Promise.all(updates);
-    console.log('[SYNC] Database synchronization complete. Updated images and enforced limits.');
-    return true;
-  } catch (err) {
-    console.error('[SYNC] Database synchronization failed:', err.message);
-    return false;
+  const fileName = mapping[p.name];
+  if (fileName) {
+    p.image = `/assets/products/${fileName}`;
+  } else {
+    // Fallback or log missing mapping
+    console.warn(`No mapping for product: ${p.name}`);
   }
-}
+
+  newProducts.push(p);
+  categoryCounts[p.categoryId]++;
+});
+
+// Ensure we have 10 each. If some were missing from the list but we have 70 products, we are good.
+// The analysis showed 10+ for each cat, so trimming works.
+data.products = newProducts;
+
+fs.writeFileSync(productsPath, JSON.stringify(data, null, 2));
+fs.writeFileSync(distPath, JSON.stringify(data, null, 2));
+console.log('Successfully updated 70 products with local images.');

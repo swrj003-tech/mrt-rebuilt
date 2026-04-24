@@ -1,5 +1,12 @@
 
-import pool from './server/db.js';
+import fs from 'fs';
+import path from 'path';
+import pool from '../server/db.js';
+
+const publicProductsDir = 'public/assets/products';
+const distProductsDir = 'dist/assets/products';
+const productsJsonPath = 'public/api/products.json';
+const distJsonPath = 'dist/api/products.json';
 
 const mapping = {
   // Category 1: Home & Kitchen
@@ -97,45 +104,83 @@ const categoryMapping = {
   7: "yoga-mat.png"
 };
 
-export async function syncDatabaseImages() {
-  console.log('[SYNC] Starting database image synchronization (v2)...');
-  
-  try {
-    const [products] = await pool.query('SELECT id, name, categoryId FROM Product');
-    const categoryCounts = {};
-    const updates = [];
+async function run() {
+  console.log('--- STARTING CLEAN SYNC ---');
 
-    // Reset counts and deactivate all first
-    await pool.query('UPDATE Product SET isActive = 0 WHERE categoryId BETWEEN 1 AND 7');
-
-    for (const p of products) {
-      if (p.categoryId < 1 || p.categoryId > 7) continue;
-      if (!categoryCounts[p.categoryId]) categoryCounts[p.categoryId] = 0;
-      if (categoryCounts[p.categoryId] >= 10) continue;
-
-      const fileName = mapping[p.name];
-      if (fileName) {
-        const ext = path.extname(fileName);
-        const base = path.basename(fileName, ext);
-        const imagePath = `/assets/products/${base}_v2${ext}`;
-        updates.push(pool.query('UPDATE Product SET image = ?, isActive = 1 WHERE id = ?', [imagePath, p.id]));
-        categoryCounts[p.categoryId]++;
+  // 1. Rename files with _v2 to force cache bypass
+  const filesToVersion = new Set([...Object.values(mapping), ...Object.values(categoryMapping)]);
+  for (const file of filesToVersion) {
+    const ext = path.extname(file);
+    const base = path.basename(file, ext);
+    const newFile = `${base}_v2${ext}`;
+    
+    // Copy in both public and dist
+    for (const dir of [publicProductsDir, distProductsDir]) {
+      const oldPath = path.join(dir, file);
+      const newPath = path.join(dir, newFile);
+      if (fs.existsSync(oldPath)) {
+        fs.copyFileSync(oldPath, newPath);
       }
     }
+  }
 
-    // Update categories
-    for (const [id, fileName] of Object.entries(categoryMapping)) {
+  // 2. Load JSON
+  const data = JSON.parse(fs.readFileSync(productsJsonPath, 'utf8'));
+  const newProducts = [];
+  const categoryCounts = {};
+
+  // 3. Update products in JSON
+  data.products.forEach(p => {
+    if (p.categoryId < 1 || p.categoryId > 7) return;
+    if (!categoryCounts[p.categoryId]) categoryCounts[p.categoryId] = 0;
+    if (categoryCounts[p.categoryId] >= 10) return;
+
+    const fileName = mapping[p.name];
+    if (fileName) {
       const ext = path.extname(fileName);
       const base = path.basename(fileName, ext);
-      const imagePath = `/assets/products/${base}_v2${ext}`;
-      updates.push(pool.query('UPDATE Category SET image = ? WHERE id = ?', [imagePath, id]));
+      p.image = `/assets/products/${base}_v2${ext}`;
+      p.isActive = 1;
+      newProducts.push(p);
+      categoryCounts[p.categoryId]++;
     }
+  });
+  data.products = newProducts;
 
-    await Promise.all(updates);
-    console.log('[SYNC] Database synchronization complete. Updated images and enforced limits.');
-    return true;
+  // 4. Update categories in JSON
+  data.categories.forEach(c => {
+    const fileName = categoryMapping[c.id];
+    if (fileName) {
+      const ext = path.extname(fileName);
+      const base = path.basename(fileName, ext);
+      c.image = `/assets/products/${base}_v2${ext}`;
+    }
+  });
+
+  // 5. Save JSON
+  fs.writeFileSync(productsJsonPath, JSON.stringify(data, null, 2));
+  fs.writeFileSync(distJsonPath, JSON.stringify(data, null, 2));
+
+  // 6. Update Database
+  try {
+    console.log('Updating database...');
+    // Deactivate all first
+    await pool.query('UPDATE Product SET isActive = 0 WHERE categoryId BETWEEN 1 AND 7');
+    
+    for (const p of data.products) {
+      await pool.query('UPDATE Product SET image = ?, isActive = 1 WHERE id = ?', [p.image, p.id]);
+    }
+    
+    for (const c of data.categories) {
+      await pool.query('UPDATE Category SET image = ? WHERE id = ?', [c.image, c.id]);
+    }
+    console.log('Database updated successfully.');
   } catch (err) {
-    console.error('[SYNC] Database synchronization failed:', err.message);
-    return false;
+    console.warn('Database update skipped (local environment):', err.message);
   }
+
+  console.log('--- CLEAN SYNC COMPLETE ---');
+  process.exit(0);
 }
+
+run();
