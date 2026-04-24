@@ -1,6 +1,6 @@
 {
   "name": "mrt-rebuilt",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "MRT International Modern Rebuild with High-Res Visuals and robust error handling.",
   "type": "module",
   "main": "server/index.js",
