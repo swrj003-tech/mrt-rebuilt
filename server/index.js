@@ -108,29 +108,17 @@ app.get('/api/blog', (req, res) => {
   res.json(cacheService.internalCache.blog || []);
 });
 
-if (!isProduction) {
-  app.get('/api/test-db', async (req, res) => {
+  app.get('/api/debug-admin-html', async (req, res) => {
     try {
-      const [rows] = await pool.query('SELECT 1 + 1 AS result');
-      res.json({ status: 'connected', result: rows[0].result });
-    } catch {
-      res.status(500).json({ status: 'error' });
-    }
-  });
-
-  app.get('/api/debug-db', async (req, res) => {
-    try {
-      const [tables] = await pool.query('SHOW TABLES');
-      const tableNames = tables.map((table) => Object.values(table)[0]);
-      const stats = {};
-      for (const name of tableNames) {
-        if (!/^[A-Za-z0-9_]+$/.test(name)) continue;
-        const [[{ count }]] = await pool.query(`SELECT COUNT(*) as count FROM \`${name}\``);
-        stats[name] = count;
-      }
-      res.json({ tables: stats, env: process.env.NODE_ENV || 'development' });
-    } catch {
-      res.status(500).json({ error: 'Debug check failed' });
+      const fs = await import('fs/promises');
+      const html = await fs.readFile(path.join(distPath, 'admin/index.html'), 'utf-8');
+      res.json({ 
+        html: html.substring(0, 1000), 
+        size: html.length,
+        modified: (await fs.stat(path.join(distPath, 'admin/index.html'))).mtime
+      });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
     }
   });
 }
