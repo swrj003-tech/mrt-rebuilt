@@ -379,7 +379,7 @@ async function renderProducts(main) {
   `;
 
   // --- Direct Event Listeners (Resilient Pattern) ---
-  main.querySelectorAll('.btn-edit-product').forEach(btn => {
+  document.querySelectorAll('.btn-edit-product').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
       const productId = btn.dataset.id;
@@ -389,7 +389,7 @@ async function renderProducts(main) {
     });
   });
 
-  main.querySelectorAll('.btn-delete-product').forEach(btn => {
+  document.querySelectorAll('.btn-delete-product').forEach(btn => {
     btn.addEventListener('click', async (e) => {
       e.preventDefault();
       const productId = btn.dataset.id;

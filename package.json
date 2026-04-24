@@ -1,9 +1,13 @@
 {
   "name": "mrt-rebuilt",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "MRT International Modern Rebuild with High-Res Visuals and robust error handling.",
+  "type": "module",
   "main": "server/index.js",
   "private": true,
+  "engines": {
+    "node": ">=20 <23"
+  },
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "client": "vite",
@@ -19,7 +23,7 @@
     "gsap": "^3.12.5",
     "postcss": "^8.4.47",
     "tailwindcss": "^3.4.13",
-    "vite": "^5.4.8"
+    "vite": "^8.0.10"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -31,7 +35,7 @@
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
     "lenis": "^1.1.14",
-    "multer": "^1.4.5-lts.1",
+    "multer": "^2.0.2",
     "mysql2": "^3.11.3",
     "node-cache": "^5.1.2",
     "sharp": "^0.33.5"
