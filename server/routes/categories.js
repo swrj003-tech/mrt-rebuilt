@@ -2,135 +2,191 @@ import express from 'express';
 import pool from '../db.js';
 import { authMiddleware, adminOnly } from '../middleware/auth.js';
 import { refreshInternalCache } from '../cache_service.js';
+import { cleanString, getColumns, parseJson, quoteId, resolveTables } from '../utils/sql.js';
 
 const router = express.Router();
 
-// Helper: Get table names dynamically
-async function getTables() {
-  const [tables] = await pool.query('SHOW TABLES');
-  const list = tables.map(t => Object.values(t)[0].toLowerCase());
+function slugify(value) {
+  return cleanString(value, 180).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+}
+
+function formatCategory(category) {
   return {
-    category: list.includes('category') ? tables.find(t => Object.values(t)[0].toLowerCase() === 'category')[Object.keys(tables[0])[0]] : 'Category',
-    theme: list.includes('categorytheme') ? tables.find(t => Object.values(t)[0].toLowerCase() === 'categorytheme')[Object.keys(tables[0])[0]] : 'CategoryTheme',
-    product: list.includes('product') ? tables.find(t => Object.values(t)[0].toLowerCase() === 'product')[Object.keys(tables[0])[0]] : 'Product'
+    ...category,
+    theme: {
+      title: category.themeTitle || category.title || category.name,
+      subtitle: category.subtitle,
+      primary: category.primary,
+      secondary: category.secondary,
+      seoTitle: category.seoTitle,
+      seoIntro: category.seoIntro,
+    },
+    _count: { products: category.productCount || 0 },
   };
 }
 
-// Public: List all categories
+async function hasTable(table) {
+  try {
+    await pool.query(`SHOW COLUMNS FROM ${quoteId(table)}`);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 router.get('/', async (req, res) => {
   try {
-    const { category, theme, product } = await getTables();
-    const [categories] = await pool.query(`
-      SELECT c.*, t.title, t.subtitle, t.primary, t.secondary, t.seoTitle, t.seoIntro,
-      (SELECT COUNT(*) FROM ${product} p WHERE p.categoryId = c.id) as productCount
-      FROM ${category} c 
-      LEFT JOIN ${theme} t ON c.id = t.categoryId 
-      ORDER BY c.sortOrder ASC
-    `);
-    
-    // Format to match old Prisma structure for frontend compatibility
-    const formatted = categories.map(c => ({
-      ...c,
-      theme: {
-        title: c.title,
-        subtitle: c.subtitle,
-        primary: c.primary,
-        secondary: c.secondary,
-        seoTitle: c.seoTitle,
-        seoIntro: c.seoIntro
-      },
-      _count: { products: c.productCount }
-    }));
+    const { Category, CategoryTheme, Product } = await resolveTables(pool, ['Category', 'CategoryTheme', 'Product']);
+    const themeExists = await hasTable(CategoryTheme);
+    const productExists = await hasTable(Product);
 
-    res.json(formatted);
+    const themeSelect = themeExists
+      ? ', t.title as themeTitle, t.subtitle, t.primary, t.secondary, t.seoTitle, t.seoIntro'
+      : ', NULL as themeTitle, NULL as subtitle, NULL as primary, NULL as secondary, NULL as seoTitle, NULL as seoIntro';
+    const themeJoin = themeExists ? `LEFT JOIN ${quoteId(CategoryTheme)} t ON c.id = t.categoryId` : '';
+    const productCount = productExists
+      ? `(SELECT COUNT(*) FROM ${quoteId(Product)} p WHERE p.categoryId = c.id) as productCount`
+      : '0 as productCount';
+
+    const [categories] = await pool.query(
+      `SELECT c.*, ${productCount} ${themeSelect}
+       FROM ${quoteId(Category)} c
+       ${themeJoin}
+       ORDER BY c.sortOrder ASC, c.id ASC`
+    );
+
+    res.json(categories.map(formatCategory));
   } catch (err) {
-    console.error('[CATEGORIES] Fetch Error:', err.message);
+    console.error('[CATEGORIES] Fetch failed:', err.message);
     res.status(500).json({ error: 'Server error' });
   }
 });
 
-// Public: Get category by slug with products
 router.get('/:slug', async (req, res) => {
   try {
-    const { category, theme, product } = await getTables();
-    const [rows] = await pool.query(`SELECT * FROM ${category} WHERE slug = ?`, [req.params.slug]);
-    const cat = rows[0];
-    
-    if (!cat) return res.status(404).json({ error: 'Category not found' });
+    const { Category, CategoryTheme, Product } = await resolveTables(pool, ['Category', 'CategoryTheme', 'Product']);
+    const [rows] = await pool.query(`SELECT * FROM ${quoteId(Category)} WHERE slug = ? LIMIT 1`, [cleanString(req.params.slug, 180)]);
+    const category = rows[0];
+    if (!category) return res.status(404).json({ error: 'Category not found' });
 
-    const [themes] = await pool.query(`SELECT * FROM ${theme} WHERE categoryId = ?`, [cat.id]);
-    const [products] = await pool.query(`SELECT * FROM ${product} WHERE categoryId = ? AND isActive = 1 ORDER BY sortOrder ASC`, [cat.id]);
+    let theme = null;
+    if (await hasTable(CategoryTheme)) {
+      const [themes] = await pool.query(`SELECT * FROM ${quoteId(CategoryTheme)} WHERE categoryId = ? LIMIT 1`, [category.id]);
+      theme = themes[0] || null;
+    }
 
-    const result = {
-      ...cat,
-      theme: themes[0] || null,
-      products: products.map(p => ({
-        ...p,
-        keyBenefits: p.keyBenefits ? JSON.parse(p.keyBenefits) : [],
-        tags: p.tags ? JSON.parse(p.tags) : []
-      }))
-    };
+    const [products] = await pool.query(
+      `SELECT * FROM ${quoteId(Product)} WHERE categoryId = ? AND isActive = 1 ORDER BY sortOrder ASC, id DESC`,
+      [category.id]
+    );
 
-    res.json(result);
+    res.json({
+      ...category,
+      theme,
+      products: products.map((product) => ({
+        ...product,
+        keyBenefits: parseJson(product.keyBenefits, []),
+        tags: parseJson(product.tags, []),
+      })),
+    });
   } catch (err) {
+    console.error('[CATEGORIES] Fetch one failed:', err.message);
     res.status(500).json({ error: 'Server error' });
   }
 });
 
-// Admin: Create category
 router.post('/', authMiddleware, adminOnly, async (req, res) => {
   try {
-    const { name, slug, image, sortOrder, theme } = req.body;
-    const finalSlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    const { category, theme: themeTable } = await getTables();
+    const { Category, CategoryTheme } = await resolveTables(pool, ['Category', 'CategoryTheme']);
+    const columns = await getColumns(pool, Category);
+    const name = cleanString(req.body.name, 180);
+    if (!name) return res.status(400).json({ error: 'Category name is required' });
+
+    const payload = {
+      name,
+      slug: slugify(req.body.slug || name),
+      image: cleanString(req.body.image, 500) || null,
+      description: cleanString(req.body.description, 1000) || null,
+      sortOrder: Number.parseInt(req.body.sortOrder, 10) || 0,
+      updatedAt: new Date(),
+    };
+    const keys = Object.keys(payload).filter((key) => columns.has(key));
 
     const [result] = await pool.query(
-      `INSERT INTO ${category} (name, slug, image, sortOrder) VALUES (?, ?, ?, ?)`,
-      [name, finalSlug, image || null, sortOrder || 0]
+      `INSERT INTO ${quoteId(Category)} (${keys.map(quoteId).join(', ')}) VALUES (${keys.map(() => '?').join(', ')})`,
+      keys.map((key) => payload[key])
     );
-    const catId = result.insertId;
 
-    if (theme) {
+    if (req.body.theme && await hasTable(CategoryTheme)) {
+      const theme = req.body.theme;
       await pool.query(
-        `INSERT INTO ${themeTable} (categoryId, title, subtitle, \`primary\`, \`secondary\`, seoTitle, seoIntro) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [catId, theme.title || name, theme.subtitle || '', theme.primary || '#914d00', theme.secondary || '#f28c28', theme.seoTitle || null, theme.seoIntro || null]
+        `INSERT INTO ${quoteId(CategoryTheme)} (categoryId, title, subtitle, ${quoteId('primary')}, ${quoteId('secondary')}, seoTitle, seoIntro)
+         VALUES (?, ?, ?, ?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE title = VALUES(title), subtitle = VALUES(subtitle), ${quoteId('primary')} = VALUES(${quoteId('primary')}), ${quoteId('secondary')} = VALUES(${quoteId('secondary')}), seoTitle = VALUES(seoTitle), seoIntro = VALUES(seoIntro)`,
+        [result.insertId, cleanString(theme.title || name, 180), cleanString(theme.subtitle, 300), cleanString(theme.primary || '#914d00', 50), cleanString(theme.secondary || '#f28c28', 50), cleanString(theme.seoTitle, 180) || null, cleanString(theme.seoIntro, 1000) || null]
       );
     }
 
     refreshInternalCache();
-    res.status(201).json({ id: catId, name, slug: finalSlug });
+    res.status(201).json({ id: result.insertId, name, slug: payload.slug });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('[CATEGORIES] Create failed:', err.message);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
-// Admin: Update category
 router.put('/:id', authMiddleware, adminOnly, async (req, res) => {
   try {
-    const { category } = await getTables();
-    const { name, slug, image, description, theme } = req.body;
-    
+    const id = Number.parseInt(req.params.id, 10);
+    if (!Number.isFinite(id)) return res.status(400).json({ error: 'Invalid category ID' });
+
+    const { Category, CategoryTheme } = await resolveTables(pool, ['Category', 'CategoryTheme']);
+    const columns = await getColumns(pool, Category);
+    const payload = {
+      name: cleanString(req.body.name, 180),
+      slug: slugify(req.body.slug || req.body.name),
+      image: cleanString(req.body.image, 500) || null,
+      description: cleanString(req.body.description, 1000) || null,
+      sortOrder: Number.parseInt(req.body.sortOrder, 10) || 0,
+      updatedAt: new Date(),
+    };
+    const keys = Object.keys(payload).filter((key) => columns.has(key) && payload[key] !== '');
+    if (!keys.length) return res.status(400).json({ error: 'No category fields to update' });
+
     await pool.query(
-      `UPDATE ${category} SET name = ?, slug = ?, image = ?, description = ?, theme = ? WHERE id = ?`,
-      [name, slug, image, description, typeof theme === 'object' ? JSON.stringify(theme) : theme, req.params.id]
+      `UPDATE ${quoteId(Category)} SET ${keys.map((key) => `${quoteId(key)} = ?`).join(', ')} WHERE id = ?`,
+      [...keys.map((key) => payload[key]), id]
     );
-    
+
+    if (req.body.theme && await hasTable(CategoryTheme)) {
+      const theme = req.body.theme;
+      await pool.query(
+        `INSERT INTO ${quoteId(CategoryTheme)} (categoryId, title, subtitle, ${quoteId('primary')}, ${quoteId('secondary')}, seoTitle, seoIntro)
+         VALUES (?, ?, ?, ?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE title = VALUES(title), subtitle = VALUES(subtitle), ${quoteId('primary')} = VALUES(${quoteId('primary')}), ${quoteId('secondary')} = VALUES(${quoteId('secondary')}), seoTitle = VALUES(seoTitle), seoIntro = VALUES(seoIntro)`,
+        [id, cleanString(theme.title || payload.name, 180), cleanString(theme.subtitle, 300), cleanString(theme.primary || '#914d00', 50), cleanString(theme.secondary || '#f28c28', 50), cleanString(theme.seoTitle, 180) || null, cleanString(theme.seoIntro, 1000) || null]
+      );
+    }
+
     refreshInternalCache();
-    res.json({ success: true, id: req.params.id });
+    res.json({ success: true, id });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('[CATEGORIES] Update failed:', err.message);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
-// Admin: Delete category
 router.delete('/:id', authMiddleware, adminOnly, async (req, res) => {
   try {
-    const { category } = await getTables();
-    await pool.query(`DELETE FROM ${category} WHERE id = ?`, [req.params.id]);
+    const id = Number.parseInt(req.params.id, 10);
+    if (!Number.isFinite(id)) return res.status(400).json({ error: 'Invalid category ID' });
+    const { Category } = await resolveTables(pool, ['Category']);
+    await pool.query(`DELETE FROM ${quoteId(Category)} WHERE id = ?`, [id]);
     refreshInternalCache();
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('[CATEGORIES] Delete failed:', err.message);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 

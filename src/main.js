@@ -51,6 +51,7 @@ class MRTApp {
     }
     
     this.setupMobileMenu();
+    this.setupContactForm();
     this.handleScroll();
     this.createQuickViewModal();
     this.syncGlobalNavigation(); // 👈 New: Auto-sync menus
@@ -165,6 +166,49 @@ class MRTApp {
       closeBtn.addEventListener('click', close);
       backdrop.addEventListener('click', close);
     }
+  }
+
+  setupContactForm() {
+    const form = document.getElementById('contact-form');
+    if (!form) return;
+
+    const status = document.getElementById('form-status');
+    const button = form.querySelector('button[type="submit"]');
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const originalText = button?.textContent || 'SEND MESSAGE';
+      if (button) {
+        button.disabled = true;
+        button.textContent = 'SENDING...';
+      }
+      if (status) {
+        status.style.display = 'block';
+        status.textContent = 'Sending your message...';
+      }
+
+      try {
+        const payload = Object.fromEntries(new FormData(form).entries());
+        const response = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || data.success === false) {
+          throw new Error(data.error || 'Unable to send message');
+        }
+        form.reset();
+        if (status) status.textContent = 'Message sent. We will get back to you soon.';
+      } catch (error) {
+        if (status) status.textContent = error.message || 'Message failed. Please email us directly.';
+      } finally {
+        if (button) {
+          button.disabled = false;
+          button.textContent = originalText;
+        }
+      }
+    });
   }
 
   handleScroll() {

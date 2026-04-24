@@ -8,8 +8,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,400;1,600&family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-25..200" rel="stylesheet">
   <script type="module" crossorigin src="/assets/modulepreload-polyfill-EeOZK34R.js"></script>
-  <script type="module" crossorigin src="/assets/main-CbQuetom.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/main-CscGwKRc.css">
+  <script type="module" crossorigin src="/assets/main-CuKpz8wI.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/main-yQ2xMgQW.css">
 </head>
 <body onload="document.body.classList.add('loaded')">
 
@@ -73,12 +73,8 @@
 
         <!-- Blog Grid -->
         <section class="blog-section">
-            <div class="blog-grid" id="blogGrid">
-                <!-- Loading state -->
-                <div class="blog-loading" id="blogLoading">
-                    <span class="material-symbols-outlined" style="font-size: 40px; opacity: 0.3; animation: spin 1s linear infinite;">refresh</span>
-                    <p style="color: var(--muted); margin-top: 1rem;">Loading posts...</p>
-                </div>
+            <div id="blog-posts-container">
+                <!-- Managed by main.js -->
             </div>
 
             <!-- Empty state (hidden by default) -->
@@ -86,17 +82,6 @@
                 <span class="material-symbols-outlined" style="font-size: 64px; color: var(--orange); opacity:0.6;">edit_note</span>
                 <h3>No Articles Yet</h3>
                 <p>Our editorial team is crafting stories for you. <br>Check back soon for insights, guides, and inspiration.</p>
-            </div>
-        </section>
-
-        <!-- Single Post View (hidden, shown via JS) -->
-        <section class="blog-post-view" id="blogPostView" style="display: none;">
-            <div class="blog-post-container">
-                <a href="blog.html" class="blog-back-link">
-                    <span class="material-symbols-outlined">arrow_back</span>
-                    Back to all posts
-                </a>
-                <div id="blogPostContent"></div>
             </div>
         </section>
     </main>
@@ -139,109 +124,6 @@
             <p>&copy; 2026 MRT International Holding LLC. All Rights Reserved.</p>
         </div>
     </footer>
-
-    <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-        // Mobile menu
-        const toggle = document.getElementById('mobileMenuToggle');
-        const nav = document.getElementById('mobileNav');
-        const close = document.getElementById('mobileNavClose');
-        const backdrop = document.getElementById('mobileNavBackdrop');
-        if (toggle) toggle.addEventListener('click', () => nav.classList.add('open'));
-        if (close) close.addEventListener('click', () => nav.classList.remove('open'));
-        if (backdrop) backdrop.addEventListener('click', () => nav.classList.remove('open'));
-
-        // Check if viewing a single post
-        const urlParams = new URLSearchParams(window.location.search);
-        const postSlug = urlParams.get('post');
-
-        if (postSlug) {
-            await loadSinglePost(postSlug);
-        } else {
-            await loadBlogGrid();
-        }
-    });
-
-    async function loadBlogGrid() {
-        const grid = document.getElementById('blogGrid');
-        const loading = document.getElementById('blogLoading');
-        const empty = document.getElementById('blogEmpty');
-        
-        try {
-            const res = await fetch('/api/blog');
-            const posts = await res.json();
-            
-            loading.style.display = 'none';
-
-            if (!posts.length) {
-                empty.style.display = 'flex';
-                return;
-            }
-
-            grid.innerHTML = posts.map((post, i) => `
-                <a href="blog.html?post=${post.slug}" class="blog-card ${i === 0 ? 'blog-card-featured' : ''}">
-                    <div class="blog-card-img">
-                        ${post.coverImage 
-                            ? `<img src="${post.coverImage}" alt="${post.title}" loading="lazy">`
-                            : `<div class="blog-card-img-placeholder"><span class="material-symbols-outlined">article</span></div>`
-                        }
-                    </div>
-                    <div class="blog-card-body">
-                        <div class="blog-card-meta">
-                            <span class="blog-card-author">${post.author || 'MRT Editorial'}</span>
-                            <span class="blog-card-dot">·</span>
-                            <span class="blog-card-date">${new Date(post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                        </div>
-                        <h3 class="blog-card-title">${post.title}</h3>
-                        <p class="blog-card-excerpt">${post.excerpt || ''}</p>
-                        <span class="blog-card-cta">Read More <span class="material-symbols-outlined" style="font-size:16px;">arrow_forward</span></span>
-                    </div>
-                </a>
-            `).join('');
-        } catch (err) {
-            console.error('Blog load error:', err);
-            loading.innerHTML = '<p style="color: #e74c3c;">Failed to load posts. Please try again later.</p>';
-        }
-    }
-
-    async function loadSinglePost(slug) {
-        const heroEl = document.querySelector('.blog-hero');
-        const gridSection = document.querySelector('.blog-section');
-        const postView = document.getElementById('blogPostView');
-        const postContent = document.getElementById('blogPostContent');
-        
-        // Hide grid, show post view
-        if (heroEl) heroEl.style.display = 'none';
-        if (gridSection) gridSection.style.display = 'none';
-        postView.style.display = 'block';
-
-        try {
-            const res = await fetch(`/api/blog/post/${slug}`);
-            if (!res.ok) throw new Error('Post not found');
-            const post = await res.json();
-
-            document.title = `${post.title} — MRT International Blog`;
-
-            postContent.innerHTML = `
-                ${post.coverImage ? `<img src="${post.coverImage}" alt="${post.title}" class="blog-post-cover">` : ''}
-                <div class="blog-post-meta">
-                    <span>${post.author || 'MRT Editorial'}</span>
-                    <span>·</span>
-                    <span>${new Date(post.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
-                </div>
-                <h1 class="blog-post-title">${post.title}</h1>
-                <div class="blog-post-body">${post.content}</div>
-            `;
-        } catch (err) {
-            postContent.innerHTML = `
-                <div style="text-align:center; padding:4rem 0;">
-                    <span class="material-symbols-outlined" style="font-size:64px; color:var(--orange); opacity:0.5;">error</span>
-                    <h3 style="margin-top:1rem; color:var(--ink);">Post Not Found</h3>
-                    <p style="color:var(--muted);">The article you're looking for doesn't exist or has been removed.</p>
-                </div>
-            `;
-        }
-    }
-    </script>
+    
 </body>
 </html>

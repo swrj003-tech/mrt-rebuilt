@@ -1,6 +1,10 @@
 import mysql from 'mysql2/promise';
 import 'dotenv/config';
 
+if (!process.env.DATABASE_URL) {
+  throw new Error('[DB] DATABASE_URL is required. Set it in Hostinger environment variables or .env.');
+}
+
 const url = new URL(process.env.DATABASE_URL);
 
 /**
@@ -8,15 +12,17 @@ const url = new URL(process.env.DATABASE_URL);
  * Bypasses Prisma to avoid binary dependency issues.
  */
 const pool = mysql.createPool({
-  host: '127.0.0.1', // FORCED IPv4 FOR HOSTINGER STABILITY
-  user: url.username,
-  password: url.password,
+  host: url.hostname || '127.0.0.1',
+  port: Number(url.port || 3306),
+  user: decodeURIComponent(url.username),
+  password: decodeURIComponent(url.password),
   database: url.pathname.substring(1),
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
   enableKeepAlive: true,
-  keepAliveInitialDelay: 10000
+  keepAliveInitialDelay: 10000,
+  multipleStatements: false
 });
 
 // Test connection

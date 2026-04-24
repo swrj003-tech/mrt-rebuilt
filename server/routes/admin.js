@@ -1,6 +1,7 @@
 import express from 'express';
 import pool from '../db.js';
 import { authMiddleware, adminOnly } from '../middleware/auth.js';
+import { getColumns, quoteId } from '../utils/sql.js';
 
 const router = express.Router();
 
@@ -16,13 +17,14 @@ async function getTables() {
     product: findTable('Product'),
     category: findTable('Category'),
     click: findTable('AffiliateClick'),
+    review: findTable('Review'),
     sub: findTable('NewsletterSub'),
     testimonial: findTable('Testimonial'),
     message: findTable('ContactMessage')
   };
 }
 
-router.get('/force-sync-products', async (req, res) => {
+router.get('/force-sync-products', authMiddleware, adminOnly, async (req, res) => {
   try {
     const t = await getTables();
     
@@ -113,9 +115,10 @@ router.get('/force-sync-products', async (req, res) => {
       { name: 'Water Bottle', category: 'sports-fitness', badge: "Editor's Choice", url: 'https://amzn.to/41MUm9M', image: '/assets/products/insulated-water-bottle.png', benefit: 'Stay hydrated.' }
     ];
 
+    const productColumns = await getColumns(pool, t.product);
     await pool.query('SET FOREIGN_KEY_CHECKS = 0');
-    await pool.query(`DELETE FROM ${t.product}`);
-    const [cats] = await pool.query(`SELECT id, slug FROM ${t.category}`);
+    await pool.query(`DELETE FROM ${quoteId(t.product)}`);
+    const [cats] = await pool.query(`SELECT id, slug FROM ${quoteId(t.category)}`);
     const catMap = {}; cats.forEach(c => catMap[c.slug.toLowerCase()] = c.id);
 
     for (const p of products) {
@@ -124,8 +127,26 @@ router.get('/force-sync-products', async (req, res) => {
       let slug = p.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
       const isDuplicate = products.filter(x => x.name.toLowerCase() === p.name.toLowerCase()).length > 1;
       if (isDuplicate) slug = `${slug}-${p.category.toLowerCase().split('-')[0]}`;
-      await pool.query(`INSERT INTO ${t.product} (name, slug, description, price, image, categoryId, affiliateUrl, badge, ratingValue, ratingText, shortDescription, keyBenefits) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [p.name, slug, p.benefit, 0, p.image, catId, p.url, p.badge, 4.8, '4.8/5 Recommended', p.benefit, JSON.stringify([p.benefit])]
+      const row = {
+        name: p.name,
+        slug,
+        description: p.benefit,
+        shortBenefit: p.benefit,
+        shortDescription: p.benefit,
+        price: 0,
+        image: p.image,
+        categoryId: catId,
+        affiliateUrl: p.url,
+        badge: p.badge,
+        ratingValue: 4.8,
+        ratingText: '4.8/5 Recommended',
+        keyBenefits: JSON.stringify([p.benefit]),
+        updatedAt: new Date(),
+      };
+      const keys = Object.keys(row).filter(key => productColumns.has(key));
+      await pool.query(
+        `INSERT INTO ${quoteId(t.product)} (${keys.map(quoteId).join(', ')}) VALUES (${keys.map(() => '?').join(', ')})`,
+        keys.map(key => row[key])
       ).catch(() => {});
     }
     await pool.query('SET FOREIGN_KEY_CHECKS = 1');
@@ -133,17 +154,116 @@ router.get('/force-sync-products', async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-router.get('/stats', authMiddleware, async (req, res) => {
+router.get('/stats', authMiddleware, adminOnly, async (req, res) => {
   try {
     const t = await getTables();
-    const [[{ pCount }]] = await pool.query(`SELECT COUNT(*) as pCount FROM ${t.product}`);
-    const [[{ cCount }]] = await pool.query(`SELECT COUNT(*) as cCount FROM ${t.category}`);
-    const [[{ clCount }]] = await pool.query(`SELECT COUNT(*) as clCount FROM ${t.click}`).catch(() => [[{ clCount: 0 }]]);
-    const [[{ sCount }]] = await pool.query(`SELECT COUNT(*) as sCount FROM ${t.sub}`).catch(() => [[{ sCount: 0 }]]);
-    const [[{ mCount }]] = await pool.query(`SELECT COUNT(*) as mCount FROM ${t.message}`).catch(() => [[{ mCount: 0 }]]);
-    const [[{ tCount }]] = await pool.query(`SELECT COUNT(*) as tCount FROM ${t.testimonial}`).catch(() => [[{ tCount: 0 }]]);
-    res.json({ productCount: pCount, categoryCount: cCount, clickCount: clCount, subscriberCount: sCount, testimonialCount: tCount, messageCount: mCount });
+    const [[{ pCount }]] = await pool.query(`SELECT COUNT(*) as pCount FROM ${quoteId(t.product)}`);
+    const [[{ cCount }]] = await pool.query(`SELECT COUNT(*) as cCount FROM ${quoteId(t.category)}`);
+    const [[{ clCount }]] = await pool.query(`SELECT COUNT(*) as clCount FROM ${quoteId(t.click)}`).catch(() => [[{ clCount: 0 }]]);
+    const [[{ sCount }]] = await pool.query(`SELECT COUNT(*) as sCount FROM ${quoteId(t.sub)}`).catch(() => [[{ sCount: 0 }]]);
+    const [[{ mCount }]] = await pool.query(`SELECT COUNT(*) as mCount FROM ${quoteId(t.message)}`).catch(() => [[{ mCount: 0 }]]);
+    const [[{ tCount }]] = await pool.query(`SELECT COUNT(*) as tCount FROM ${quoteId(t.testimonial)}`).catch(() => [[{ tCount: 0 }]]);
+    const [[{ rCount }]] = await pool.query(`SELECT COUNT(*) as rCount FROM ${quoteId(t.review)}`).catch(() => [[{ rCount: 0 }]]);
+    const [recentClicks] = await pool.query(
+      `SELECT c.*, p.name as productName, p.image as productImage
+       FROM ${quoteId(t.click)} c
+       LEFT JOIN ${quoteId(t.product)} p ON p.id = c.productId
+       ORDER BY c.clickedAt DESC
+       LIMIT 10`
+    ).catch(() => [[]]);
+    res.json({
+      productCount: pCount,
+      categoryCount: cCount,
+      clickCount: clCount,
+      subscriberCount: sCount,
+      testimonialCount: tCount,
+      messageCount: mCount,
+      reviewCount: rCount,
+      recentClicks,
+    });
   } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+router.get('/messages', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const t = await getTables();
+    const [messages] = await pool.query(
+      `SELECT * FROM ${quoteId(t.message)} ORDER BY createdAt DESC LIMIT 500`
+    );
+    res.json(messages);
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+router.get('/reviews', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const t = await getTables();
+    const [reviews] = await pool.query(
+      `SELECT r.*, p.name as productName, p.image as productImage
+       FROM ${quoteId(t.review)} r
+       LEFT JOIN ${quoteId(t.product)} p ON p.id = r.productId
+       ORDER BY r.createdAt DESC
+       LIMIT 500`
+    );
+    res.json(reviews.map(review => ({
+      ...review,
+      product: review.productId ? {
+        id: review.productId,
+        name: review.productName,
+        image: review.productImage,
+      } : null,
+    })));
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+router.post('/reviews/:id/verify', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const id = Number.parseInt(req.params.id, 10);
+    if (!Number.isFinite(id)) return res.status(400).json({ error: 'Invalid review ID' });
+    const t = await getTables();
+    await pool.query(`UPDATE ${quoteId(t.review)} SET isVerified = 1 WHERE id = ?`, [id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+router.get('/analytics', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const t = await getTables();
+    const [clicks] = await pool.query(
+      `SELECT c.*, p.name as productName, p.image as productImage
+       FROM ${quoteId(t.click)} c
+       LEFT JOIN ${quoteId(t.product)} p ON p.id = c.productId
+       ORDER BY c.clickedAt DESC
+       LIMIT 100`
+    ).catch(() => [[]]);
+
+    const [categoryDistribution] = await pool.query(
+      `SELECT c.name as categoryId, COUNT(p.id) as _count
+       FROM ${quoteId(t.product)} p
+       LEFT JOIN ${quoteId(t.category)} c ON c.id = p.categoryId
+       GROUP BY c.name
+       ORDER BY _count DESC`
+    ).catch(() => [[]]);
+
+    res.json({
+      clicks: clicks.map(click => ({
+        ...click,
+        product: click.productId ? {
+          id: click.productId,
+          name: click.productName,
+          image: click.productImage,
+        } : null,
+      })),
+      categoryDistribution,
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 export default router;

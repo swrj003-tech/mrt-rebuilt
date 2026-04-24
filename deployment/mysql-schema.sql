@@ -67,13 +67,18 @@ CREATE TABLE IF NOT EXISTS `Product` (
     `slug` VARCHAR(255) NOT NULL UNIQUE,
     `description` TEXT DEFAULT NULL,
     `shortBenefit` VARCHAR(500) DEFAULT NULL,
+    `shortDescription` VARCHAR(500) DEFAULT NULL,
     `price` DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    `originalPrice` DECIMAL(10, 2) DEFAULT NULL,
+    `currency` VARCHAR(10) NOT NULL DEFAULT 'USD',
     `image` VARCHAR(500) DEFAULT NULL,
     `badge` VARCHAR(100) DEFAULT NULL,
     `affiliateUrl` VARCHAR(1000) DEFAULT NULL,
+    `secondaryUrl` VARCHAR(1000) DEFAULT NULL,
     `isActive` BOOLEAN NOT NULL DEFAULT TRUE,
     `sortOrder` INT NOT NULL DEFAULT 0,
     `ratingValue` DECIMAL(3, 2) NOT NULL DEFAULT 5.00,
+    `ratingText` VARCHAR(100) DEFAULT NULL,
     `tags` JSON DEFAULT NULL,
     `keyBenefits` JSON DEFAULT NULL,
     `categoryId` INT NOT NULL,
@@ -108,6 +113,7 @@ CREATE TABLE IF NOT EXISTS `Testimonial` (
     `quote` TEXT DEFAULT NULL,
     `text` TEXT DEFAULT NULL,
     `region` VARCHAR(100) DEFAULT NULL,
+    `isActive` BOOLEAN NOT NULL DEFAULT TRUE,
     `rating` INT NOT NULL DEFAULT 5,
     `sortOrder` INT NOT NULL DEFAULT 1,
     `createdAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -158,6 +164,33 @@ CREATE TABLE IF NOT EXISTS `NewsletterSub` (
     `email` VARCHAR(255) NOT NULL UNIQUE,
     `createdAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     INDEX `idx_newsletter_email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Contact Messages
+CREATE TABLE IF NOT EXISTS `ContactMessage` (
+    `id` VARCHAR(191) NOT NULL PRIMARY KEY,
+    `name` VARCHAR(255) NOT NULL,
+    `email` VARCHAR(255) NOT NULL,
+    `phone` VARCHAR(100) DEFAULT NULL,
+    `subject` VARCHAR(255) DEFAULT NULL,
+    `message` TEXT NOT NULL,
+    `status` VARCHAR(50) NOT NULL DEFAULT 'new',
+    `createdAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX `idx_contact_created` (`createdAt`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Media Library
+CREATE TABLE IF NOT EXISTS `MediaFile` (
+    `id` VARCHAR(191) NOT NULL PRIMARY KEY,
+    `filename` VARCHAR(255) NOT NULL,
+    `originalName` VARCHAR(255) NOT NULL,
+    `mimeType` VARCHAR(100) NOT NULL,
+    `size` INT NOT NULL,
+    `url` VARCHAR(500) NOT NULL,
+    `altText` VARCHAR(255) NOT NULL DEFAULT '',
+    `uploadedBy` VARCHAR(191) DEFAULT NULL,
+    `createdAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX `idx_media_created` (`createdAt`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================

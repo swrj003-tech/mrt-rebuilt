@@ -2,54 +2,65 @@ import express from 'express';
 import pool from '../db.js';
 import { authMiddleware, adminOnly } from '../middleware/auth.js';
 import { refreshInternalCache } from '../cache_service.js';
+import { cleanString, getColumns, quoteId, resolveTable } from '../utils/sql.js';
 
 const router = express.Router();
 
-// Helper: Get table names dynamically
-async function getTables() {
-  const [tables] = await pool.query('SHOW TABLES');
-  const list = tables.map(t => Object.values(t)[0].toLowerCase());
-  return {
-    testimonial: list.includes('testimonial') ? tables.find(t => Object.values(t)[0].toLowerCase() === 'testimonial')[Object.keys(tables[0])[0]] : 'Testimonial'
-  };
-}
-
-// Public: List all active testimonials
 router.get('/', async (req, res) => {
   try {
-    const { testimonial } = await getTables();
-    const [rows] = await pool.query(`SELECT * FROM ${testimonial} WHERE isActive = 1 ORDER BY sortOrder ASC`);
+    const table = await resolveTable(pool, 'Testimonial');
+    const columns = await getColumns(pool, table);
+    const activeWhere = columns.has('isActive') ? 'WHERE isActive = 1' : '';
+    const [rows] = await pool.query(
+      `SELECT * FROM ${quoteId(table)} ${activeWhere} ORDER BY sortOrder ASC, id ASC`
+    );
     res.json(rows);
   } catch (err) {
+    console.error('[TESTIMONIALS] Fetch failed:', err.message);
     res.status(500).json({ error: 'Server error' });
   }
 });
 
-// Admin: Create testimonial
 router.post('/', authMiddleware, adminOnly, async (req, res) => {
   try {
-    const { testimonial } = await getTables();
-    const { name, location, quote, text, region, isActive, sortOrder } = req.body;
+    const table = await resolveTable(pool, 'Testimonial');
+    const columns = await getColumns(pool, table);
+    const payload = {
+      name: cleanString(req.body.name, 180),
+      location: cleanString(req.body.location, 180) || null,
+      quote: cleanString(req.body.quote, 500) || null,
+      text: cleanString(req.body.text, 1000) || null,
+      region: cleanString(req.body.region || 'us', 30),
+      isActive: req.body.isActive === false ? 0 : 1,
+      rating: Number.parseInt(req.body.rating, 10) || 5,
+      sortOrder: Number.parseInt(req.body.sortOrder, 10) || 0,
+    };
+    if (!payload.name) return res.status(400).json({ error: 'Name is required' });
+    const keys = Object.keys(payload).filter((key) => columns.has(key));
+
     const [result] = await pool.query(
-      `INSERT INTO ${testimonial} (name, location, quote, text, region, isActive, sortOrder) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [name, location, quote, text, region || 'us', isActive !== false ? 1 : 0, sortOrder || 0]
+      `INSERT INTO ${quoteId(table)} (${keys.map(quoteId).join(', ')}) VALUES (${keys.map(() => '?').join(', ')})`,
+      keys.map((key) => payload[key])
     );
     refreshInternalCache();
-    res.status(201).json({ id: result.insertId, name });
+    res.status(201).json({ id: result.insertId, name: payload.name });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('[TESTIMONIALS] Create failed:', err.message);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
-// Admin: Delete testimonial
 router.delete('/:id', authMiddleware, adminOnly, async (req, res) => {
   try {
-    const { testimonial } = await getTables();
-    await pool.query(`DELETE FROM ${testimonial} WHERE id = ?`, [req.params.id]);
+    const id = Number.parseInt(req.params.id, 10);
+    if (!Number.isFinite(id)) return res.status(400).json({ error: 'Invalid testimonial ID' });
+    const table = await resolveTable(pool, 'Testimonial');
+    await pool.query(`DELETE FROM ${quoteId(table)} WHERE id = ?`, [id]);
     refreshInternalCache();
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('[TESTIMONIALS] Delete failed:', err.message);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 

@@ -123,8 +123,8 @@ import"./modulepreload-polyfill-EeOZK34R.js";var e=`/api`,t=localStorage.getItem
             <tr>
               <td>
                 <div class="flex gap-1" style="align-items:center">
-                  <img src="${e.product?.image||``}" class="product-thumb" alt="">
-                  <span>${e.product?.name||`Unknown`}</span>
+                  <img src="${e.productImage||e.product?.image||`/assets/placeholder.png`}" class="product-thumb" alt="" onerror="this.src='/assets/placeholder.png'">
+                  <span>${e.productName||e.product?.name||`Unknown`}</span>
                 </div>
               </td>
               <td><span class="badge badge-info">Affiliate Click</span></td>
@@ -134,7 +134,7 @@ import"./modulepreload-polyfill-EeOZK34R.js";var e=`/api`,t=localStorage.getItem
         </tbody>
       </table>
     </div>
-  `)}async function p(e){let t=await r(`/products`),n=await r(`/categories`);if(!t)return;let a=t.products||[];e.innerHTML=`
+  `)}async function p(e){let t=await r(`/products`),n=await r(`/categories`);if(!t)return;let a=t.products||[];window._allProducts=a,e.innerHTML=`
     <div class="page-header">
       <div><h2>Products</h2><div class="subtitle">${t.total||0} products total</div></div>
       <button class="btn btn-primary" id="btn-add-product"><span class="material-symbols-outlined">add</span> Add Product</button>
@@ -145,7 +145,7 @@ import"./modulepreload-polyfill-EeOZK34R.js";var e=`/api`,t=localStorage.getItem
         <tbody>
           ${a.map(e=>`
             <tr>
-              <td><img src="${e.image||``}" class="product-thumb" alt="${e.name}" onerror="this.style.opacity='0.2'"></td>
+              <td><img src="${e.image||`/assets/placeholder.png`}" class="product-thumb" alt="${e.name}" onerror="this.src='/assets/placeholder.png'"></td>
               <td>
                 <strong>${e.name}</strong>
                 <br><span class="text-muted text-sm">${e.slug}</span>
@@ -172,7 +172,7 @@ import"./modulepreload-polyfill-EeOZK34R.js";var e=`/api`,t=localStorage.getItem
         </tbody>
       </table>
     </div>
-  `,document.getElementById(`btn-add-product`)?.addEventListener(`click`,()=>m(null,n)),document.querySelectorAll(`.btn-edit-product`).forEach(e=>e.addEventListener(`click`,()=>{let t=a.find(t=>String(t.id)===String(e.dataset.id));t&&m(t,n)})),document.querySelectorAll(`.btn-delete-product`).forEach(e=>e.addEventListener(`click`,async()=>{if(!confirm(`Delete this product? This cannot be undone.`))return;let t=e.dataset.id;e.disabled=!0,e.innerHTML=`<div class="loading-spinner" style="width:14px;height:14px"></div>`;let n=await r(`/products/${t}`,{method:`DELETE`});if(n?.error){i(`Delete failed: `+n.error,`error`),e.disabled=!1,e.innerHTML=`<span class="material-symbols-outlined">delete</span>`;return}i(`Product deleted`),await d()}))}function m(e,t){let n=!!e,a=document.createElement(`div`);a.className=`modal-overlay`,a.innerHTML=`
+  `,document.querySelectorAll(`.btn-edit-product`).forEach(e=>{e.addEventListener(`click`,t=>{t.preventDefault();let r=e.dataset.id,o=a.find(e=>String(e.id)===String(r));o?m(o,n):i(`Product not found in current list`,`error`)})}),document.querySelectorAll(`.btn-delete-product`).forEach(e=>{e.addEventListener(`click`,async t=>{t.preventDefault();let n=e.dataset.id;if(!confirm(`Are you sure you want to delete this product?`))return;let a=await r(`/products/${n}`,{method:`DELETE`});if(a?.error)return i(`Delete failed: `+a.error,`error`);i(`Product deleted`),d()})}),document.getElementById(`btn-add-product`)?.addEventListener(`click`,()=>{m(null,n)})}function m(e,t){let n=!!e,a=document.createElement(`div`);a.className=`modal-overlay`,a.innerHTML=`
     <div class="modal">
       <div class="modal-header">
         <h3>${n?`Edit Product`:`Add Product`}</h3>
@@ -241,8 +241,8 @@ import"./modulepreload-polyfill-EeOZK34R.js";var e=`/api`,t=localStorage.getItem
           </div>
         </div>
         <div class="form-group">
-          <label>Short Benefit</label>
-          <input type="text" name="shortBenefit" value="${e?.shortBenefit||``}" placeholder="One-line selling point">
+          <label>Short Description</label>
+          <input type="text" name="shortDescription" value="${e?.shortDescription||``}" placeholder="One-line selling point">
         </div>
 
         <!-- ENHANCED IMAGE SECTION with URL Fetch + Upload -->

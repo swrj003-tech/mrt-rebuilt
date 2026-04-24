@@ -1,9 +1,13 @@
 // MRT INTERNATIONAL - Final High-Resilience Entry Point
-// CommonJS Bridge to Consolidated ESM Backend
+// Consolidated ESM Backend Entry Point
 
-const http = require('http');
-const path = require('path');
-const fs = require('fs');
+import http from 'http';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const PORT = process.env.PORT || 3001;
 

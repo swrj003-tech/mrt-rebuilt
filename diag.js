@@ -1,5 +1,5 @@
-// MRT INTERNATIONAL - Diagnostic Mode (CommonJS)
-const http = require('http');
+// MRT INTERNATIONAL - Diagnostic Mode (ESM)
+import http from 'http';
 const PORT = process.env.PORT || 3001;
 
 console.log('--- MRT DIAGNOSTIC MODE ---');

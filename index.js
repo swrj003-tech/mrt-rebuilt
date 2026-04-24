@@ -1,7 +1,11 @@
-// MRT INTERNATIONAL - Alternative Entry Point (CommonJS)
-const http = require('http');
-const path = require('path');
-const fs = require('fs');
+// MRT INTERNATIONAL - Alternative Entry Point (ESM)
+import http from 'http';
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const PORT = process.env.PORT || 3001;
 
@@ -44,7 +48,7 @@ function serveStaticFallback(req, res) {
 const server = http.createServer(async (req, res) => {
   try {
     if (req.url === '/ping' || req.url === '/health') {
-      res.writeHead(200);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
       return res.end(JSON.stringify({ status: expressApp ? 'ready' : 'loading' }));
     }
     const app = await loadExpressApp();

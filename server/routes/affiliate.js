@@ -1,83 +1,59 @@
 import express from 'express';
 import crypto from 'crypto';
-import prisma from '../db.js';
+import pool from '../db.js';
 import { authMiddleware, adminOnly } from '../middleware/auth.js';
+import { clampInt, quoteId, resolveTables } from '../utils/sql.js';
 
 const router = express.Router();
 
-// Public: Track click and redirect
 router.get('/redirect/:productId', async (req, res) => {
   try {
-    const productId = parseInt(req.params.productId);
-    if (isNaN(productId)) return res.status(400).json({ error: 'Invalid product ID' });
+    const productId = Number.parseInt(req.params.productId, 10);
+    if (!Number.isFinite(productId)) return res.status(400).json({ error: 'Invalid product ID' });
 
-    const product = await prisma.product.findUnique({ where: { id: productId } });
+    const tables = await resolveTables(pool, ['Product', 'AffiliateClick']);
+    const [products] = await pool.query(
+      `SELECT id, name, affiliateUrl FROM ${quoteId(tables.Product)} WHERE id = ? AND isActive = 1 LIMIT 1`,
+      [productId]
+    );
+    const product = products[0];
     if (!product) return res.status(404).json({ error: 'Product not found' });
 
-    // AffiliateClick schema fields: productId (Int), ip (String?), userAgent (String?), clickedAt (DateTime)
-    // REMOVED: source, ipHash, sessionId — not in AffiliateClick schema
-    // ipHash → mapped to 'ip' (hashed for privacy)
-    const ipHash = crypto.createHash('sha256').update(req.ip || 'unknown').digest('hex').slice(0, 16);
+    const ipHash = crypto.createHash('sha256').update(req.ip || 'unknown').digest('hex').slice(0, 32);
+    await pool.query(
+      `INSERT INTO ${quoteId(tables.AffiliateClick)} (productId, ip, userAgent) VALUES (?, ?, ?)`,
+      [product.id, ipHash, String(req.headers['user-agent'] || '').slice(0, 500)]
+    ).catch((err) => console.warn('[AFFILIATE] Click tracking failed:', err.message));
 
-    await prisma.affiliateClick.create({
-      data: {
-        productId: product.id,
-        ip: ipHash,                                              // schema field is 'ip', not 'ipHash'
-        userAgent: (req.headers['user-agent'] || '').slice(0, 200),
-        // REMOVED: source    — not in AffiliateClick schema
-        // REMOVED: sessionId — not in AffiliateClick schema
-      },
-    });
-
-    const redirectUrl = product.affiliateUrl
-      || `https://wa.me/?text=I+am+interested+in+${encodeURIComponent(product.name)}`;
-    res.redirect(302, redirectUrl);
+    const fallback = `https://wa.me/?text=I%20am%20interested%20in%20${encodeURIComponent(product.name)}`;
+    res.redirect(302, product.affiliateUrl || fallback);
   } catch (err) {
-    console.error('Affiliate redirect error:', err);
+    console.error('[AFFILIATE] Redirect failed:', err.message);
     res.status(500).json({ error: 'Server error' });
   }
 });
 
-// Admin: Analytics overview
 router.get('/analytics', authMiddleware, adminOnly, async (req, res) => {
   try {
-    const { days = 30 } = req.query;
-    // AffiliateClick only has 'clickedAt', not 'createdAt'
-    const since = new Date(Date.now() - parseInt(days) * 86400000);
-
-    const totalClicks = await prisma.affiliateClick.count({
-      where: { clickedAt: { gte: since } },
-    });
-
-    const topProducts = await prisma.affiliateClick.groupBy({
-      by: ['productId'],
-      _count: { id: true },
-      where: { clickedAt: { gte: since } },
-      orderBy: { _count: { id: 'desc' } },
-      take: 10,
-    });
-
-    const productDetails = await prisma.product.findMany({
-      where: { id: { in: topProducts.map(t => t.productId) } },
-      select: { id: true, name: true, image: true, price: true, badge: true },
-    });
-
-    const dailyClicks = await prisma.affiliateClick.groupBy({
-      by: ['clickedAt'],
-      _count: { id: true },
-      where: { clickedAt: { gte: since } },
-    });
-
-    res.json({
-      totalClicks,
-      topProducts: topProducts.map(t => ({
-        ...productDetails.find(p => p.id === t.productId),
-        clicks: t._count.id,
-      })),
-      dailyClicks,
-    });
+    const days = clampInt(req.query.days, 30, 1, 365);
+    const tables = await resolveTables(pool, ['AffiliateClick', 'Product']);
+    const [topProducts] = await pool.query(
+      `SELECT p.id, p.name, p.image, COUNT(c.id) as clicks
+       FROM ${quoteId(tables.AffiliateClick)} c
+       LEFT JOIN ${quoteId(tables.Product)} p ON p.id = c.productId
+       WHERE c.clickedAt >= DATE_SUB(NOW(), INTERVAL ? DAY)
+       GROUP BY p.id, p.name, p.image
+       ORDER BY clicks DESC
+       LIMIT 10`,
+      [days]
+    );
+    const [[{ totalClicks }]] = await pool.query(
+      `SELECT COUNT(*) as totalClicks FROM ${quoteId(tables.AffiliateClick)} WHERE clickedAt >= DATE_SUB(NOW(), INTERVAL ? DAY)`,
+      [days]
+    );
+    res.json({ totalClicks, topProducts });
   } catch (err) {
-    console.error('Analytics error:', err);
+    console.error('[AFFILIATE] Analytics failed:', err.message);
     res.status(500).json({ error: 'Server error' });
   }
 });

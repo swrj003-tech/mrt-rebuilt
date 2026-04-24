@@ -1,92 +1,94 @@
 import express from 'express';
-import prisma from '../db.js';
+import pool from '../db.js';
+import { cleanString, parseJson, quoteId, resolveTables } from '../utils/sql.js';
 
 const router = express.Router();
 
-// Helper: parse product JSON fields that exist in schema
-function parseProductFields(p) {
+function formatItem(item) {
   return {
-    ...p,
-    keyBenefits: safeJsonParse(p.keyBenefits, []),
-    tags: safeJsonParse(p.tags, []),
-    // REMOVED: pros / cons — not on Product model
+    ...item,
+    product: item.productId ? {
+      id: item.productId,
+      name: item.productName,
+      slug: item.productSlug,
+      image: item.productImage,
+      price: item.productPrice,
+      affiliateUrl: item.affiliateUrl,
+      keyBenefits: parseJson(item.keyBenefits, []),
+      tags: parseJson(item.tags, []),
+      category: { slug: item.categorySlug, name: item.categoryName },
+    } : null,
   };
 }
 
-function safeJsonParse(val, fallback) {
-  try { return val ? JSON.parse(val) : fallback; } catch { return fallback; }
-}
-
-// GET /api/comparison?sid=<deviceId>
 router.get('/', async (req, res) => {
   try {
-    // NOTE: Schema uses 'deviceId', not 'sessionId'. The frontend 'sid' query
-    // param is treated as deviceId throughout this router.
-    const deviceId = req.query.sid;
+    const deviceId = cleanString(req.query.sid, 191);
     if (!deviceId) return res.json([]);
-
-    const items = await prisma.comparisonItem.findMany({
-      where: { deviceId },
-      include: {
-        product: {
-          include: { category: { select: { slug: true, name: true } } },
-        },
-      },
-    });
-
-    items.forEach(item => {
-      item.product = parseProductFields(item.product);
-    });
-
-    res.json(items);
+    const tables = await resolveTables(pool, ['ComparisonItem', 'Product', 'Category']);
+    const [items] = await pool.query(
+      `SELECT ci.*, p.name as productName, p.slug as productSlug, p.image as productImage, p.price as productPrice,
+        p.affiliateUrl, p.keyBenefits, p.tags, c.slug as categorySlug, c.name as categoryName
+       FROM ${quoteId(tables.ComparisonItem)} ci
+       LEFT JOIN ${quoteId(tables.Product)} p ON p.id = ci.productId
+       LEFT JOIN ${quoteId(tables.Category)} c ON c.id = p.categoryId
+       WHERE ci.deviceId = ?
+       ORDER BY ci.createdAt DESC`,
+      [deviceId]
+    );
+    res.json(items.map(formatItem));
   } catch (err) {
+    console.error('[COMPARISON] Fetch failed:', err.message);
     res.status(500).json({ error: 'Server error' });
   }
 });
 
-// POST /api/comparison
 router.post('/', async (req, res) => {
   try {
-    // Accept either sessionId or deviceId from frontend
-    const deviceId = req.body.sessionId || req.body.deviceId;
-    const productId = parseInt(req.body.productId);
-
-    if (!deviceId || isNaN(productId)) {
-      return res.status(400).json({ error: 'deviceId (or sessionId) and productId required' });
+    const deviceId = cleanString(req.body.sessionId || req.body.deviceId, 191);
+    const productId = Number.parseInt(req.body.productId, 10);
+    if (!deviceId || !Number.isFinite(productId)) {
+      return res.status(400).json({ error: 'deviceId and productId required' });
     }
 
-    const count = await prisma.comparisonItem.count({ where: { deviceId } });
+    const tables = await resolveTables(pool, ['ComparisonItem']);
+    const [[{ count }]] = await pool.query(
+      `SELECT COUNT(*) as count FROM ${quoteId(tables.ComparisonItem)} WHERE deviceId = ?`,
+      [deviceId]
+    );
     if (count >= 4) return res.status(400).json({ error: 'Maximum 4 products for comparison' });
 
-    // Use findFirst + create instead of upsert (schema has no @@unique on deviceId+productId)
-    const existing = await prisma.comparisonItem.findFirst({
-      where: { deviceId, productId },
-    });
+    const [existing] = await pool.query(
+      `SELECT * FROM ${quoteId(tables.ComparisonItem)} WHERE deviceId = ? AND productId = ? LIMIT 1`,
+      [deviceId, productId]
+    );
+    if (existing[0]) return res.status(201).json(existing[0]);
 
-    if (existing) return res.status(201).json(existing);
-
-    const item = await prisma.comparisonItem.create({
-      data: { deviceId, productId },
-    });
-    res.status(201).json(item);
+    const [result] = await pool.query(
+      `INSERT INTO ${quoteId(tables.ComparisonItem)} (deviceId, productId) VALUES (?, ?)`,
+      [deviceId, productId]
+    );
+    res.status(201).json({ id: result.insertId, deviceId, productId });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('[COMPARISON] Create failed:', err.message);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
-// DELETE /api/comparison/:productId?sid=<deviceId>
 router.delete('/:productId', async (req, res) => {
   try {
-    const deviceId = req.query.sid;
-    const productId = parseInt(req.params.productId);
-
-    if (!deviceId) return res.status(400).json({ error: 'sid required' });
-    if (isNaN(productId)) return res.status(400).json({ error: 'Invalid product ID' });
-
-    await prisma.comparisonItem.deleteMany({ where: { deviceId, productId } });
+    const deviceId = cleanString(req.query.sid, 191);
+    const productId = Number.parseInt(req.params.productId, 10);
+    if (!deviceId || !Number.isFinite(productId)) return res.status(400).json({ error: 'Invalid request' });
+    const tables = await resolveTables(pool, ['ComparisonItem']);
+    await pool.query(
+      `DELETE FROM ${quoteId(tables.ComparisonItem)} WHERE deviceId = ? AND productId = ?`,
+      [deviceId, productId]
+    );
     res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('[COMPARISON] Delete failed:', err.message);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 

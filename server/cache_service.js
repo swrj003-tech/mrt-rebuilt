@@ -77,10 +77,12 @@ export async function refreshInternalCache() {
     try {
       const pPath = path.join(process.cwd(), 'public', 'api', 'products.json');
       const raw = await fs.readFile(pPath, 'utf8');
-      const data = JSON.parse(raw);
+      const data = JSON.parse(raw.replace(/^\uFEFF/, ''));
       // Ensure we extract the products array if it's wrapped in an object
       internalCache.products = Array.isArray(data) ? data : (data.products || []);
       internalCache.categories = data.categories || [];
+      internalCache.testimonials = data.testimonials || [];
+      internalCache.blog = data.blog || [];
       console.log(`[CACHE] Fail-over loaded: ${internalCache.products.length} products from JSON`);
     } catch (fsErr) {
       console.error('[CACHE] Critical: Static products.json also missing.');
