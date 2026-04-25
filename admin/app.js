@@ -505,7 +505,11 @@ function showProductModal(product, categories) {
         </div>
         <div class="form-group">
           <label>Key Benefits (one per line)</label>
-          <textarea name="keyBenefits" placeholder="Fast charging&#10;Compact design&#10;Universal compatibility">${(product?.keyBenefits || []).join('\n')}</textarea>
+          <textarea name="keyBenefits" placeholder="Fast charging&#10;Compact design&#10;Universal compatibility">${(() => {
+            let b = product?.keyBenefits || [];
+            if (typeof b === 'string' && b.startsWith('[')) { try { b = JSON.parse(b); } catch(e) { b = [b]; } }
+            return Array.isArray(b) ? b.join('\n') : b;
+          })()}</textarea>
         </div>
 
         <div class="modal-actions">

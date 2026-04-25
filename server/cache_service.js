@@ -61,7 +61,22 @@ export async function refreshInternalCache() {
       try { blog = (await pool.query(`SELECT * FROM ${blogTable} WHERE isPublished = 1 ORDER BY createdAt DESC`))[0]; } catch(e) { console.warn('BlogPost table not found or empty'); }
 
       return {
-        products: products.map(p => ({ ...p, category: { slug: p.cat_slug, name: p.cat_name } })),
+        products: products.map(p => {
+          let benefits = p.keyBenefits;
+          if (typeof benefits === 'string') {
+            try { benefits = JSON.parse(benefits); } catch(e) { benefits = []; }
+          }
+          let tags = p.tags;
+          if (typeof tags === 'string') {
+            try { tags = JSON.parse(tags); } catch(e) { tags = []; }
+          }
+          return { 
+            ...p, 
+            keyBenefits: Array.isArray(benefits) ? benefits : [],
+            tags: Array.isArray(tags) ? tags : [],
+            category: { slug: p.cat_slug, name: p.cat_name } 
+          };
+        }),
         categories: categoriesWithCount,
         testimonials,
         blog
