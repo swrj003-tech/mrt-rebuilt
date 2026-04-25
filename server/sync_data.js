@@ -1,5 +1,5 @@
-
-import pool from './server/db.js';
+import path from 'path';
+import pool from './db.js';
 
 const mapping = {
   // Category 1: Home & Kitchen
