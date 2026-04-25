@@ -100,13 +100,7 @@ app.get('/api/products', (req, res) => {
   });
 });
 
-app.get('/api/testimonials', (req, res) => {
-  res.json(cacheService.internalCache.testimonials || []);
-});
-
-app.get('/api/blog', (req, res) => {
-  res.json(cacheService.internalCache.blog || []);
-});
+// Endpoints now handled by routers below
 
 if (!isProduction) {
   app.get('/api/test-db', async (req, res) => {
@@ -130,7 +124,7 @@ app.get('/health', async (req, res) => {
   res.json({
     status: cacheService.internalCache.status === 'ready' ? 'ready' : 'degraded',
     node: process.version,
-    deployedAt: '2026-04-25T16:35:00Z'
+    deployedAt: '2026-04-25T16:45:00Z'
   });
 });
 

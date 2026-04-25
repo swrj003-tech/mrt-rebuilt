@@ -784,8 +784,7 @@ function showCategoryModal(cat) {
 async function renderBlog(main) {
   const data = await api('/blog/admin/all');
   if (!data) return;
-  
-  main.innerHTML = `
+  window._allBlogPosts = data;
     <div class="page-header">
       <div><h2>Blog Posts</h2><div class="subtitle">${data.length} posts total</div></div>
       <button class="btn btn-primary" id="btn-add-blog"><span class="material-symbols-outlined">add</span> Add Post</button>
@@ -818,20 +817,7 @@ async function renderBlog(main) {
     </div>
   `;
 
-  document.getElementById('btn-add-blog')?.addEventListener('click', () => showBlogModal(null));
-  document.querySelectorAll('.btn-edit-blog').forEach(b => b.addEventListener('click', () => {
-    const post = data.find(x => String(x.id) === String(b.dataset.id));
-    if (post) showBlogModal(post);
-  }));
-
-  document.querySelectorAll('.btn-delete-blog').forEach(b => b.addEventListener('click', async () => {
-    if (!confirm('Delete this blog post?')) return;
-    b.disabled = true;
-    b.innerHTML = '<div class="loading-spinner" style="width:14px;height:14px"></div>';
-    const res = await api(`/blog/${b.dataset.id}`, { method: 'DELETE' });
-    if (res?.error) { toast('Delete failed: ' + res.error, 'error'); b.disabled = false; b.innerHTML = '<span class="material-symbols-outlined">delete</span>'; return; }
-    toast('Post deleted'); await renderView();
-  }));
+  // Listeners moved to global delegator
 }
 
 function showBlogModal(post) {
@@ -927,50 +913,7 @@ async function renderTestimonials(main) {
     </div>
   `;
 
-  document.querySelectorAll('.btn-del-test').forEach(b => b.addEventListener('click', async () => {
-    if (!confirm('Delete?')) return;
-    const res = await api(`/testimonials/${b.dataset.id}`, { method: 'DELETE' });
-    if (res?.error) { toast('Delete failed', 'error'); return; }
-    toast('Deleted'); renderView();
-  }));
-
-  document.getElementById('btn-add-test')?.addEventListener('click', () => {
-    const overlay = document.createElement('div');
-    overlay.className = 'modal-overlay';
-    overlay.innerHTML = `
-      <div class="modal">
-        <div class="modal-header">
-          <h3>Add Testimonial</h3>
-          <button class="modal-close-btn" id="modal-close-x" type="button"><span class="material-symbols-outlined">close</span></button>
-        </div>
-        <form id="test-form">
-          <div class="grid-2">
-            <div class="form-group"><label>Name</label><input type="text" name="name" required placeholder="John Doe"></div>
-            <div class="form-group"><label>Location</label><input type="text" name="location" required placeholder="Dubai, UAE"></div>
-          </div>
-          <div class="grid-2">
-            <div class="form-group"><label>Region</label><select name="region"><option value="us">US</option><option value="ae">UAE</option></select></div>
-            <div class="form-group"><label>Quote Title</label><input type="text" name="quote" placeholder="Great product!"></div>
-          </div>
-          <div class="form-group"><label>Review Text</label><textarea name="text" required placeholder="Customer's review text..."></textarea></div>
-          <div class="modal-actions">
-            <button type="button" class="btn btn-secondary" id="modal-cancel">Cancel</button>
-            <button type="submit" class="btn btn-primary">Create</button>
-          </div>
-        </form>
-      </div>
-    `;
-    document.body.appendChild(overlay);
-    overlay.querySelector('#modal-cancel').addEventListener('click', () => overlay.remove());
-    overlay.querySelector('#modal-close-x').addEventListener('click', () => overlay.remove());
-    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
-    overlay.querySelector('#test-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const body = Object.fromEntries(new FormData(e.target).entries());
-      await api('/testimonials', { method: 'POST', body: JSON.stringify(body) });
-      toast('Created'); overlay.remove(); renderView();
-    });
-  });
+  // Listeners moved to global delegator
 }
 
 // === Newsletter ===
@@ -999,12 +942,7 @@ async function renderNewsletter(main) {
     </div>
   `;
 
-  document.querySelectorAll('.btn-del-sub').forEach(b => b.addEventListener('click', async () => {
-    if (!confirm('Remove subscriber?')) return;
-    const res = await api(`/newsletter/subscribers/${b.dataset.id}`, { method: 'DELETE' });
-    if (res?.error) { toast('Remove failed', 'error'); return; }
-    toast('Subscriber removed'); renderView();
-  }));
+  // Listeners moved to global delegator
 }
 
 async function loadMessages() {
@@ -1139,17 +1077,7 @@ async function renderReviews(main) {
     </div>
   `;
 
-  document.querySelectorAll('.btn-verify-review').forEach(b => b.addEventListener('click', async () => {
-    await api(`/admin/reviews/${b.dataset.id}/verify`, { method: 'POST' });
-    toast('Review verified'); renderView();
-  }));
-
-  document.querySelectorAll('.btn-delete-review').forEach(b => b.addEventListener('click', async () => {
-    if (!confirm('Delete this review?')) return;
-    const res = await api(`/reviews/${b.dataset.id}`, { method: 'DELETE' });
-    if (res?.error) { toast('Delete failed', 'error'); return; }
-    toast('Review deleted'); renderView();
-  }));
+  // Listeners moved to global delegator
 }
 
 // === Drag & Drop Upload Support ===
@@ -1329,6 +1257,80 @@ document.addEventListener('click', async (e) => {
       const res = await api(`/reviews/${deleteReviewBtn.dataset.id}`, { method: 'DELETE' });
       if (res?.error) return toast(res.error, 'error');
       toast('Review deleted');
+      renderView();
+      return;
+    }
+
+    // 4. BLOG ACTIONS
+    const editBlogBtn = target.closest('.btn-edit-blog');
+    if (editBlogBtn) {
+      const post = (window._allBlogPosts || []).find(x => String(x.id) === String(editBlogBtn.dataset.id));
+      if (post) showBlogModal(post);
+      return;
+    }
+
+    const deleteBlogBtn = target.closest('.btn-delete-blog');
+    if (deleteBlogBtn) {
+      if (!await customConfirm('Delete this blog post?')) return;
+      const res = await api(`/blog/${deleteBlogBtn.dataset.id}`, { method: 'DELETE' });
+      if (res?.error) return toast(res.error, 'error');
+      toast('Blog post deleted');
+      renderView();
+      return;
+    }
+
+    const addBlogBtn = target.closest('#btn-add-blog');
+    if (addBlogBtn) {
+      showBlogModal(null);
+      return;
+    }
+
+    // 5. TESTIMONIAL ACTIONS
+    const deleteTestBtn = target.closest('.btn-del-test');
+    if (deleteTestBtn) {
+      if (!await customConfirm('Delete this testimonial?')) return;
+      const res = await api(`/testimonials/${deleteTestBtn.dataset.id}`, { method: 'DELETE' });
+      if (res?.error) return toast(res.error, 'error');
+      toast('Testimonial deleted');
+      renderView();
+      return;
+    }
+
+    const addTestBtn = target.closest('#btn-add-test');
+    if (addTestBtn) {
+      const overlay = document.createElement('div');
+      overlay.className = 'modal-overlay';
+      overlay.innerHTML = `
+        <div class="modal">
+          <div class="modal-header"><h3>Add Testimonial</h3><button class="modal-close-btn" id="modal-close-x" type="button"><span class="material-symbols-outlined">close</span></button></div>
+          <form id="test-form">
+            <div class="grid-2"><div class="form-group"><label>Name</label><input type="text" name="name" required placeholder="John Doe"></div><div class="form-group"><label>Location</label><input type="text" name="location" required placeholder="Dubai, UAE"></div></div>
+            <div class="grid-2"><div class="form-group"><label>Region</label><select name="region"><option value="us">US</option><option value="ae">UAE</option></select></div><div class="form-group"><label>Quote Title</label><input type="text" name="quote" placeholder="Great product!"></div></div>
+            <div class="form-group"><label>Review Text</label><textarea name="text" required placeholder="Customer's review text..."></textarea></div>
+            <div class="modal-actions"><button type="button" class="btn btn-secondary" id="modal-cancel">Cancel</button><button type="submit" class="btn btn-primary">Create</button></div>
+          </form>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+      const close = () => overlay.remove();
+      overlay.querySelector('#modal-cancel').addEventListener('click', close);
+      overlay.querySelector('#modal-close-x').addEventListener('click', close);
+      overlay.querySelector('#test-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const body = Object.fromEntries(new FormData(e.target).entries());
+        await api('/testimonials', { method: 'POST', body: JSON.stringify(body) });
+        toast('Created'); close(); renderView();
+      });
+      return;
+    }
+
+    // 6. NEWSLETTER ACTIONS
+    const deleteSubBtn = target.closest('.btn-del-sub');
+    if (deleteSubBtn) {
+      if (!await customConfirm('Remove this subscriber?')) return;
+      const res = await api(`/newsletter/subscribers/${deleteSubBtn.dataset.id}`, { method: 'DELETE' });
+      if (res?.error) return toast(res.error, 'error');
+      toast('Subscriber removed');
       renderView();
       return;
     }
