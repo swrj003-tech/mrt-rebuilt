@@ -130,7 +130,7 @@ app.get('/health', async (req, res) => {
   res.json({
     status: cacheService.internalCache.status === 'ready' ? 'ready' : 'degraded',
     node: process.version,
-    deployedAt: '2026-04-25T16:20:00Z'
+    deployedAt: '2026-04-25T16:35:00Z'
   });
 });
 

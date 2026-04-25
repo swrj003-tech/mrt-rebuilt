@@ -180,13 +180,27 @@ router.delete('/:id', authMiddleware, adminOnly, async (req, res) => {
   try {
     const id = Number.parseInt(req.params.id, 10);
     if (!Number.isFinite(id)) return res.status(400).json({ error: 'Invalid category ID' });
-    const { Category } = await resolveTables(pool, ['Category']);
+    
+    const { Category, Product, CategoryTheme } = await resolveTables(pool, ['Category', 'Product', 'CategoryTheme']);
+    
+    // 1. Delete associated products
+    if (await hasTable(Product)) {
+      await pool.query(`DELETE FROM ${quoteId(Product)} WHERE categoryId = ?`, [id]);
+    }
+    
+    // 2. Delete associated theme
+    if (await hasTable(CategoryTheme)) {
+      await pool.query(`DELETE FROM ${quoteId(CategoryTheme)} WHERE categoryId = ?`, [id]);
+    }
+
+    // 3. Delete category itself
     await pool.query(`DELETE FROM ${quoteId(Category)} WHERE id = ?`, [id]);
+    
     refreshInternalCache();
     res.json({ success: true });
   } catch (err) {
     console.error('[CATEGORIES] Delete failed:', err.message);
-    res.status(500).json({ error: 'Server error' });
+    res.status(500).json({ error: 'Server error: ' + err.message });
   }
 });
 
