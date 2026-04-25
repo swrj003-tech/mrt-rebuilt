@@ -453,7 +453,7 @@ function showProductModal(product, categories) {
           <div class="form-group">
             <label>Category</label>
             <select name="categoryId" required>
-              ${(categories || []).map(c => `<option value="${c.id}" ${product?.categoryId === c.id ? 'selected' : ''}>${c.name}</option>`).join('')}
+              ${(Array.isArray(categories) ? categories : []).map(c => `<option value="${c.id}" ${product?.categoryId === c.id ? 'selected' : ''}>${c.name}</option>`).join('')}
             </select>
           </div>
           <div class="form-group">
@@ -1242,79 +1242,95 @@ function customConfirm(message) {
 document.addEventListener('click', async (e) => {
   const target = e.target;
   
-  // 1. PRODUCT ACTIONS
-  const editProdBtn = target.closest('.btn-edit-product');
-  if (editProdBtn) {
-    const p = (window._allProducts || []).find(x => String(x.id) === String(editProdBtn.dataset.id));
-    if (p) {
-      const cats = await api('/categories');
-      showProductModal(p, cats);
+  try {
+    // 1. PRODUCT ACTIONS
+    const editProdBtn = target.closest('.btn-edit-product');
+    if (editProdBtn) {
+      const productId = editProdBtn.dataset.id;
+      const p = (window._allProducts || []).find(x => String(x.id) === String(productId));
+      if (p) {
+        const cats = await api('/categories');
+        if (cats && !cats.error) {
+          showProductModal(p, cats);
+        } else {
+          toast('Failed to load categories', 'error');
+        }
+      } else {
+        console.warn('Product not found in window._allProducts:', productId);
+      }
+      return;
     }
-    return;
-  }
 
-  const deleteProdBtn = target.closest('.btn-delete-product');
-  if (deleteProdBtn) {
-    if (!await customConfirm('Are you sure you want to delete this product?')) return;
-    deleteProdBtn.disabled = true;
-    const res = await api(`/products/${deleteProdBtn.dataset.id}`, { method: 'DELETE' });
-    if (res?.error) { toast(res.error, 'error'); deleteProdBtn.disabled = false; return; }
-    toast('Product deleted');
-    renderView();
-    return;
-  }
+    const deleteProdBtn = target.closest('.btn-delete-product');
+    if (deleteProdBtn) {
+      if (!await customConfirm('Are you sure you want to delete this product?')) return;
+      deleteProdBtn.disabled = true;
+      const res = await api(`/products/${deleteProdBtn.dataset.id}`, { method: 'DELETE' });
+      if (res?.error) { toast(res.error, 'error'); deleteProdBtn.disabled = false; return; }
+      toast('Product deleted');
+      renderView();
+      return;
+    }
 
-  const addProdBtn = target.closest('#btn-add-product');
-  if (addProdBtn) {
-    const cats = await api('/categories');
-    showProductModal(null, cats);
-    return;
-  }
+    const addProdBtn = target.closest('#btn-add-product');
+    if (addProdBtn) {
+      const cats = await api('/categories');
+      if (cats && !cats.error) {
+        showProductModal(null, cats);
+      } else {
+        toast('Failed to load categories', 'error');
+      }
+      return;
+    }
 
-  // 2. CATEGORY ACTIONS
-  const editCatBtn = target.closest('.btn-edit-cat');
-  if (editCatBtn) {
-    const cats = await api('/categories');
-    const c = (cats || []).find(x => String(x.id) === String(editCatBtn.dataset.id));
-    if (c) showCategoryModal(c);
-    return;
-  }
+    // 2. CATEGORY ACTIONS
+    const editCatBtn = target.closest('.btn-edit-cat');
+    if (editCatBtn) {
+      const cats = await api('/categories');
+      const c = (Array.isArray(cats) ? cats : []).find(x => String(x.id) === String(editCatBtn.dataset.id));
+      if (c) showCategoryModal(c);
+      return;
+    }
 
-  const deleteCatBtn = target.closest('.btn-delete-cat');
-  if (deleteCatBtn) {
-    if (!await customConfirm('Delete this category? This will also remove all associated products.')) return;
-    deleteCatBtn.disabled = true;
-    const res = await api(`/categories/${deleteCatBtn.dataset.id}`, { method: 'DELETE' });
-    if (res?.error) { toast(res.error, 'error'); deleteCatBtn.disabled = false; return; }
-    toast('Category deleted');
-    renderView();
-    return;
-  }
+    const deleteCatBtn = target.closest('.btn-delete-cat');
+    if (deleteCatBtn) {
+      if (!await customConfirm('Delete this category? This will also remove all associated products.')) return;
+      deleteCatBtn.disabled = true;
+      const res = await api(`/categories/${deleteCatBtn.dataset.id}`, { method: 'DELETE' });
+      if (res?.error) { toast(res.error, 'error'); deleteCatBtn.disabled = false; return; }
+      toast('Category deleted');
+      renderView();
+      return;
+    }
 
-  const addCatBtn = target.closest('#btn-add-cat');
-  if (addCatBtn) {
-    showCategoryModal(null);
-    return;
-  }
+    const addCatBtn = target.closest('#btn-add-cat');
+    if (addCatBtn) {
+      showCategoryModal(null);
+      return;
+    }
 
-  // 3. REVIEW ACTIONS
-  const verifyReviewBtn = target.closest('.btn-verify-review');
-  if (verifyReviewBtn) {
-    const res = await api(`/admin/reviews/${verifyReviewBtn.dataset.id}/verify`, { method: 'POST' });
-    if (res?.error) return toast(res.error, 'error');
-    toast('Review verified');
-    renderView();
-    return;
-  }
+    // 3. REVIEW ACTIONS
+    const verifyReviewBtn = target.closest('.btn-verify-review');
+    if (verifyReviewBtn) {
+      const res = await api(`/admin/reviews/${verifyReviewBtn.dataset.id}/verify`, { method: 'POST' });
+      if (res?.error) return toast(res.error, 'error');
+      toast('Review verified');
+      renderView();
+      return;
+    }
 
-  const deleteReviewBtn = target.closest('.btn-delete-review');
-  if (deleteReviewBtn) {
-    if (!await customConfirm('Delete this review?')) return;
-    const res = await api(`/reviews/${deleteReviewBtn.dataset.id}`, { method: 'DELETE' });
-    if (res?.error) return toast(res.error, 'error');
-    toast('Review deleted');
-    renderView();
-    return;
+    const deleteReviewBtn = target.closest('.btn-delete-review');
+    if (deleteReviewBtn) {
+      if (!await customConfirm('Delete this review?')) return;
+      const res = await api(`/reviews/${deleteReviewBtn.dataset.id}`, { method: 'DELETE' });
+      if (res?.error) return toast(res.error, 'error');
+      toast('Review deleted');
+      renderView();
+      return;
+    }
+  } catch (err) {
+    console.error('Global Click Delegator Error:', err);
+    toast('An unexpected error occurred', 'error');
   }
 });
 
