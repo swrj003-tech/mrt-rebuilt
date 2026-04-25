@@ -83,7 +83,7 @@ app.get('/api/categories', (req, res) => {
 });
 
 app.get('/api/products', (req, res) => {
-  const { category, search, limit = 50 } = req.query;
+  const { category, search, limit = 1000 } = req.query;
   let products = cacheService.internalCache.products || [];
 
   if (category) products = products.filter((p) => p.category && p.category.slug === category);
@@ -92,7 +92,7 @@ app.get('/api/products', (req, res) => {
     products = products.filter((p) => String(p.name || '').toLowerCase().includes(query));
   }
 
-  const safeLimit = Math.min(Math.max(Number.parseInt(limit, 10) || 50, 1), 200);
+  const safeLimit = Math.min(Math.max(Number.parseInt(limit, 10) || 1000, 1), 1000);
   res.json({
     products: products.slice(0, safeLimit),
     total: products.length,
@@ -130,7 +130,7 @@ app.get('/health', async (req, res) => {
   res.json({
     status: cacheService.internalCache.status === 'ready' ? 'ready' : 'degraded',
     node: process.version,
-    deployedAt: '2026-04-25T15:35:00Z'
+    deployedAt: '2026-04-25T16:15:00Z'
   });
 });
 

@@ -343,7 +343,7 @@ async function renderDashboard(main) {
 
 // === Products ===
 async function renderProducts(main) {
-  const data = await api('/products');
+  const data = await api('/products?limit=1000');
   const cats = await api('/categories');
   if (!data) return;
   const products = data.products || [];
