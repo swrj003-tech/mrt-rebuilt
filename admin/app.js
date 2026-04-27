@@ -1192,8 +1192,6 @@ function initDragAndDrop(dropzone, onUpload) {
   });
 }
 
-<<<<<<< HEAD
-=======
 // === EDIT REVIEW MODAL ===
 function showEditReviewModal(review) {
   const overlay = document.createElement('div');
@@ -1261,7 +1259,6 @@ function showEditReviewModal(review) {
   });
 }
 
->>>>>>> c7256ed (pushing changes made by codex - including CMS fixes, product display updates, and data sync scripts)
 // === CUSTOM ASYNC CONFIRM MODAL ===
 function customConfirm(message) {
   return new Promise((resolve) => {

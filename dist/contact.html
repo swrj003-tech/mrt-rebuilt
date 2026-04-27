@@ -5,108 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Contact Us | MRT International</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,400;1,600&family=Inter:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@300,0..1&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@300,0..1&display=swap" rel="stylesheet">
   <script type="module" crossorigin src="/assets/modulepreload-polyfill-EeOZK34R.js"></script>
-<<<<<<< HEAD
-  <script type="module" crossorigin src="/assets/main-CuKpz8wI.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/main-yQ2xMgQW.css">
-</head>
-<body onload="document.body.classList.add('loaded')">
-
-    <header class="mrt-nav">
-        <a href="index.html" class="mrt-nav-logo">MRT International</a>
-        <nav class="mrt-nav-links">
-            <a href="index.html">Home</a>
-            <a href="categories.html">Shop / Collections</a>
-            <div class="nav-dropdown-container">
-                <a href="categories.html" style="display:flex;align-items:center;gap:3px;">
-                    Categories <span class="material-symbols-outlined" style="font-size:17px;">expand_more</span>
-                </a>
-                <div class="nav-dropdown">
-                    <a href="category.html?c=home-kitchen"         class="nav-dropdown-item">Home &amp; Kitchen</a>
-                    <a href="category.html?c=beauty-personal-care" class="nav-dropdown-item">Beauty &amp; Personal Care</a>
-                    <a href="category.html?c=health-wellness"      class="nav-dropdown-item">Health &amp; Wellness</a>
-                    <a href="category.html?c=pet-supplies"         class="nav-dropdown-item">Pet Supplies</a>
-                    <a href="category.html?c=baby-kids-essentials" class="nav-dropdown-item">Baby &amp; Kids Essentials</a>
-                    <a href="category.html?c=electronics-accessories" class="nav-dropdown-item">Electronics &amp; Accessories</a>
-                    <a href="category.html?c=sports-fitness"       class="nav-dropdown-item">Sports &amp; Fitness</a>
-                </div>
-            </div>
-            <a href="about.html">About</a>
-            <a href="blog.html">Blog</a>
-            <a href="contact.html" class="active">Contact</a>
-        </nav>
-        <div class="mrt-nav-right">
-            <a href="categories.html" class="nav-cta">EXPLORE COLLECTIONS</a>
-            <button class="nav-menu-btn" id="mobileMenuToggle"><span class="material-symbols-outlined">menu</span></button>
-        </div>
-    </header>
-
-    <div class="mobile-nav" id="mobileNav">
-        <div class="mobile-nav-panel">
-            <button class="mobile-nav-close" id="mobileNavClose"><span class="material-symbols-outlined">close</span></button>
-            <a href="index.html">Home</a>
-            <a href="categories.html">Shop / Collections</a>
-            <a href="about.html">About</a>
-            <a href="contact.html" class="active">Contact</a>
-        </div>
-        <div style="flex:1" id="mobileNavBackdrop"></div>
-    </div>
-
-    <main>
-        <section style="padding: 8rem 2.5rem; max-width: 1200px; margin: 0 auto;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6rem;">
-                <div>
-                    <p style="text-transform: uppercase; letter-spacing: 0.2em; font-size: 0.8rem; color: var(--orange); font-weight: 700; margin-bottom: 2rem;">Get in Touch</p>
-                    <h1 style="font-family: 'Playfair Display', serif; font-size: clamp(3rem, 6vw, 5rem); margin-bottom: 2.5rem; line-height: 1.1;">MRT International Holding LLC</h1>
-                    <p style="font-size: 1.1rem; line-height: 1.8; color: var(--muted); margin-bottom: 4rem;">
-                        Whether you have a product suggestion, a partnership inquiry, or need assistance, our team is here to help. Discover smarter shopping today.
-                    </p>
-                    <div style="display: flex; flex-direction: column; gap: 2rem;">
-                        <div>
-                            <p style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--ink); margin-bottom: 0.5rem;">Email Support</p>
-                            <p style="font-family: 'Playfair Display', serif; font-size: 1.75rem;">Info@mrtinternationalholding.com</p>
-                        </div>
-                        <div>
-                            <p style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--ink); margin-bottom: 0.5rem;">Phone & WhatsApp</p>
-                            <p style="font-family: 'Playfair Display', serif; font-size: 1.75rem;">+1 904 459 4398</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div style="background: #fff; padding: 4rem; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.05);">
-                    <form id="contact-form" style="display: flex; flex-direction: column; gap: 2.5rem;">
-                        <div>
-                            <label style="display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.75rem; color: var(--ink);">Full Name</label>
-                            <input type="text" name="name" required style="width: 100%; border: none; border-bottom: 1px solid var(--border); padding: 0.75rem 0; outline: none; transition: border-color 0.3s;" onfocus="this.style.borderColor='var(--orange)'" onblur="this.style.borderColor='var(--border)'">
-                        </div>
-                        <div>
-                            <label style="display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.75rem; color: var(--ink);">Email Address</label>
-                            <input type="email" name="email" required style="width: 100%; border: none; border-bottom: 1px solid var(--border); padding: 0.75rem 0; outline: none; transition: border-color 0.3s;" onfocus="this.style.borderColor='var(--orange)'" onblur="this.style.borderColor='var(--border)'">
-                        </div>
-                        <div>
-                            <label style="display: block; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.75rem; color: var(--ink);">Message</label>
-                            <textarea name="message" required style="width: 100%; border: none; border-bottom: 1px solid var(--border); padding: 0.75rem 0; outline: none; transition: border-color 0.3s; min-height: 100px; resize: none;" onfocus="this.style.borderColor='var(--orange)'" onblur="this.style.borderColor='var(--border)'"></textarea>
-                        </div>
-                        <button type="submit" class="nav-cta" style="width: 100%; justify-content: center; padding: 1.25rem; font-size: 0.9rem;">SEND MESSAGE</button>
-                        <div id="form-status" style="display: none; text-align: center; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--orange);"></div>
-                    </form>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <footer class="mrt-footer">
-        <div class="footer-grid">
-            <div style="grid-column: span 2;">
-                <p class="footer-brand-logo">MRT International</p>
-                <p class="footer-brand-desc">Curating luxury since 2026.</p>
-            </div>
-        </div>
-    </footer>
-</body>
-</html>
-=======
   <script type="module" crossorigin src="/assets/main-Dc91haMe.js"></script>
   <link rel="stylesheet" crossorigin href="/assets/main-DRdVatNc.css">
 </head>
@@ -206,4 +106,3 @@
     </footer>
 </body>
 </html>
->>>>>>> c7256ed (pushing changes made by codex - including CMS fixes, product display updates, and data sync scripts)
