@@ -2,6 +2,7 @@ import express from 'express';
 import pool from '../db.js';
 import { authMiddleware, adminOnly } from '../middleware/auth.js';
 import { getColumns, quoteId } from '../utils/sql.js';
+import { refreshInternalCache } from '../cache_service.js';
 
 const router = express.Router();
 
@@ -243,22 +244,29 @@ router.put('/reviews/:id', authMiddleware, adminOnly, async (req, res) => {
     if (!userName || !comment) return res.status(400).json({ error: 'Missing required fields' });
 
     const t = await getTables();
+    const [[review]] = await pool.query(
+      `SELECT productId FROM ${quoteId(t.review)} WHERE id = ? LIMIT 1`,
+      [id]
+    );
+    if (!review) return res.status(404).json({ error: 'Review not found' });
+
     await pool.query(
       `UPDATE ${quoteId(t.review)} SET userName = ?, rating = ?, comment = ? WHERE id = ?`,
       [userName, rating, comment, id]
     );
 
-    // Update product avg rating
+    // Update product avg rating for the edited review's product
     const [[avg]] = await pool.query(
-      `SELECT AVG(rating) as ratingValue, productId FROM ${quoteId(t.review)} WHERE id = ?`,
-      [id]
+      `SELECT AVG(rating) as ratingValue FROM ${quoteId(t.review)} WHERE productId = ?`,
+      [review.productId]
     );
-    if (avg?.productId && avg?.ratingValue) {
+    if (review.productId && avg?.ratingValue) {
       await pool.query(
         `UPDATE ${quoteId(t.product)} SET ratingValue = ? WHERE id = ?`,
-        [Number(avg.ratingValue).toFixed(2), avg.productId]
+        [Number(avg.ratingValue).toFixed(2), review.productId]
       );
     }
+    refreshInternalCache();
 
     res.json({ success: true });
   } catch (err) {

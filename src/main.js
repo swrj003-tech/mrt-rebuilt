@@ -62,6 +62,7 @@ class MRTApp {
     const communityGrid = document.getElementById('community-grid');
 
     const blogGrid = document.getElementById('blog-posts-container');
+    const blogPostContainer = document.getElementById('blog-post-container');
 
     if (homeGrid) {
       await this.fetchAndRender(homeGrid, 8);
@@ -76,6 +77,8 @@ class MRTApp {
       } catch {}
     } else if (blogGrid) {
       await this.fetchAndRenderBlog(blogGrid);
+    } else if (blogPostContainer) {
+      await this.fetchAndRenderBlogPost(blogPostContainer);
     }
 
     if (communityGrid) {
@@ -471,7 +474,10 @@ class MRTApp {
   createProductCard(p) {
     const buyUrl = p.affiliateUrl || '#';
     const secondaryUrl = p.secondaryUrl || buyUrl;
-    const ratingText = p.ratingText || '4.8/5 Recommended';
+    const numericRating = Number.parseFloat(p.ratingValue);
+    const ratingText = Number.isFinite(numericRating) && numericRating > 0
+      ? `${numericRating.toFixed(1)}/5 Recommended`
+      : (p.ratingText || '4.8/5 Recommended');
     
     const badgeHtml = p.badge 
       ? `<span class="pc-badge ${p.badge.toLowerCase().replace(/\s+/g, '-')}">${p.badge}</span>` 
@@ -556,7 +562,7 @@ class MRTApp {
                 </div>
                 <h3 class="blog-card-title">${post.title}</h3>
                 <p class="blog-card-excerpt">${post.excerpt || ''}</p>
-                <a href="blog-post.html?slug=${post.slug}" class="blog-card-cta">
+                <a href="blog-post.html?slug=${encodeURIComponent(post.slug)}" class="blog-card-cta">
                   Read Story <span class="material-symbols-outlined" style="font-size:16px;">arrow_forward</span>
                 </a>
               </div>
@@ -568,6 +574,62 @@ class MRTApp {
       console.error('Blog Fetch Error:', err);
       container.innerHTML = '<p class="no-products">Connection issue. Please try again later.</p>';
     }
+  }
+
+  async fetchAndRenderBlogPost(container) {
+    const slug = new URLSearchParams(window.location.search).get('slug');
+    if (!slug) {
+      container.innerHTML = this.blogPostNotFound();
+      return;
+    }
+
+    try {
+      this.showLoading(container);
+      const res = await fetch(`/api/blog/${encodeURIComponent(slug)}?_t=${Date.now()}`);
+      if (!res.ok) {
+        container.innerHTML = this.blogPostNotFound();
+        return;
+      }
+
+      const post = await res.json();
+      const dateStr = post.createdAt
+        ? new Date(post.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+        : '';
+      const author = post.author || 'MRT Editorial';
+
+      container.innerHTML = `
+        <a href="blog.html" class="blog-back-link">
+          <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span>
+          Back to Blog
+        </a>
+        ${post.coverImage ? `<img src="${post.coverImage}" alt="${post.title}" class="blog-post-cover" onerror="this.style.display='none'">` : ''}
+        <div class="blog-post-meta">
+          <span>${author}</span>
+          ${dateStr ? `<span>·</span><span>${dateStr}</span>` : ''}
+        </div>
+        <h1 class="blog-post-title">${post.title}</h1>
+        <article class="blog-post-body">
+          ${post.content || `<p>${post.excerpt || ''}</p>`}
+        </article>
+      `;
+      document.title = `${post.title} | MRT International`;
+    } catch (err) {
+      console.error('Blog Post Fetch Error:', err);
+      container.innerHTML = '<p class="no-products">Connection issue. Please try again later.</p>';
+    }
+  }
+
+  blogPostNotFound() {
+    return `
+      <a href="blog.html" class="blog-back-link">
+        <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span>
+        Back to Blog
+      </a>
+      <h1 class="blog-post-title">Article Not Found</h1>
+      <div class="blog-post-body">
+        <p>This article is unavailable or has not been published yet.</p>
+      </div>
+    `;
   }
 
   // ── Testimonials ──

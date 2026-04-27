@@ -13,6 +13,7 @@ export default defineConfig({
         admin: resolve(__dirname, 'admin/index.html'),
         about: resolve(__dirname, 'about.html'),
         blog: resolve(__dirname, 'blog.html'),
+        blogPost: resolve(__dirname, 'blog-post.html'),
         categories: resolve(__dirname, 'categories.html'),
         category: resolve(__dirname, 'category.html'),
         contact: resolve(__dirname, 'contact.html'),

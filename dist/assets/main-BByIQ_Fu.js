@@ -12,7 +12,7 @@ var e=class{constructor(){this.allProducts=[],this.activeCategory=new URLSearchP
             </div>
           </div>
         </a>
-      `).join(``)}catch(e){console.error(`Failed to sync collections grid:`,e)}}async init(){`serviceWorker`in navigator&&navigator.serviceWorker.getRegistrations().then(e=>e.forEach(e=>e.unregister())),this.setupMobileMenu(),this.setupContactForm(),this.handleScroll(),this.createQuickViewModal(),this.syncGlobalNavigation(),document.getElementById(`categories-grid`);let e=document.getElementById(`products-home-grid`)||document.getElementById(`featured-products`),t=document.getElementById(`category-products-container`),n=document.getElementById(`community-grid`),r=document.getElementById(`blog-posts-container`);if(e)await this.fetchAndRender(e,8);else if(t){await this.fetchAndRender(t,50);try{let e=(await(await fetch(`/api/categories`)).json()).find(e=>e.slug===this.activeCategory);e&&this.updateCategoryUI(e)}catch{}}else r&&await this.fetchAndRenderBlog(r);n&&this.renderTestimonials(n)}async fetchProducts(e=null){try{let t=e?`/api/products?category=${e}&_t=${Date.now()}&limit=100`:`/api/products?_t=${Date.now()}&limit=100`,n=await(await fetch(t)).json();this.products=n.products||(Array.isArray(n)?n:[]),this.renderProducts()}catch(e){console.error(`Fetch Error:`,e)}}async syncGlobalNavigation(){try{let e=await(await fetch(`/api/categories?_t=`+Date.now())).json();if(!e||e.length===0)return;let t=document.getElementById(`nav-categories-dropdown`);t&&(t.innerHTML=e.map(e=>`
+      `).join(``)}catch(e){console.error(`Failed to sync collections grid:`,e)}}async init(){`serviceWorker`in navigator&&navigator.serviceWorker.getRegistrations().then(e=>e.forEach(e=>e.unregister())),this.setupMobileMenu(),this.setupContactForm(),this.handleScroll(),this.createQuickViewModal(),this.syncGlobalNavigation(),document.getElementById(`categories-grid`);let e=document.getElementById(`products-home-grid`)||document.getElementById(`featured-products`),t=document.getElementById(`category-products-container`),n=document.getElementById(`community-grid`),r=document.getElementById(`blog-posts-container`),i=document.getElementById(`blog-post-container`);if(e)await this.fetchAndRender(e,8);else if(t){await this.fetchAndRender(t,50);try{let e=(await(await fetch(`/api/categories`)).json()).find(e=>e.slug===this.activeCategory);e&&this.updateCategoryUI(e)}catch{}}else r?await this.fetchAndRenderBlog(r):i&&await this.fetchAndRenderBlogPost(i);n&&this.renderTestimonials(n)}async fetchProducts(e=null){try{let t=e?`/api/products?category=${e}&_t=${Date.now()}&limit=100`:`/api/products?_t=${Date.now()}&limit=100`,n=await(await fetch(t)).json();this.products=n.products||(Array.isArray(n)?n:[]),this.renderProducts()}catch(e){console.error(`Fetch Error:`,e)}}async syncGlobalNavigation(){try{let e=await(await fetch(`/api/categories?_t=`+Date.now())).json();if(!e||e.length===0)return;let t=document.getElementById(`nav-categories-dropdown`);t&&(t.innerHTML=e.map(e=>`
           <a href="category.html?c=${e.slug}" class="nav-dropdown-item">${e.name}</a>
         `).join(``));let n=document.getElementById(`mobile-categories-list`);n&&(n.innerHTML=e.map(e=>`
           <a href="category.html?c=${e.slug}">
@@ -66,23 +66,23 @@ var e=class{constructor(){this.allProducts=[],this.activeCategory=new URLSearchP
         <span class="material-symbols-outlined animate-spin" style="font-size: 48px; margin-bottom: 20px;">refresh</span>
         <p style="font-weight: 500;">Curating your collection...</p>
       </div>
-    `}renderProducts(e,t){if(this.activeCategory&&e.id===`category-products-container`){let n=t.filter(e=>e.badge===`Top Pick`),r=t.filter(e=>e.badge===`Trending Now`),i=t.filter(e=>e.badge===`Editor's Choice`),a=t.filter(e=>![`Top Pick`,`Trending Now`,`Editor's Choice`].includes(e.badge)),o=``;n.length>0&&(o+=`<div class="category-section-title">⭐ Top Picks</div>`,o+=`<div class="products-grid">${n.map(e=>this.createProductCard(e)).join(``)}</div>`),r.length>0&&(o+=`<div class="category-section-title">🔥 Trending Now</div>`,o+=`<div class="products-grid">${r.map(e=>this.createProductCard(e)).join(``)}</div>`),i.length>0&&(o+=`<div class="category-section-title">💡 Editor’s Choice</div>`,o+=`<div class="products-grid">${i.map(e=>this.createProductCard(e)).join(``)}</div>`),a.length>0&&o===``&&(o+=`<div class="products-grid">${a.map(e=>this.createProductCard(e)).join(``)}</div>`),e.innerHTML=o||`<p class="no-products">No products found in this selection.</p>`}else e.innerHTML=`<div class="products-grid">${t.map(e=>this.createProductCard(e)).join(``)}</div>`}updateCategoryUI(e){let t=document.getElementById(`category-title-display`),n=document.getElementById(`category-desc-display`),r=document.getElementById(`category-hero`);e&&(t&&(t.innerText=e.theme?.title||e.name,t.classList.add(`seo-title`)),n&&(n.innerText=e.theme?.seoIntro||e.description||`Explore our curated selection.`,n.classList.add(`seo-intro`)),r&&e.image&&(r.style.backgroundImage=`url('${e.image}')`))}createProductCard(e){let t=e.affiliateUrl||`#`,n=e.secondaryUrl||t,r=e.ratingText||`4.8/5 Recommended`,i=e.badge?`<span class="pc-badge ${e.badge.toLowerCase().replace(/\s+/g,`-`)}">${e.badge}</span>`:``,a=Array.isArray(e.keyBenefits)?e.keyBenefits:[],o=a.length>0?`<ul class="pc-benefits-list">
-          ${a.map(e=>`<li><span class="material-symbols-outlined">check_circle</span> ${e}</li>`).join(``)}
-         </ul>`:``,s=e.image||`/assets/placeholder-product.jpg`;return`
+    `}renderProducts(e,t){if(this.activeCategory&&e.id===`category-products-container`){let n=t.filter(e=>e.badge===`Top Pick`),r=t.filter(e=>e.badge===`Trending Now`),i=t.filter(e=>e.badge===`Editor's Choice`),a=t.filter(e=>![`Top Pick`,`Trending Now`,`Editor's Choice`].includes(e.badge)),o=``;n.length>0&&(o+=`<div class="category-section-title">⭐ Top Picks</div>`,o+=`<div class="products-grid">${n.map(e=>this.createProductCard(e)).join(``)}</div>`),r.length>0&&(o+=`<div class="category-section-title">🔥 Trending Now</div>`,o+=`<div class="products-grid">${r.map(e=>this.createProductCard(e)).join(``)}</div>`),i.length>0&&(o+=`<div class="category-section-title">💡 Editor’s Choice</div>`,o+=`<div class="products-grid">${i.map(e=>this.createProductCard(e)).join(``)}</div>`),a.length>0&&o===``&&(o+=`<div class="products-grid">${a.map(e=>this.createProductCard(e)).join(``)}</div>`),e.innerHTML=o||`<p class="no-products">No products found in this selection.</p>`}else e.innerHTML=`<div class="products-grid">${t.map(e=>this.createProductCard(e)).join(``)}</div>`}updateCategoryUI(e){let t=document.getElementById(`category-title-display`),n=document.getElementById(`category-desc-display`),r=document.getElementById(`category-hero`);e&&(t&&(t.innerText=e.theme?.title||e.name,t.classList.add(`seo-title`)),n&&(n.innerText=e.theme?.seoIntro||e.description||`Explore our curated selection.`,n.classList.add(`seo-intro`)),r&&e.image&&(r.style.backgroundImage=`url('${e.image}')`))}createProductCard(e){let t=e.affiliateUrl||`#`,n=e.secondaryUrl||t,r=Number.parseFloat(e.ratingValue),i=Number.isFinite(r)&&r>0?`${r.toFixed(1)}/5 Recommended`:e.ratingText||`4.8/5 Recommended`,a=e.badge?`<span class="pc-badge ${e.badge.toLowerCase().replace(/\s+/g,`-`)}">${e.badge}</span>`:``,o=Array.isArray(e.keyBenefits)?e.keyBenefits:[],s=o.length>0?`<ul class="pc-benefits-list">
+          ${o.map(e=>`<li><span class="material-symbols-outlined">check_circle</span> ${e}</li>`).join(``)}
+         </ul>`:``,c=e.image||`/assets/placeholder-product.jpg`;return`
       <article class="pc-card affiliate-card" data-id="${e.id}">
         <div class="pc-img-wrap">
-          <img src="${s}" alt="${e.name}" loading="lazy" onerror="this.src='/assets/placeholder-product.jpg';this.onerror=null;">
-          ${i}
+          <img src="${c}" alt="${e.name}" loading="lazy" onerror="this.src='/assets/placeholder-product.jpg';this.onerror=null;">
+          ${a}
         </div>
         <div class="pc-info">
           <div class="pc-header">
-            <div class="pc-rating-tag">⭐ ${r}</div>
+            <div class="pc-rating-tag">⭐ ${i}</div>
             <h3 class="pc-name">${e.name}</h3>
           </div>
           
           <p class="pc-description">${e.shortDescription||``}</p>
           
-          ${o}
+          ${s}
           
           <div class="pc-actions">
             ${e.price&&e.price>0?`<div class="pc-price-row"><span class="pc-price">$${Number(e.price).toFixed(2)}</span><span class="pc-price-note">via Amazon</span></div>`:``}
@@ -114,13 +114,36 @@ var e=class{constructor(){this.allProducts=[],this.activeCategory=new URLSearchP
                 </div>
                 <h3 class="blog-card-title">${e.title}</h3>
                 <p class="blog-card-excerpt">${e.excerpt||``}</p>
-                <a href="blog-post.html?slug=${e.slug}" class="blog-card-cta">
+                <a href="blog-post.html?slug=${encodeURIComponent(e.slug)}" class="blog-card-cta">
                   Read Story <span class="material-symbols-outlined" style="font-size:16px;">arrow_forward</span>
                 </a>
               </div>
             </article>`}).join(``)}
         </div>
-      `}catch(t){console.error(`Blog Fetch Error:`,t),e.innerHTML=`<p class="no-products">Connection issue. Please try again later.</p>`}}async renderTestimonials(e){try{let t=await(await fetch(`/api/testimonials`)).json();if(t&&t.length>0){let n=t.filter(e=>e.region===`us`),r=t.filter(e=>e.region===`ae`),i=``;n.length>0&&(i+=`
+      `}catch(t){console.error(`Blog Fetch Error:`,t),e.innerHTML=`<p class="no-products">Connection issue. Please try again later.</p>`}}async fetchAndRenderBlogPost(e){let t=new URLSearchParams(window.location.search).get(`slug`);if(!t){e.innerHTML=this.blogPostNotFound();return}try{this.showLoading(e);let n=await fetch(`/api/blog/${encodeURIComponent(t)}?_t=${Date.now()}`);if(!n.ok){e.innerHTML=this.blogPostNotFound();return}let r=await n.json(),i=r.createdAt?new Date(r.createdAt).toLocaleDateString(`en-US`,{month:`long`,day:`numeric`,year:`numeric`}):``,a=r.author||`MRT Editorial`;e.innerHTML=`
+        <a href="blog.html" class="blog-back-link">
+          <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span>
+          Back to Blog
+        </a>
+        ${r.coverImage?`<img src="${r.coverImage}" alt="${r.title}" class="blog-post-cover" onerror="this.style.display='none'">`:``}
+        <div class="blog-post-meta">
+          <span>${a}</span>
+          ${i?`<span>·</span><span>${i}</span>`:``}
+        </div>
+        <h1 class="blog-post-title">${r.title}</h1>
+        <article class="blog-post-body">
+          ${r.content||`<p>${r.excerpt||``}</p>`}
+        </article>
+      `,document.title=`${r.title} | MRT International`}catch(t){console.error(`Blog Post Fetch Error:`,t),e.innerHTML=`<p class="no-products">Connection issue. Please try again later.</p>`}}blogPostNotFound(){return`
+      <a href="blog.html" class="blog-back-link">
+        <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span>
+        Back to Blog
+      </a>
+      <h1 class="blog-post-title">Article Not Found</h1>
+      <div class="blog-post-body">
+        <p>This article is unavailable or has not been published yet.</p>
+      </div>
+    `}async renderTestimonials(e){try{let t=await(await fetch(`/api/testimonials`)).json();if(t&&t.length>0){let n=t.filter(e=>e.region===`us`),r=t.filter(e=>e.region===`ae`),i=``;n.length>0&&(i+=`
             <div class="testimonial-region">
               <h3 class="region-header">🇺🇸 United States Customers</h3>
               <div class="testimonial-grid">

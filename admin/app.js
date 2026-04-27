@@ -837,8 +837,21 @@ function showBlogModal(post) {
           <div class="form-group"><label>Slug</label><input type="text" name="slug" value="${post?.slug || ''}" placeholder="auto-generated"></div>
         </div>
         <div class="form-group">
-          <label>Cover Image URL</label>
-          <input type="text" name="coverImage" value="${post?.coverImage || ''}" placeholder="https://example.com/image.jpg">
+          <label>Cover Image</label>
+          <div style="display:flex;gap:0.5rem;align-items:center">
+            <input type="text" name="coverImage" id="blog-cover-image-path" value="${post?.coverImage || ''}" placeholder="https://example.com/image.jpg">
+            <button type="button" class="btn btn-secondary" id="btn-preview-blog-cover">
+              <span class="material-symbols-outlined">visibility</span>
+              <span class="btn-label">Preview</span>
+            </button>
+          </div>
+          <div id="blog-cover-preview-wrap" style="display:${post?.coverImage ? 'block' : 'none'};margin-top:0.75rem">
+            <img id="blog-cover-preview-img" src="${post?.coverImage || ''}" alt="" style="max-height:120px;max-width:100%;border-radius:var(--radius-md);border:1px solid var(--border);object-fit:cover">
+          </div>
+          <div class="dropzone dropzone-wide" id="blog-cover-dropzone" style="margin-top:0.75rem">
+            <span class="material-symbols-outlined">upload_file</span>
+            <span>Or drag &amp; drop / click to upload a file</span>
+          </div>
         </div>
         <div class="grid-2">
           <div class="form-group"><label>Author</label><input type="text" name="author" value="${post?.author || 'MRT Editorial'}"></div>
@@ -861,6 +874,25 @@ function showBlogModal(post) {
   overlay.querySelector('#modal-cancel').addEventListener('click', () => overlay.remove());
   overlay.querySelector('#modal-close-x').addEventListener('click', () => overlay.remove());
   overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+
+  const coverInput = overlay.querySelector('#blog-cover-image-path');
+  const previewWrap = overlay.querySelector('#blog-cover-preview-wrap');
+  const previewImg = overlay.querySelector('#blog-cover-preview-img');
+  const showCoverPreview = (url = coverInput.value.trim()) => {
+    if (!url) {
+      previewWrap.style.display = 'none';
+      return;
+    }
+    previewImg.src = url;
+    previewImg.onerror = () => { toast('Could not load image preview', 'error'); previewWrap.style.display = 'none'; };
+    previewImg.onload = () => { previewWrap.style.display = 'block'; };
+  };
+  overlay.querySelector('#btn-preview-blog-cover').addEventListener('click', () => showCoverPreview());
+  initDragAndDrop(overlay.querySelector('#blog-cover-dropzone'), (url) => {
+    coverInput.value = url;
+    showCoverPreview(url);
+    toast('Blog cover uploaded');
+  });
 
   overlay.querySelector('#blog-form').addEventListener('submit', async (e) => {
     e.preventDefault();

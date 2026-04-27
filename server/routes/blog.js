@@ -2,6 +2,7 @@ import express from 'express';
 import pool from '../db.js';
 import { authMiddleware, adminOnly } from '../middleware/auth.js';
 import { refreshInternalCache } from '../cache_service.js';
+import { quoteId } from '../utils/sql.js';
 
 const router = express.Router();
 
@@ -57,6 +58,25 @@ router.get('/admin/all', authMiddleware, adminOnly, async (req, res) => {
     res.json(posts);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch posts' });
+  }
+});
+
+// PUBLIC: Get one published post by slug
+router.get('/:slug', async (req, res) => {
+  try {
+    const t = await getTables();
+    const slug = String(req.params.slug || '').trim();
+    if (!slug) return res.status(400).json({ error: 'Missing blog slug' });
+
+    const [posts] = await pool.query(
+      `SELECT * FROM ${quoteId(t.blog)} WHERE slug = ? AND isPublished = 1 LIMIT 1`,
+      [slug]
+    );
+
+    if (!posts[0]) return res.status(404).json({ error: 'Post not found' });
+    res.json(posts[0]);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch blog post' });
   }
 });
 
