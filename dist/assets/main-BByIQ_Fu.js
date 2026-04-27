@@ -18,7 +18,7 @@ var e=class{constructor(){this.allProducts=[],this.activeCategory=new URLSearchP
           <a href="category.html?c=${e.slug}">
             <span class="material-symbols-outlined" style="font-size:18px;">label</span> ${e.name}
           </a>
-        `).join(``));let r=document.getElementById(`categories-grid`);if(r){let t=!!document.getElementById(`featured`),n=e.map(e=>`
+        `).join(``));let r=document.getElementById(`categories-grid`);r&&(r.innerHTML=e.map(e=>`
           <a href="category.html?c=${e.slug}" class="avory-cat-card">
             <div class="cat-img-wrapper">
               <img src="${e.image||`/assets/editorial_v3/hero.png`}" alt="${e.name}" class="cat-img">
@@ -28,18 +28,7 @@ var e=class{constructor(){this.allProducts=[],this.activeCategory=new URLSearchP
               <p class="cat-subtitle">${e.theme?.subtitle||e.description||`Explore our curated selection.`}</p>
             </div>
           </a>
-        `).join(``);r.innerHTML=`${t?`
-          <a href="categories.html" class="avory-cat-card all-collections-card">
-            <div class="cat-img-wrapper">
-              <img src="/assets/editorial_v3/explore_cta_bg.png" alt="All Collections" class="cat-img" onerror="this.src='/assets/editorial_v3/hero.png'">
-            </div>
-            <div class="cat-meta">
-              <span class="cat-kicker">Shop Everything</span>
-              <h3 class="cat-title">All Collections</h3>
-              <p class="cat-subtitle">Explore every curated MRT category in one place.</p>
-            </div>
-          </a>
-        `:``}${n}`}}catch(e){console.warn(`[MRT] Navigation sync failed:`,e)}}setupMobileMenu(){let e=document.getElementById(`mobileMenuToggle`),t=document.getElementById(`mobileNav`),n=document.getElementById(`mobileNavClose`),r=document.getElementById(`mobileNavBackdrop`);if(e&&t&&n&&r){e.addEventListener(`click`,()=>{t.style.display=`flex`,setTimeout(()=>t.classList.add(`open`),10)});let i=()=>{t.classList.remove(`open`),setTimeout(()=>t.style.display=`none`,300)};n.addEventListener(`click`,i),r.addEventListener(`click`,i)}}setupContactForm(){let e=document.getElementById(`contact-form`);if(!e)return;let t=document.getElementById(`form-status`),n=e.querySelector(`button[type="submit"]`);e.addEventListener(`submit`,async r=>{r.preventDefault();let i=n?.textContent||`SEND MESSAGE`;n&&(n.disabled=!0,n.textContent=`SENDING...`),t&&(t.style.display=`block`,t.textContent=`Sending your message...`);try{let n=Object.fromEntries(new FormData(e).entries()),r=await fetch(`/api/contact`,{method:`POST`,headers:{"Content-Type":`application/json`},body:JSON.stringify(n)}),i=await r.json().catch(()=>({}));if(!r.ok||i.success===!1)throw Error(i.error||`Unable to send message`);e.reset(),t&&(t.textContent=`Message sent. We will get back to you soon.`)}catch(e){t&&(t.textContent=e.message||`Message failed. Please email us directly.`)}finally{n&&(n.disabled=!1,n.textContent=i)}})}handleScroll(){let e=document.querySelector(`.mrt-nav`);e&&window.addEventListener(`scroll`,()=>{window.scrollY>50?e.classList.add(`scrolled`):e.classList.remove(`scrolled`)})}createQuickViewModal(){if(document.getElementById(`quickViewModal`))return;let e=document.createElement(`div`);e.id=`quickViewModal`,e.className=`qv-overlay`,e.innerHTML=`
+        `).join(``))}catch(e){console.warn(`[MRT] Navigation sync failed:`,e)}}setupMobileMenu(){let e=document.getElementById(`mobileMenuToggle`),t=document.getElementById(`mobileNav`),n=document.getElementById(`mobileNavClose`),r=document.getElementById(`mobileNavBackdrop`);if(e&&t&&n&&r){e.addEventListener(`click`,()=>{t.style.display=`flex`,setTimeout(()=>t.classList.add(`open`),10)});let i=()=>{t.classList.remove(`open`),setTimeout(()=>t.style.display=`none`,300)};n.addEventListener(`click`,i),r.addEventListener(`click`,i)}}setupContactForm(){let e=document.getElementById(`contact-form`);if(!e)return;let t=document.getElementById(`form-status`),n=e.querySelector(`button[type="submit"]`);e.addEventListener(`submit`,async r=>{r.preventDefault();let i=n?.textContent||`SEND MESSAGE`;n&&(n.disabled=!0,n.textContent=`SENDING...`),t&&(t.style.display=`block`,t.textContent=`Sending your message...`);try{let n=Object.fromEntries(new FormData(e).entries()),r=await fetch(`/api/contact`,{method:`POST`,headers:{"Content-Type":`application/json`},body:JSON.stringify(n)}),i=await r.json().catch(()=>({}));if(!r.ok||i.success===!1)throw Error(i.error||`Unable to send message`);e.reset(),t&&(t.textContent=`Message sent. We will get back to you soon.`)}catch(e){t&&(t.textContent=e.message||`Message failed. Please email us directly.`)}finally{n&&(n.disabled=!1,n.textContent=i)}})}handleScroll(){let e=document.querySelector(`.mrt-nav`);e&&window.addEventListener(`scroll`,()=>{window.scrollY>50?e.classList.add(`scrolled`):e.classList.remove(`scrolled`)})}createQuickViewModal(){if(document.getElementById(`quickViewModal`))return;let e=document.createElement(`div`);e.id=`quickViewModal`,e.className=`qv-overlay`,e.innerHTML=`
       <div class="qv-panel">
         <button class="qv-close" onclick="closeQuickView()">
           <span class="material-symbols-outlined">close</span>
@@ -132,7 +121,6 @@ var e=class{constructor(){this.allProducts=[],this.activeCategory=new URLSearchP
             </article>`}).join(``)}
         </div>
       `}catch(t){console.error(`Blog Fetch Error:`,t),e.innerHTML=`<p class="no-products">Connection issue. Please try again later.</p>`}}async fetchAndRenderBlogPost(e){let t=new URLSearchParams(window.location.search).get(`slug`);if(!t){e.innerHTML=this.blogPostNotFound();return}try{this.showLoading(e);let n=await fetch(`/api/blog/${encodeURIComponent(t)}?_t=${Date.now()}`);if(!n.ok){e.innerHTML=this.blogPostNotFound();return}let r=await n.json(),i=r.createdAt?new Date(r.createdAt).toLocaleDateString(`en-US`,{month:`long`,day:`numeric`,year:`numeric`}):``,a=r.author||`MRT Editorial`;e.innerHTML=`
-        <div class="blog-post-shell">
         <a href="blog.html" class="blog-back-link">
           <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span>
           Back to Blog
@@ -146,7 +134,6 @@ var e=class{constructor(){this.allProducts=[],this.activeCategory=new URLSearchP
         <article class="blog-post-body">
           ${r.content||`<p>${r.excerpt||``}</p>`}
         </article>
-        </div>
       `,document.title=`${r.title} | MRT International`}catch(t){console.error(`Blog Post Fetch Error:`,t),e.innerHTML=`<p class="no-products">Connection issue. Please try again later.</p>`}}blogPostNotFound(){return`
       <a href="blog.html" class="blog-back-link">
         <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span>
