@@ -43,17 +43,18 @@
     <div class="mobile-nav" id="mobileNav">
         <div class="mobile-nav-panel">
             <button class="mobile-nav-close" id="mobileNavClose"><span class="material-symbols-outlined">close</span></button>
-            <a href="index.html">Home</a>
-            <a href="categories.html">Shop / Collections</a>
-            <a href="about.html">About</a>
-            <a href="contact.html" class="active">Contact</a>
+            <a href="index.html"><span class="material-symbols-outlined" style="font-size:18px;">home</span> Home</a>
+            <a href="categories.html"><span class="material-symbols-outlined" style="font-size:18px;">storefront</span> Shop / Collections</a>
+            <a href="about.html"><span class="material-symbols-outlined" style="font-size:18px;">info</span> About</a>
+            <a href="blog.html"><span class="material-symbols-outlined" style="font-size:18px;">article</span> Blog</a>
+            <a href="contact.html" class="active"><span class="material-symbols-outlined" style="font-size:18px;">mail</span> Contact</a>
         </div>
         <div style="flex:1" id="mobileNavBackdrop"></div>
     </div>
 
     <main>
-        <section style="padding: 8rem 2.5rem; max-width: 1200px; margin: 0 auto;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6rem;">
+        <section style="padding: clamp(3rem,8vw,8rem) clamp(1.25rem,4vw,2.5rem); max-width: 1200px; margin: 0 auto;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: clamp(2rem,5vw,6rem);">
                 <div>
                     <p style="text-transform: uppercase; letter-spacing: 0.2em; font-size: 0.8rem; color: var(--orange); font-weight: 700; margin-bottom: 2rem;">Get in Touch</p>
                     <h1 style="font-family: 'Playfair Display', serif; font-size: clamp(3rem, 6vw, 5rem); margin-bottom: 2.5rem; line-height: 1.1;">MRT International Holding LLC</h1>

@@ -231,6 +231,42 @@ router.post('/reviews/:id/verify', authMiddleware, adminOnly, async (req, res) =
   }
 });
 
+router.put('/reviews/:id', authMiddleware, adminOnly, async (req, res) => {
+  try {
+    const id = Number.parseInt(req.params.id, 10);
+    if (!Number.isFinite(id)) return res.status(400).json({ error: 'Invalid review ID' });
+
+    const userName = String(req.body.userName || '').trim().slice(0, 120);
+    const comment = String(req.body.comment || '').trim().slice(0, 2000);
+    const rating = Math.min(5, Math.max(1, Number.parseInt(req.body.rating, 10) || 5));
+
+    if (!userName || !comment) return res.status(400).json({ error: 'Missing required fields' });
+
+    const t = await getTables();
+    await pool.query(
+      `UPDATE ${quoteId(t.review)} SET userName = ?, rating = ?, comment = ? WHERE id = ?`,
+      [userName, rating, comment, id]
+    );
+
+    // Update product avg rating
+    const [[avg]] = await pool.query(
+      `SELECT AVG(rating) as ratingValue, productId FROM ${quoteId(t.review)} WHERE id = ?`,
+      [id]
+    );
+    if (avg?.productId && avg?.ratingValue) {
+      await pool.query(
+        `UPDATE ${quoteId(t.product)} SET ratingValue = ? WHERE id = ?`,
+        [Number(avg.ratingValue).toFixed(2), avg.productId]
+      );
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[ADMIN] Review update failed:', err.message);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 router.get('/analytics', authMiddleware, adminOnly, async (req, res) => {
   try {
     const t = await getTables();

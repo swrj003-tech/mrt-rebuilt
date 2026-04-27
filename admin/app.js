@@ -1111,6 +1111,7 @@ async function renderReviews(main) {
               <td>
                 <div class="action-btns">
                   ${!r.isVerified ? `<button class="btn btn-sm btn-primary btn-verify-review" data-id="${r.id}" title="Verify"><span class="material-symbols-outlined">verified</span></button>` : ''}
+                  <button class="btn btn-sm btn-secondary btn-edit-review" data-id="${r.id}" data-username="${r.userName}" data-rating="${r.rating}" data-comment="${encodeURIComponent(r.comment)}" title="Edit"><span class="material-symbols-outlined">edit</span></button>
                   <button class="btn btn-sm btn-danger btn-delete-review" data-id="${r.id}" title="Delete"><span class="material-symbols-outlined">delete</span></button>
                 </div>
               </td>
@@ -1121,17 +1122,16 @@ async function renderReviews(main) {
     </div>
   `;
 
-  document.querySelectorAll('.btn-verify-review').forEach(b => b.addEventListener('click', async () => {
-    await api(`/admin/reviews/${b.dataset.id}/verify`, { method: 'POST' });
-    toast('Review verified'); renderView();
+  // Edit review handler (only direct listener since global delegator doesn't handle edit-review)
+  document.querySelectorAll('.btn-edit-review').forEach(b => b.addEventListener('click', () => {
+    showEditReviewModal({
+      id: b.dataset.id,
+      userName: b.dataset.username,
+      rating: Number(b.dataset.rating),
+      comment: decodeURIComponent(b.dataset.comment)
+    });
   }));
-
-  document.querySelectorAll('.btn-delete-review').forEach(b => b.addEventListener('click', async () => {
-    if (!confirm('Delete this review?')) return;
-    const res = await api(`/reviews/${b.dataset.id}`, { method: 'DELETE' });
-    if (res?.error) { toast('Delete failed', 'error'); return; }
-    toast('Review deleted'); renderView();
-  }));
+  // NOTE: verify and delete are handled by the global click delegator only
 }
 
 // === Drag & Drop Upload Support ===
@@ -1192,6 +1192,76 @@ function initDragAndDrop(dropzone, onUpload) {
   });
 }
 
+<<<<<<< HEAD
+=======
+// === EDIT REVIEW MODAL ===
+function showEditReviewModal(review) {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal" style="max-width:500px;">
+      <div class="modal-header">
+        <h3>Edit Review</h3>
+        <button class="btn-close" id="close-review-modal"><span class="material-symbols-outlined">close</span></button>
+      </div>
+      <div class="modal-body" style="display:flex;flex-direction:column;gap:1rem;">
+        <div class="form-group">
+          <label class="form-label">Reviewer Name</label>
+          <input type="text" class="form-input" id="edit-review-username" value="${review.userName}" maxlength="120">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Rating (1–5)</label>
+          <input type="number" class="form-input" id="edit-review-rating" value="${review.rating}" min="1" max="5" step="1">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Comment</label>
+          <textarea class="form-input" id="edit-review-comment" rows="4" maxlength="2000">${review.comment}</textarea>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="cancel-review-edit">Cancel</button>
+        <button class="btn btn-primary" id="save-review-edit">Save Changes</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  overlay.querySelector('#close-review-modal').addEventListener('click', () => overlay.remove());
+  overlay.querySelector('#cancel-review-edit').addEventListener('click', () => overlay.remove());
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+
+  overlay.querySelector('#save-review-edit').addEventListener('click', async () => {
+    const userName = overlay.querySelector('#edit-review-username').value.trim();
+    const rating = Number(overlay.querySelector('#edit-review-rating').value);
+    const comment = overlay.querySelector('#edit-review-comment').value.trim();
+
+    if (!userName || !comment || rating < 1 || rating > 5) {
+      toast('Please fill all fields with valid values', 'error');
+      return;
+    }
+
+    const btn = overlay.querySelector('#save-review-edit');
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+
+    const res = await api(`/admin/reviews/${review.id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ userName, rating, comment })
+    });
+
+    if (res?.error) {
+      toast(res.error, 'error');
+      btn.disabled = false;
+      btn.textContent = 'Save Changes';
+      return;
+    }
+    toast('Review updated');
+    overlay.remove();
+    renderView();
+  });
+}
+
+>>>>>>> c7256ed (pushing changes made by codex - including CMS fixes, product display updates, and data sync scripts)
 // === CUSTOM ASYNC CONFIRM MODAL ===
 function customConfirm(message) {
   return new Promise((resolve) => {

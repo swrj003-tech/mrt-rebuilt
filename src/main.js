@@ -503,6 +503,7 @@ class MRTApp {
           ${benefitsHtml}
           
           <div class="pc-actions">
+            ${p.price && p.price > 0 ? `<div class="pc-price-row"><span class="pc-price">$${Number(p.price).toFixed(2)}</span><span class="pc-price-note">via Amazon</span></div>` : ''}
             <a href="${buyUrl}" target="_blank" rel="noopener" class="pc-btn primary-btn">
               Check Latest Price
               <span class="material-symbols-outlined">open_in_new</span>
@@ -525,25 +526,42 @@ class MRTApp {
       const posts = await res.json();
       
       if (!posts || posts.length === 0) {
-        container.innerHTML = '<p class="no-products">Our editorial team is curating new stories. Check back soon!</p>';
+        const emptyEl = document.getElementById('blogEmpty');
+        if (emptyEl) emptyEl.style.display = 'flex';
+        container.innerHTML = '';
         return;
       }
 
       container.innerHTML = `
         <div class="blog-grid">
-          ${posts.map(post => `
-            <article class="blog-card">
+          ${posts.map((post, idx) => {
+            const isFeature = idx === 0 && posts.length > 2;
+            const dateStr = post.createdAt ? new Date(post.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+            const author = post.author || 'MRT Editorial';
+            const tag = post.tag || post.category || 'Editorial';
+            return `
+            <article class="blog-card${isFeature ? ' blog-card-featured' : ''}">
               <div class="blog-card-img">
-                <img src="${post.coverImage || '/assets/editorial_v3/hero.png'}" alt="${post.title}" onerror="this.src='/assets/editorial_v3/hero.png'">
+                ${post.coverImage
+                  ? `<img src="${post.coverImage}" alt="${post.title}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'blog-card-img-placeholder\\'><span class=\\'material-symbols-outlined\\'>article</span></div>'">`
+                  : `<div class="blog-card-img-placeholder"><span class="material-symbols-outlined">article</span></div>`
+                }
+                <span class="blog-card-tag">${tag}</span>
               </div>
-              <div class="blog-card-content">
-                <span class="blog-date">${new Date(post.createdAt).toLocaleDateString()}</span>
-                <h3 class="blog-title">${post.title}</h3>
-                <p class="blog-excerpt">${post.excerpt || ''}</p>
-                <a href="blog-post.html?slug=${post.slug}" class="blog-read-more">Read Full Story</a>
+              <div class="blog-card-body">
+                <div class="blog-card-meta">
+                  <span class="blog-card-author">${author}</span>
+                  <span class="blog-card-dot">·</span>
+                  <span>${dateStr}</span>
+                </div>
+                <h3 class="blog-card-title">${post.title}</h3>
+                <p class="blog-card-excerpt">${post.excerpt || ''}</p>
+                <a href="blog-post.html?slug=${post.slug}" class="blog-card-cta">
+                  Read Story <span class="material-symbols-outlined" style="font-size:16px;">arrow_forward</span>
+                </a>
               </div>
-            </article>
-          `).join('')}
+            </article>`;
+          }).join('')}
         </div>
       `;
     } catch (err) {
