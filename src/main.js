@@ -132,7 +132,20 @@ class MRTApp {
       // 3. Sync Categories Grid (if on categories.html)
       const categoriesGrid = document.getElementById('categories-grid');
       if (categoriesGrid) {
-        categoriesGrid.innerHTML = categories.map(cat => `
+        const isFeaturedHomeGrid = !!document.getElementById('featured');
+        const allCollectionsCard = `
+          <a href="categories.html" class="avory-cat-card all-collections-card">
+            <div class="cat-img-wrapper">
+              <img src="/assets/editorial_v3/explore_cta_bg.png" alt="All Collections" class="cat-img" onerror="this.src='/assets/editorial_v3/hero.png'">
+            </div>
+            <div class="cat-meta">
+              <span class="cat-kicker">Shop Everything</span>
+              <h3 class="cat-title">All Collections</h3>
+              <p class="cat-subtitle">Explore every curated MRT category in one place.</p>
+            </div>
+          </a>
+        `;
+        const categoryCards = categories.map(cat => `
           <a href="category.html?c=${cat.slug}" class="avory-cat-card">
             <div class="cat-img-wrapper">
               <img src="${cat.image || '/assets/editorial_v3/hero.png'}" alt="${cat.name}" class="cat-img">
@@ -143,6 +156,7 @@ class MRTApp {
             </div>
           </a>
         `).join('');
+        categoriesGrid.innerHTML = `${isFeaturedHomeGrid ? allCollectionsCard : ''}${categoryCards}`;
       }
     } catch (err) {
       console.warn('[MRT] Navigation sync failed:', err);
@@ -598,6 +612,7 @@ class MRTApp {
       const author = post.author || 'MRT Editorial';
 
       container.innerHTML = `
+        <div class="blog-post-shell">
         <a href="blog.html" class="blog-back-link">
           <span class="material-symbols-outlined" style="font-size:18px;">arrow_back</span>
           Back to Blog
@@ -611,6 +626,7 @@ class MRTApp {
         <article class="blog-post-body">
           ${post.content || `<p>${post.excerpt || ''}</p>`}
         </article>
+        </div>
       `;
       document.title = `${post.title} | MRT International`;
     } catch (err) {
